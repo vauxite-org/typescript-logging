@@ -1,0 +1,30 @@
+{
+  "name": "typescript-logging",
+  "version": "0.1.0",
+  "description": "Library for logging, written in typescript, but can be used by normal es5+ javascript as well.",
+  "main": "dist/typescript-logging",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "pre-publish": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mreuvers/typescript-logging.git"
+  },
+  "keywords": [
+    "typescript-logging",
+    "logging",
+    "javascript-logging",
+    "log"
+  ],
+  "author": "Martijn Reuvers <martijn.reuvers@gmail.com> (http://www.javalid.org)",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/mreuvers/typescript-logging/issues"
+  },
+  "homepage": "https://github.com/mreuvers/typescript-logging#readme",
+  "devDependencies": {
+    "typescript": "^1.8.10"
+  }
+}

@@ -1,0 +1,5 @@
+.idea
+node_modules
+npm-debug.log
+
+# Dist is what we publish so won't ignore for npm
