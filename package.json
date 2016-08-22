@@ -18,7 +18,7 @@
     "javascript-logging",
     "log"
   ],
-  "author": "Martijn Reuvers <martijn.reuvers@gmail.com> (http://www.javalid.org)",
+  "author": "Martijn Reuvers <martijnr.work@gmail.com> (http://www.javalid.org)",
   "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/mreuvers/typescript-logging/issues"
@@ -26,5 +26,6 @@
   "homepage": "https://github.com/mreuvers/typescript-logging#readme",
   "devDependencies": {
     "typescript": "^1.8.10"
-  }
+  },
+  "typings": "./dist/typescript-logging.d.ts"
 }
