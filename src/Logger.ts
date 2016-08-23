@@ -1,4 +1,6 @@
-
+/**
+ * Log level for a logger.
+ */
 export enum LogLevel {
 
   Trace,
@@ -10,13 +12,21 @@ export enum LogLevel {
 
 }
 
+/**
+ * Where to log to? Pick one of the constants. Custom requires a callback to be present, see LFService.createLoggerFactory(...)
+ * where this comes into play.
+ */
 export enum LoggerType {
 
   Console,
+  MessageBuffer,
   Custom
 }
 
-
+/**
+ * The Logger interface where you talk to when logging with a Logger.
+ * To retrieve a logger see LoggerFactory (which is created through LFService)
+ */
 export interface Logger {
 
   trace(msg: string, error?: Error): void;

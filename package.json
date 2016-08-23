@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
-    "prepublish": "tsc"
+    "prepublish": "tsc",
+    "postinstall": "typings install"
   },
   "repository": {
     "type": "git",
@@ -25,7 +26,13 @@
   },
   "homepage": "https://github.com/mreuvers/typescript-logging#readme",
   "devDependencies": {
-    "typescript": "^1.8.10"
+    "jasmine": "^2.4.1",
+    "jasmine-node": "^1.14.5",
+    "typescript": "^1.8.10",
+    "typings": "^1.3.2"
   },
-  "typings": "./dist/typescript-logging.d.ts"
+  "typings": "./dist/typescript-logging.d.ts",
+  "dependencies": {
+    "stacktrace-js": "^1.3.1"
+  }
 }

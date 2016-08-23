@@ -1,0 +1,15 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "outDir": "./dist-test",
+    "sourceMap": true,
+    "noImplicitAny": true,
+    "module": "commonjs",
+    "target": "es5"
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "dist-test"
+  ]
+}

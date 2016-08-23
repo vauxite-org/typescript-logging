@@ -1,8 +1,9 @@
 .idea
 node_modules
 npm-debug.log
+typings
 
 # Exclude dist for git
 dist
-
+dist-test
 
