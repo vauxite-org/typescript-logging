@@ -5,9 +5,9 @@
   "main": "dist/typescript-logging",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc",
-    "prepublish": "tsc",
-    "postinstall": "typings install"
+    "build": "./node_modules/.bin/tsc",
+    "prepublish": "./node_modules/.bin/tsc",
+    "postinstall": "./node_modules/.bin/typings install"
   },
   "repository": {
     "type": "git",
