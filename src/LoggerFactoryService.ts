@@ -1,6 +1,6 @@
 import {LoggerFactory} from "./LoggerFactory";
 import {Logger, LogLevel, LoggerType} from "./Logger";
-import {AbstractLogger, ConsoleLoggerImpl, BufferedLoggerImpl} from "./LoggerImpl";
+import {AbstractLogger, ConsoleLoggerImpl, MessageBufferLoggerImpl} from "./LoggerImpl";
 
 /**
  * Defines several date enums used for formatting a date.
@@ -112,15 +112,15 @@ export class LogGroupRule {
    * and what format to write in. If the loggerType is custom, then the callBackLogger must be supplied as callback function to return a custom logger.
    * @param regExp Regular expression, what matches for your logger names for this group
    * @param level LogLevel
-   * @param loggerType Type of logger, if Custom, make sure to implement callBackLogger and pass in, this will be called so you can return your own logger.
    * @param logFormat LogFormat
+   * @param loggerType Type of logger, if Custom, make sure to implement callBackLogger and pass in, this will be called so you can return your own logger.
    * @param callBackLogger Callback function to return a new clean custom logger (yours!)
    */
-  constructor(regExp: RegExp, level: LogLevel, loggerType: LoggerType = LoggerType.Console, logFormat: LogFormat = new LogFormat(), callBackLogger?: (name: string, logGroupRule: LogGroupRule)=>AbstractLogger) {
+  constructor(regExp: RegExp, level: LogLevel, logFormat: LogFormat = new LogFormat(), loggerType: LoggerType = LoggerType.Console, callBackLogger?: (name: string, logGroupRule: LogGroupRule)=>AbstractLogger) {
     this._regExp = regExp;
     this._level = level;
-    this._loggerType = loggerType;
     this._logFormat = logFormat;
+    this._loggerType = loggerType;
     this._callBackLogger = callBackLogger;
   }
 
@@ -214,6 +214,11 @@ class LoggerFactoryImpl implements LoggerFactory {
     return logger;
   }
 
+
+  isEnabled(): boolean {
+    return this.options.enabled;
+  }
+
   closeLoggers(): void {
     for(let key in this.loggers) {
       this.loggers[key].close();
@@ -231,7 +236,7 @@ class LoggerFactoryImpl implements LoggerFactory {
           case LoggerType.Console:
             return new ConsoleLoggerImpl(named, logGroupRule);
           case LoggerType.MessageBuffer:
-            return new BufferedLoggerImpl(named, logGroupRule);
+            return new MessageBufferLoggerImpl(named, logGroupRule);
           case LoggerType.Custom:
             return logGroupRule.callBackLogger(named, logGroupRule);
           default:

@@ -3,8 +3,13 @@
 
 import {LogLevel, Logger} from "./Logger";
 import {LogGroupRule, DateFormatEnum} from "./LoggerFactoryService";
+import * as ST from "stacktrace-js";
 
-
+/**
+ * Abstract base logger, extend to easily implement a custom logger that
+ * logs wherever you want. You only need to implement doLog(msg: string) and
+ * log that somewhere (it will contain format and everything else).
+ */
 export abstract class AbstractLogger implements Logger {
 
   private open: boolean = true;
@@ -42,6 +47,30 @@ export abstract class AbstractLogger implements Logger {
     this.log(LogLevel.Fatal, msg, error);
   }
 
+  tracec(msg: ()=>string, error?: ()=>Error): void {
+    this.logc(LogLevel.Trace, msg, error);
+  }
+
+  debugc(msg: ()=>string, error?: ()=>Error): void {
+    this.logc(LogLevel.Debug, msg, error);
+  }
+
+  infoc(msg: ()=>string, error?: ()=>Error): void {
+    this.logc(LogLevel.Info, msg, error);
+  }
+
+  warnc(msg: ()=>string, error?: ()=>Error): void {
+    this.logc(LogLevel.Warn, msg, error);
+  }
+
+  errorc(msg: ()=>string, error?: ()=>Error): void {
+    this.logc(LogLevel.Error, msg, error);
+  }
+
+  fatalc(msg: ()=>string, error?: ()=>Error): void {
+    this.logc(LogLevel.Fatal, msg, error);
+  }
+
   isTraceEnabled(): boolean {
     return this.level == LogLevel.Trace;
   }
@@ -72,7 +101,13 @@ export abstract class AbstractLogger implements Logger {
 
   log(level: LogLevel, msg: string, error?: Error): void {
     if(this.open && this.level <= level) {
-      this.createMessage(msg, new Date(), error);
+      this.createMessage(level, msg, new Date(), error);
+    }
+  }
+
+  logc(level: LogLevel, msg: ()=>string, error?: ()=>Error): void {
+    if(this.open && this.level <= level) {
+      this.createMessage(level, msg(), new Date(), error !== undefined ? error() : undefined);
     }
   }
 
@@ -86,7 +121,7 @@ export abstract class AbstractLogger implements Logger {
     this.open = false;
   }
 
-  private createMessage(msg: string, date: Date, error?: Error): void {
+  private createMessage(level: LogLevel, msg: string, date: Date, error?: Error): void {
     const lpad = (value: string, chars: number, padWith: string): string => {
       const howMany = chars - value.length;
       if(howMany > 0) {
@@ -98,11 +133,40 @@ export abstract class AbstractLogger implements Logger {
         return res;
       }
       return value;
-    }
+    };
 
-    let result: string = '';
+    const fullYear = (date: Date): string => {
+      return lpad(date.getFullYear().toString(), 4, '0');
+    };
+
+    const month = (date: Date): string => {
+      return lpad((date.getMonth()+1).toString(), 2, '0');
+    };
+
+    const day = (date: Date): string => {
+      return lpad(date.getDate().toString(), 2, '0');
+    };
+
+    const hours = (date: Date): string => {
+      return lpad(date.getHours().toString(), 2, '0');
+    };
+
+    const minutes = (date: Date): string => {
+      return lpad(date.getMinutes().toString(), 2, '0');
+    };
+
+    const seconds = (date: Date): string => {
+      return lpad(date.getSeconds().toString(), 2, '0');
+    };
+
+    const millis = (date: Date): string => {
+      return date.getMilliseconds().toString();
+    };
+
+
+    let result: string = LogLevel[level].toUpperCase() + " ";
     if(this.rule.logFormat.showLoggerName) {
-      result += this.name + ": ";
+      result += "[" + this.name + "]: ";
     }
 
     if(this.rule.logFormat.showTimeStamp) {
@@ -111,18 +175,20 @@ export abstract class AbstractLogger implements Logger {
       switch(this.rule.logFormat.dateFormat.formatEnum) {
         case DateFormatEnum.Default:
           // yyyy-mm-dd hh:mm:ss,m
-          ds = lpad(date.getFullYear().toString(), 4, '0') + dateSeparator + lpad((date.getMonth()+1).toString(), 2, '0') + dateSeparator +
-               lpad(date.getDate().toString(),2,'0') + ' ' + lpad(date.getHours().toString(),2,'0') + ':' + lpad(date.getMinutes().toString(),2,'0') + ":" +
-               lpad(date.getSeconds().toString(),2,'0') + "," + date.getMilliseconds();
+          ds = fullYear(date) + dateSeparator + month(date) + dateSeparator + day(date) + ' ' +
+               hours(date) + ':' + minutes(date) + ":" + seconds(date) + "," + millis(date);
           break;
         case DateFormatEnum.YearMonthDayTime:
-          ds = "TODO";
+          ds = fullYear(date) + dateSeparator + month(date) + dateSeparator + day(date) + ' ' +
+               hours(date) + ':' + minutes(date) + ":" + seconds(date);
           break;
         case DateFormatEnum.YearDayMonthWithFullTime:
-          ds = "TODO";
+          ds = fullYear(date) + dateSeparator + day(date) + dateSeparator + month(date) + ' ' +
+               hours(date) + ':' + minutes(date) + ":" + seconds(date) + "," + millis(date);
           break;
         case DateFormatEnum.YearDayMonthTime:
-          ds = "TODO";
+          ds = fullYear(date) + dateSeparator + day(date) + dateSeparator + month(date) + ' ' +
+            hours(date) + ':' + minutes(date) + ":" + seconds(date);
           break;
         default:
           throw new Error("Unsupported date format enum: " + this.rule.logFormat.dateFormat.formatEnum);
@@ -131,11 +197,11 @@ export abstract class AbstractLogger implements Logger {
     }
     result += ' ' + msg;
     if(error !== undefined) {
-      result += '\n' + error.name + ", msg=" + error.message + "@";
-      StackTrace.fromError(error, {offline: true}).then((frames: StackTrace.StackFrame[]) => {
-        const stackStr = (frames.map((frame: StackTrace.StackFrame) => {
+      result += '\n' + error.name + ": " + error.message + "\n@";
+      ST.fromError(error, {offline: true}).then((frames: ST.StackFrame[]) => {
+        const stackStr = (frames.map((frame: ST.StackFrame) => {
           return frame.toString();
-        })).join('\n');
+        })).join('\n  ');
 
         result += '\n' + stackStr;
 
@@ -173,7 +239,7 @@ export class ConsoleLoggerImpl extends AbstractLogger {
  * Can be convenient in some cases. Call toString() for full output, or cast to this class
  * and call getMessages() to do something with it yourself.
  */
-export class BufferedLoggerImpl extends AbstractLogger {
+export class MessageBufferLoggerImpl extends AbstractLogger {
 
   private messages: string[] = [];
 

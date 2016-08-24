@@ -24,4 +24,8 @@ export interface LoggerFactory {
    */
   getLogger(named: string): Logger;
 
+  /**
+   * Return true if enabled, false otherwise. If disabled, logging is not written in any form.
+   */
+  isEnabled(): boolean;
 }
