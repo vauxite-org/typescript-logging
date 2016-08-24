@@ -4,10 +4,10 @@
   "description": "Library for logging, written in typescript, but can be used by normal es5+ javascript as well.",
   "main": "dist/typescript-logging",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "./node_modules/.bin/tsc",
-    "prepublish": "./node_modules/.bin/tsc",
-    "postinstall": "./node_modules/.bin/typings install"
+    "test": "tsc -p tsconfig-test.json && jasmine-node --verbose ./dist-test/spec",
+    "build": "tsc",
+    "prepublish": "tsc",
+    "postinstall": "typings install"
   },
   "repository": {
     "type": "git",
