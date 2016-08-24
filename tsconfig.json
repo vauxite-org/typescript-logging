@@ -8,9 +8,6 @@
     "target": "es5",
     "declaration": true
   },
-  "files": [
-    "./src/typescript-logging.ts"
-  ],
   "exclude": [
     "node_modules",
     "dist",

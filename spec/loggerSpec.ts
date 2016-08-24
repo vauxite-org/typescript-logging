@@ -1,6 +1,6 @@
 import {LFService, LoggerFactoryOptions, LogGroupRule, LogFormat} from "../src/LoggerFactoryService";
 import {LogLevel, LoggerType} from "../src/Logger";
-import {MessageBufferLoggerImpl, AbstractLogger, ConsoleLoggerImpl} from "../src/LoggerImpl";
+import {MessageBufferLoggerImpl, AbstractLogger} from "../src/LoggerImpl";
 
 /**
  * Custom logger for testing, only logs the last message.

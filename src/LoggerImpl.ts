@@ -1,6 +1,3 @@
-///<reference path="../typings/globals/stacktrace-js/index.d.ts"/>
-///<reference path="../typings/globals/es6-promise/index.d.ts"/>
-
 import {LogLevel, Logger} from "./Logger";
 import {LogGroupRule, DateFormatEnum} from "./LoggerFactoryService";
 import * as ST from "stacktrace-js";
@@ -163,11 +160,7 @@ export abstract class AbstractLogger implements Logger {
       return date.getMilliseconds().toString();
     };
 
-
-    let result: string = LogLevel[level].toUpperCase() + " ";
-    if(this.rule.logFormat.showLoggerName) {
-      result += "[" + this.name + "]: ";
-    }
+    let result: string = "";
 
     if(this.rule.logFormat.showTimeStamp) {
       const dateSeparator = this.rule.logFormat.dateFormat.dateSeparator;
@@ -193,8 +186,14 @@ export abstract class AbstractLogger implements Logger {
         default:
           throw new Error("Unsupported date format enum: " + this.rule.logFormat.dateFormat.formatEnum);
       }
-      result += ds;
+      result += ds + " ";
     }
+
+    result += LogLevel[level].toUpperCase() + " ";
+    if(this.rule.logFormat.showLoggerName) {
+      result += "[" + this.name + "]";
+    }
+
     result += ' ' + msg;
     if(error !== undefined) {
       result += '\n' + error.name + ": " + error.message + "\n@";
