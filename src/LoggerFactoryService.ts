@@ -257,9 +257,9 @@ export class LFService {
 
   /**
    * Create a new LoggerFactory with given options (if any). If no options
-   * are specified the LoggerFactory, will accept any named logger and will
-   * log on info level by default, to the console.
-   * @param options Options, optinal.
+   * are specified, the LoggerFactory, will accept any named logger and will
+   * log on info level by default for, to the console.
+   * @param options Options, optional.
    * @returns {LoggerFactory}
    */
   static createLoggerFactory(options?: LoggerFactoryOptions): LoggerFactory {
