@@ -79,7 +79,7 @@ Below follow a few examples on how to use the library in typescript.
     .addLogGroupRule(new LogGroupRule(new RegExp("model\\..+"), LogLevel.INFO)))
     .addLogGroupRule(new LogGroupRule(new RegExp("service\\..+"), LogLevel.DEBUG)));
   const loggerModel = factory.getLogger("model.Person");  // This one will log on info and higher
-  const loggerService = factory.getLogger("model.Service");  // This one will log on debug and higher
+  const loggerService = factory.getLogger("service.MyService");  // This one will log on debug and higher
 ~~~
 
 ### Create LoggerFactory with different date format
