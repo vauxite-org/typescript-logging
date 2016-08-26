@@ -2,6 +2,7 @@
 node_modules
 npm-debug.log
 spec
+downloads
 # Dist is what we publish so won't ignore for npm
 dist-test
 
