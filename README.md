@@ -117,7 +117,7 @@ Below follow a few examples on how to use the library in typescript.
 ## API
 
 This describes the more often used part of the typescript API. Keep in mind the javascript API is exactly the same (except you need to call things the javascript way).
-Finally it's recommended to just look in the relevant classes hey contain the most up to date documentation.
+Finally it's recommended to just look in the relevant classes as they contain the most up to date documentation.
 
 ### LFService
 
