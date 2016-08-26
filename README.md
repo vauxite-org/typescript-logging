@@ -244,3 +244,26 @@ This is an enumeration with the following values:
    */
   YearDayMonthTime
 ~~~
+
+## Tests
+
+To run the tests:
+
+~~~
+npm run test
+~~~
+
+## Bugs
+
+We all wish there were none in our software, but alas. If you encounter a bug please log it in the issue tracker.
+
+## Contributing
+
+Feel free to contribute or come up with great ideas, please use the issue tracker for that. 
+
+If you add/change new functionality and want it merged to master, please open a pull request. Also add tests for it (spec directory).
+Some things may not fit the library and could be rejected, so if you are unsure please ask first before wasting your valuable time.
+
+## History
+
+* 0.1.0 Initial release 
