@@ -18,7 +18,7 @@ No additional typings are required, these are included.
 
 ## Browser
 
-To use in the browser with javascript directly, download the (minified) library [here](Here).
+To use in the browser with javascript directly, download the (minified) library from [here](https://github.com/mreuvers/typescript-logging/tree/master/downloads/bundle/0.1.2).
 The library is exposed by global variable TSL. See the example below.
 
 ~~~~
