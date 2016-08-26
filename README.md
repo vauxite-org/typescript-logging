@@ -266,4 +266,6 @@ Some things may not fit the library and could be rejected, so if you are unsure 
 
 ## History
 
-* 0.1.0 Initial release 
+* 0.1.0 Initial release, do not use.
+* 0.1.1 No changes (npm related), do not use.
+* 0.1.2 No changes (npm related), this release is fine.
