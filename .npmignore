@@ -1,5 +1,7 @@
 .idea
 node_modules
 npm-debug.log
-dist-test
+spec
 # Dist is what we publish so won't ignore for npm
+dist-test
+

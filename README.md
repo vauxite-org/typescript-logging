@@ -1,9 +1,10 @@
 # typescript-logging
 
 Typescript and javascript library for logging. Simple and flexible.
-Written in typescript, so easily integrates within any Typescript project.
+Written in typescript, so easily integrates within any Typescript project 
+in addition to normal javascript projects.
 
-Can also be used in javascript projects, or in the browser directly.
+Can also be used in javascript projects, or in the browser directly (es5 compatible).
 
 ## Installation
 
@@ -26,13 +27,19 @@ The library is exposed by global variable TSL. See the example below.
   <head>
     <script type="text/javascript" src="typescript-logging-bundle.min.js"></script>
     <script type="text/javascript">
+      // Create default logger
       var loggerFactory = TSL.LFService.createLoggerFactory();
+      // Get a logger called "Hello"
       var logger = loggerFactory.getLogger("Hello");
+      
+      // Normal logging
       logger.info("Hello this is a log statement.");
       logger.error("Ooops", new Error("Failed!"));
       
-      // With callbacks, useful for expensive logging that's only called when needed.
+      // With callbacks, this is useful when log statements are expensive (e.g. require calculation)
+      // The callback is only called when needed.
       logger.infoc(function() { return "Only called when INFO (or lower) level is enabled!"; });
+      logger.warnc(function() { return "Warn " + somethingVeryExpensive(); }, function() { return new Error("Oh oh"); }); 
     </script>
   </head>
 </html>
@@ -42,13 +49,75 @@ The library is exposed by global variable TSL. See the example below.
 
 Below follow a few examples on how to use the library in typescript.
 
+### Create default LoggerFactory and log
+~~~
+  const factory = LFService.createLoggerFactory();
+  const logger = factory.getLogger("SomeName");
+  logger.info("Will log on info and higher by default");
+~~~
 
+### Create LoggerFactory, use closures for logging
+~~~
+  const factory = LFService.createLoggerFactory();
+  const logger = factory.getLogger("SomeName");
+  logger.infoc(() => "Will only be called for info level or higher");
+  logger.errorc(() => "Failure", () => new Error("Something went wrong"));
+~~~
+
+### Create LoggerFactory, which logs on DEBUG (and higher) for all loggers.
+~~~
+  const factory = LFService.createLoggerFactory(new LoggerFactoryOptions().addLogGroupRule(new LogGroupRule(new RegExp(".+"), LogLevel.Debug)));
+  const logger = factory.getLogger("AnyName");
+  logger.trace("Will not be logged");
+  logger.debug("Will log");
+  logger.info("Will log"); // etc.
+~~~
+
+### Create LoggerFactory which has different log levels for two groups
+~~~
+  const factory = LFService.createLoggerFactory(new LoggerFactoryOptions()
+    .addLogGroupRule(new LogGroupRule(new RegExp("model\\..+"), LogLevel.INFO)))
+    .addLogGroupRule(new LogGroupRule(new RegExp("service\\..+"), LogLevel.DEBUG)));
+  const loggerModel = factory.getLogger("model.Person");  // This one will log on info and higher
+  const loggerService = factory.getLogger("model.Service");  // This one will log on debug and higher
+~~~
+
+### Create LoggerFactory with different date format
+~~~
+  // The loggerfactory uses a different dateformat, and different date separator.
+  const loggerFactory = LFService.createLoggerFactory(new LoggerFactoryOptions()
+    .addLogGroupRule(new LogGroupRule(new RegExp(".+"),LogLevel.Info, new LogFormat(new DateFormat(DateFormatEnum.YearDayMonthWithFullTime,"/"))));
+~~~
+
+### Create LoggerFactory with custom logger
+~~~
+  // Custom logger, extend AbstractLogger which makes your life easy.
+  class CustomLoggerImpl extends AbstractLogger {
+
+    constructor(name: string, rule: LogGroupRule) {
+      super(name, rule);
+    }
+
+    protected doLog(msg: string): void {
+      // Do what you need to do with this log message!
+    }    
+  }   
+
+  // The options, define LoggerType.Custom, then use a closure to return the new logger 
+  // (this will be called by the library when it creates a new logger). 
+  // Make sure to return a new instance, unless they are shareable between different loggers.
+  const loggerOptions = new LoggerFactoryOptions().addLogGroupRule(new LogGroupRule(new RegExp(".+"),LogLevel.Info, new LogFormat(), LoggerType.Custom,
+      (name: string, logGroupRule: LogGroupRule) => new CustomLoggerImpl(name, logGroupRule)
+  ));
+  const loggerFactory = LFService.createLoggerFactory(loggerOptions);
+  const logger = loggerFactory.getLogger("SomeName");  // This will return your logger now.
+~~~
 
 
 ## API
 
 This describes the more often used part of the typescript API. Keep in mind the javascript API is exactly the same (except you need to call things the javascript way).
-
+Finally it's recommended to just look in the relevant classes hey contain the most up to date documentation.
 
 ### LFService
 
@@ -133,3 +202,45 @@ LogFormat allows to set some options about what a log line should look like. Cre
 
 ### DateFormat
 
+Defines what the timestamp should look like. Create a new DateFormat... 
+
+~~~
+  /**
+   * Constructor, can be called empty as it uses defaults.
+   * @param formatEnum DateFormatEnum
+   * @param dateSeparator Separator used between dates
+   */
+  constructor(formatEnum: DateFormatEnum = DateFormatEnum.Default, dateSeparator: string = '-')
+~~~
+
+The DateFormatEnum allows some change on how the date is formatted.
+
+### DateFormatEnum
+
+This is an enumeration with the following values:
+
+~~~
+  /**
+   * Displays as: year-month-day hour:minute:second,millis -> 1999-02-12 23:59:59,123
+   * Note the date separator can be set separately.
+   */
+  Default,
+
+  /**
+   * Displays as: year-month-day hour:minute:second -> 1999-02-12 23:59:59
+   * Note the date separator can be set separately.
+   */
+  YearMonthDayTime,
+
+  /**
+   * Displays as: year-day-month hour:minute:second,millis -> 1999-12-02 23:59:59,123
+   * Note the date separator can be set separately.
+   */
+  YearDayMonthWithFullTime,
+
+  /**
+   * Displays as: year-day-month hour:minute:second -> 1999-12-02 23:59:59
+   * Note the date separator can be set separately.
+   */
+  YearDayMonthTime
+~~~

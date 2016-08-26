@@ -8,7 +8,7 @@ import {AbstractLogger, ConsoleLoggerImpl, MessageBufferLoggerImpl} from "./Logg
 export enum DateFormatEnum {
 
   /**
-   * Displays as: year-month-day hour:minute:second,millis -> 1999-02-12 23:59:59,123456
+   * Displays as: year-month-day hour:minute:second,millis -> 1999-02-12 23:59:59,123
    * Note the date separator can be set separately.
    */
   Default,
@@ -20,7 +20,7 @@ export enum DateFormatEnum {
   YearMonthDayTime,
 
   /**
-   * Displays as: year-day-month hour:minute:second,millis -> 1999-12-02 23:59:59,123456
+   * Displays as: year-day-month hour:minute:second,millis -> 1999-12-02 23:59:59,123
    * Note the date separator can be set separately.
    */
   YearDayMonthWithFullTime,
