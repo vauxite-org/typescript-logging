@@ -2,6 +2,166 @@ import {LogLevel, Logger} from "./Logger";
 import {LogGroupRule, DateFormatEnum} from "./LoggerFactoryService";
 import * as ST from "stacktrace-js";
 
+class Message {
+
+  private _ready: boolean;
+  private _message: string;
+
+  constructor(ready: boolean, message?: string) {
+    this._ready = ready;
+    this._message = message;
+  }
+
+
+  get ready(): boolean {
+    return this._ready;
+  }
+
+  set ready(value: boolean) {
+    this._ready = value;
+  }
+
+  get message(): string {
+    return this._message;
+  }
+
+  set message(value: string) {
+    this._message = value;
+  }
+}
+
+class LinkedNode<T> {
+
+  private _value: T;
+  private _previous: LinkedNode<T> = null;
+  private _next: LinkedNode<T> = null;
+
+  constructor(value: T) {
+    this._value = value;
+  }
+
+  get previous(): LinkedNode<T> {
+    return this._previous;
+  }
+
+  set previous(value: LinkedNode<T>) {
+    this._previous = value;
+  }
+
+  get next(): LinkedNode<T> {
+    return this._next;
+  }
+
+  set next(value: LinkedNode<T>) {
+    this._next = value;
+  }
+
+  get value(): T {
+    return this._value;
+  }
+}
+
+class LinkedList<T> {
+
+  private head: LinkedNode<T> = null;
+  private size: number = 0;
+
+  addHead(value: T): void {
+    if(!this.createHeadIfNeeded(value)) {
+      const nextNode = this.head.next;
+      const newHeadNode = new LinkedNode<T>(value);
+      if(nextNode != null) {
+        nextNode.previous = newHeadNode;
+        newHeadNode.next = nextNode;
+      }
+      this.head = newHeadNode;
+    }
+    this.size++;
+  }
+
+  addTail(value : T): void {
+    if(!this.createHeadIfNeeded(value)) {
+      const oldTailNode = this.getTailNode();
+      const newTailNode = new LinkedNode<T>(value);
+      oldTailNode.next = newTailNode;
+      newTailNode.previous = oldTailNode;
+    }
+    this.size++;
+  }
+
+  clear() {
+    this.head = null;
+    this.size = 0;
+  }
+
+  getHead(): T {
+    if(this.head != null) {
+      return this.head.value;
+    }
+    return null;
+  }
+
+  removeHead(): T {
+    if(this.head != null) {
+      const oldHead = this.head;
+      const value = oldHead.value;
+      this.head = oldHead.next;
+      this.size --;
+      return value;
+    }
+    return null;
+  }
+
+  getTail(): T {
+    const node = this.getTailNode();
+    if(node != null) {
+      return node.value;
+    }
+    return null;
+  }
+
+  removeTail(): T {
+    const node = this.getTailNode();
+    if(node != null) {
+      if(node === this.head) {
+        this.head = null;
+      }
+      else {
+        const previousNode = node.previous;
+        previousNode.next = null;
+      }
+      this.size--;
+      return node.value;
+    }
+    return null;
+  }
+
+  getSize(): number {
+    return this.size;
+  }
+
+  private createHeadIfNeeded(value: T): boolean {
+    if(this.head == null) {
+      this.head = new LinkedNode(value);
+      return true;
+    }
+    return false;
+  }
+
+  private getTailNode(): LinkedNode<T> {
+    if(this.head == null) {
+      return null;
+    }
+
+    let node = this.head;
+    while(node.next != null) {
+      node = node.next;
+    }
+
+    return node;
+  }
+}
+
 /**
  * Abstract base logger, extend to easily implement a custom logger that
  * logs wherever you want. You only need to implement doLog(msg: string) and
@@ -13,6 +173,8 @@ export abstract class AbstractLogger implements Logger {
   private name: string;
   private rule: LogGroupRule;
   private level: LogLevel;
+
+  private _allMessages: LinkedList<Message> = new LinkedList<Message>();
 
   constructor(name: string, rule: LogGroupRule) {
     this.name = name;
@@ -98,13 +260,15 @@ export abstract class AbstractLogger implements Logger {
 
   log(level: LogLevel, msg: string, error?: Error): void {
     if(this.open && this.level <= level) {
-      this.createMessage(level, msg, new Date(), error);
+      this._allMessages.addTail(this.createMessage(level, msg, new Date(), error));
+      this.processMessages();
     }
   }
 
   logc(level: LogLevel, msg: ()=>string, error?: ()=>Error): void {
     if(this.open && this.level <= level) {
-      this.createMessage(level, msg(), new Date(), error !== undefined ? error() : undefined);
+      this._allMessages.addTail(this.createMessage(level, msg(), new Date(), error !== undefined ? error() : undefined));
+      this.processMessages();
     }
   }
 
@@ -116,9 +280,10 @@ export abstract class AbstractLogger implements Logger {
 
   close(): void {
     this.open = false;
+    this._allMessages.clear();
   }
 
-  private createMessage(level: LogLevel, msg: string, date: Date, error?: Error): void {
+  private createMessage(level: LogLevel, msg: string, date: Date, error?: Error): Message {
     const lpad = (value: string, chars: number, padWith: string): string => {
       const howMany = chars - value.length;
       if(howMany > 0) {
@@ -196,6 +361,7 @@ export abstract class AbstractLogger implements Logger {
 
     result += ' ' + msg;
     if(error !== undefined) {
+      const message = new Message(false);
       result += '\n' + error.name + ": " + error.message + "\n@";
       ST.fromError(error, {offline: true}).then((frames: ST.StackFrame[]) => {
         const stackStr = (frames.map((frame: ST.StackFrame) => {
@@ -204,11 +370,33 @@ export abstract class AbstractLogger implements Logger {
 
         result += '\n' + stackStr;
 
-        this.doLog(result);
+        message.message = result;
+        message.ready = true;
+        this.processMessages();
       });
+      return message;
     }
     else {
-      this.doLog(result);
+      return new Message(true, result);
+    }
+  }
+
+  private processMessages(): void {
+    // Basically we wait until errors are resolved (those messages
+    // may not be ready).
+    const msgs = this._allMessages;
+    if(msgs.getSize() > 0) {
+      do {
+        const msg = msgs.getHead();
+        if(msg != null) {
+          if(!msg.ready) {
+            break;
+          }
+          msgs.removeHead();
+          this.doLog(msg.message);
+        }
+      }
+      while(msgs.getSize() > 0);
     }
   }
 }
@@ -260,6 +448,8 @@ export class MessageBufferLoggerImpl extends AbstractLogger {
   }
 
   toString(): string {
-    return this.messages.toString();
+    return this.messages.map(msg => {
+      return msg;
+    }).join("\n");
   }
 }

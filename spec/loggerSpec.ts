@@ -43,6 +43,7 @@ describe("Loggers", () => {
     expect(messages[0]).toContain("INFO");
 
     logger.warn("This is a warning!");
+
     expect(messages.length).toEqual(2);
     expect(messages[1]).toContain("This is a warning!");
     expect(messages[1]).toContain("WARN");
@@ -106,5 +107,28 @@ describe("Loggers", () => {
       expect(logger.toString()).toContain("Failed");
     });
   });
+
+  it("Will log in order", () => {
+    const loggerFactory = LFService.createLoggerFactory(new LoggerFactoryOptions().addLogGroupRule(new LogGroupRule(new RegExp(".+"),LogLevel.Info, new LogFormat(), LoggerType.MessageBuffer)));
+    const logger = <MessageBufferLoggerImpl>loggerFactory.getLogger("ABC");
+    logger.info("First");
+    logger.info("Second", new Error("fail"));
+    logger.info("Third", new Error("fail"));
+    logger.info("Fourth");
+    logger.info("Fifth", new Error("fail"));
+
+    const msgs = logger.getMessages();
+    waitsFor(() => msgs.length == 5, "Waited for 5 messages", 3000);
+    runs(() => {
+      expect(msgs[0]).toContain("First");
+      expect(msgs[1]).toContain("Second");
+      expect(msgs[2]).toContain("Third");
+      expect(msgs[3]).toContain("Fourth");
+      expect(msgs[4]).toContain("Fifth");
+
+      console.log(logger.toString());
+    });
+
+  })
 
 });

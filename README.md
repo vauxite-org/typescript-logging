@@ -49,14 +49,20 @@ The library is exposed by global variable TSL. See the example below.
 
 Below follow a few examples on how to use the library in typescript.
 
-### Create default LoggerFactory and log
+**Importing**
+~~~
+import {LFService,LoggerFactoryOptions} from "typescript-logging"
+~~~
+All classes can be imported from "typescript-logging".
+
+**Create default LoggerFactory and log**
 ~~~
   const factory = LFService.createLoggerFactory();
   const logger = factory.getLogger("SomeName");
   logger.info("Will log on info and higher by default");
 ~~~
 
-### Create LoggerFactory, use closures for logging
+**Create LoggerFactory, use closures for logging**
 ~~~
   const factory = LFService.createLoggerFactory();
   const logger = factory.getLogger("SomeName");
@@ -64,16 +70,17 @@ Below follow a few examples on how to use the library in typescript.
   logger.errorc(() => "Failure", () => new Error("Something went wrong"));
 ~~~
 
-### Create LoggerFactory, which logs on DEBUG (and higher) for all loggers.
+**Create LoggerFactory, which logs on DEBUG (and higher) for all loggers.**
 ~~~
-  const factory = LFService.createLoggerFactory(new LoggerFactoryOptions().addLogGroupRule(new LogGroupRule(new RegExp(".+"), LogLevel.Debug)));
+  const factory = LFService.createLoggerFactory(new LoggerFactoryOptions()
+    .addLogGroupRule(new LogGroupRule(new RegExp(".+"), LogLevel.Debug)));
   const logger = factory.getLogger("AnyName");
   logger.trace("Will not be logged");
   logger.debug("Will log");
   logger.info("Will log"); // etc.
 ~~~
 
-### Create LoggerFactory which has different log levels for two groups
+**Create LoggerFactory which has different log levels for two groups**
 ~~~
   const factory = LFService.createLoggerFactory(new LoggerFactoryOptions()
     .addLogGroupRule(new LogGroupRule(new RegExp("model\\..+"), LogLevel.INFO)))
@@ -82,14 +89,15 @@ Below follow a few examples on how to use the library in typescript.
   const loggerService = factory.getLogger("service.MyService");  // This one will log on debug and higher
 ~~~
 
-### Create LoggerFactory with different date format
+**Create LoggerFactory with different date format**
 ~~~
   // The loggerfactory uses a different dateformat, and different date separator.
   const loggerFactory = LFService.createLoggerFactory(new LoggerFactoryOptions()
-    .addLogGroupRule(new LogGroupRule(new RegExp(".+"),LogLevel.Info, new LogFormat(new DateFormat(DateFormatEnum.YearDayMonthWithFullTime,"/"))));
+    .addLogGroupRule(new LogGroupRule(new RegExp(".+"),LogLevel.Info, 
+      new LogFormat(new DateFormat(DateFormatEnum.YearDayMonthWithFullTime,"/"))));
 ~~~
 
-### Create LoggerFactory with custom logger
+**Create LoggerFactory with custom logger**
 ~~~
   // Custom logger, extend AbstractLogger which makes your life easy.
   class CustomLoggerImpl extends AbstractLogger {
@@ -106,7 +114,8 @@ Below follow a few examples on how to use the library in typescript.
   // The options, define LoggerType.Custom, then use a closure to return the new logger 
   // (this will be called by the library when it creates a new logger). 
   // Make sure to return a new instance, unless they are shareable between different loggers.
-  const loggerOptions = new LoggerFactoryOptions().addLogGroupRule(new LogGroupRule(new RegExp(".+"),LogLevel.Info, new LogFormat(), LoggerType.Custom,
+  const loggerOptions = new LoggerFactoryOptions()
+    .addLogGroupRule(new LogGroupRule(new RegExp(".+"),LogLevel.Info, new LogFormat(), LoggerType.Custom,
       (name: string, logGroupRule: LogGroupRule) => new CustomLoggerImpl(name, logGroupRule)
   ));
   const loggerFactory = LFService.createLoggerFactory(loggerOptions);
@@ -135,6 +144,33 @@ Use this to create and configure a LoggerFactory. The LoggerFactory is used to g
   static createLoggerFactory(options?: LoggerFactoryOptions): LoggerFactory 
 ~~~ 
 
+### LoggerFactory
+
+Created by LFService. Than use getLogger(name: string) to get a new logger to log with.
+
+### Logger
+
+Used to log messages and optionally Errors. 
+
+~~~
+  debug(msg: string, error?: Error): void;
+  
+  debugc(msg:() => string, error?:() => Error): void;
+  
+  isDebugEnabled(): boolean;
+~~~
+
+The above snippets shows only the debug related methods, this is the complete list of log methods:
+ 
+* trace / tracec / isTraceEnabled
+* debug / debugc / isDebugEnabled
+* info / infoc / isInfoEnabled
+* warn / warnc / isWarnEnabled
+* error / errorc / isErrorEnabled
+* fatal / fatalc / isFatalEnabled
+
+When the method ends with a 'c', it means that is a closure log method and should be used as such. Without the
+ending 'c', it is a normal method. Both types can be used, depending on preference and potentially performance reasons.
 
 ### LoggerFactoryOptions
 
@@ -245,6 +281,14 @@ This is an enumeration with the following values:
   YearDayMonthTime
 ~~~
 
+## Build
+
+To build locally:
+
+~~~
+npm run build
+~~~
+
 ## Tests
 
 To run the tests:
@@ -268,4 +312,7 @@ Some things may not fit the library and could be rejected, so if you are unsure 
 
 * 0.1.0 Initial release, do not use.
 * 0.1.1 No changes (npm related), do not use.
-* 0.1.2 No changes (npm related), this release is fine.
+* 0.1.2 No changes (npm related), release ok.
+* 0.1.3 No api changes, release ok.
+  * Updated documentation (slightly changed examples, added example how to import, added additional logger api)
+  * Fix that messages get logged in proper order always (due to using a promise for error resolving, they could get out of order)
