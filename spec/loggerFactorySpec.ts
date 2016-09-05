@@ -1,5 +1,6 @@
 import {LFService, LoggerFactoryOptions, LogGroupRule} from "../src/LoggerFactoryService";
-import {LogLevel, Logger} from "../src/Logger";
+import {LogLevel, Logger, Category} from "../src/Logger";
+import {CategoryService} from "../src/CategoryService";
 
 describe("LoggerFactory configuration", () => {
 
@@ -66,6 +67,28 @@ describe("LoggerFactory configuration", () => {
 
     // model. is invalid, it needs to have something after the name
     expect(() => factory.getLogger("model.")).toThrow();
+
+    // Can create hierarchy by passing parent in constructor, or use addchild.
+    // All categories are at Info by default, unless specified. Maybe it should be Error?
+    const cat = new Category("x", new Category("parent"));
+    const sub1 = new Category("sub1");
+    cat.addChild(sub1).addChild(new Category("sub2", null, LogLevel.Error));
+
+    // Export this logger somewhere for reuse, perhaps add getLogger(cat),
+    // to retrieve the same in case you just need to pull it out again for some reason.
+    // Or maybe just call it getLogger(cat) ?
+    const logger = CategoryService.createLogger(cat);
+
+    // Unfortunately [] must be first, since we also have an optional Error, so
+    // we can't use the rest (...) notation.
+    logger.info([cat],"x");
+    try {
+      throw new Error("Oops");
+    }
+    catch(e) {
+      logger.info([sub1], "Something went wrong", e);
+    }
+
   });
 
 });

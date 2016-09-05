@@ -24,6 +24,42 @@ export enum LoggerType {
 }
 
 /**
+ * Category for categorized logging.
+ */
+export class Category {
+
+  private name: string;
+  private parent: Category;
+  private children: Category[] = [];
+  private logLevel: LogLevel;
+
+  constructor(name: string, parent: Category = null, logLevel: LogLevel = LogLevel.Info) {
+    this.name = name;
+    this.parent = parent;
+    this.logLevel = logLevel;
+    if(this.parent != null) {
+      this.parent.children.push(this);
+    }
+  }
+
+  addChild(category: Category): Category {
+    category.parent = this;
+    this.children.push(category);
+    return this;
+  }
+
+  getLogLevel(): LogLevel {
+    return this.logLevel;
+  }
+
+  getChildren(): Category[] {
+    return this.children;
+  }
+
+
+}
+
+/**
  * The Logger interface used for logging.
  * You can get a Logger from LoggerFactory.
  * LoggerFactory itself you create and configure through LFService.
@@ -57,7 +93,7 @@ export interface Logger {
 
   debug(msg: string, error?: Error): void;
 
-  info(msg: string, error?: Error): void;
+  info(msg: string,  error?: Error): void;
 
   warn(msg: string, error?: Error): void;
 
