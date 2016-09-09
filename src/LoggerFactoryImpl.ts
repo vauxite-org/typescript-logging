@@ -1,7 +1,8 @@
 import {LoggerFactory} from "./LoggerFactory";
 import {LoggerFactoryOptions} from "./LoggerFactoryService";
 import {AbstractLogger, ConsoleLoggerImpl, MessageBufferLoggerImpl} from "./LoggerImpl";
-import {Logger, LoggerType} from "./Logger";
+import {Logger} from "./Logger";
+import {LoggerType} from "./LoggerOptions";
 
 export class LoggerFactoryImpl implements LoggerFactory {
 

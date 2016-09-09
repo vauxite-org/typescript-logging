@@ -1,8 +1,7 @@
 import {LoggerFactory} from "./LoggerFactory";
-import {LogLevel, LoggerType} from "./Logger";
 import {AbstractLogger} from "./LoggerImpl";
 import {LoggerFactoryImpl} from "./LoggerFactoryImpl";
-import {LogFormat} from "./ServiceOptions";
+import {LogFormat,LogLevel, LoggerType} from "./LoggerOptions";
 
 
 /**

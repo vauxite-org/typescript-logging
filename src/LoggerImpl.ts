@@ -1,7 +1,7 @@
-import {LogLevel, Logger, Category} from "./Logger";
+import {Logger} from "./Logger";
 import {LogGroupRule} from "./LoggerFactoryService";
 import * as ST from "stacktrace-js";
-import {DateFormatEnum} from "./ServiceOptions";
+import {DateFormatEnum, LogLevel} from "./LoggerOptions";
 
 class Message {
 
@@ -191,7 +191,7 @@ export abstract class AbstractLogger implements Logger {
     this.log(LogLevel.Debug, msg, error);
   }
 
-  info(msg: string, error?: Error, ...categories: Category[]): void {
+  info(msg: string, error?: Error): void {
     this.log(LogLevel.Info, msg, error);
   }
 

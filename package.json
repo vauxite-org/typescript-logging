@@ -4,10 +4,9 @@
   "description": "Library for logging, written in typescript, but can be used by normal es5+ javascript as well.",
   "main": "dist/commonjs/typescript-logging",
   "scripts": {
+    "setup": "typings install",
     "test": "tsc -p tsconfig-test.json && jasmine-node --verbose ./dist-test/spec",
-    "build": "tsc && webpack --config webpack.config.bundle.js && webpack --config webpack.config.bundle-min.js",
-    "prepublish": "tsc && webpack --config webpack.config.bundle.js && webpack --config webpack.config.bundle-min.js",
-    "postinstall": "typings install"
+    "build": "tsc && webpack --config webpack.config.bundle.js && webpack --config webpack.config.bundle-min.js"
   },
   "repository": {
     "type": "git",

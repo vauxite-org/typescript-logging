@@ -1,4 +1,29 @@
 /**
+ * Log level for a logger.
+ */
+export enum LogLevel {
+
+  Trace,
+  Debug,
+  Info,
+  Warn,
+  Error,
+  Fatal
+
+}
+
+/**
+ * Where to log to? Pick one of the constants. Custom requires a callback to be present, see LFService.createLoggerFactory(...)
+ * where this comes into play.
+ */
+export enum LoggerType {
+
+  Console,
+  MessageBuffer,
+  Custom
+}
+
+/**
  * Defines several date enums used for formatting a date.
  */
 export enum DateFormatEnum {
