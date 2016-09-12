@@ -38,6 +38,16 @@ export class Category {
   get logLevel(): LogLevel {
     return this._logLevel;
   }
+
+  getCategoryPath(): string {
+    let result = this.name;
+    let cat: Category = this;
+    while((cat = cat.parent) != null) {
+      result = cat.name + "." + result;
+    }
+    return result;
+  }
+
 }
 
 export class CategoryLogFormat {
