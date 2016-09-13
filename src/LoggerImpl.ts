@@ -1,8 +1,8 @@
 import {Logger} from "./Logger";
 import {LogGroupRule} from "./LoggerFactoryService";
-import * as ST from "stacktrace-js";
-import {DateFormatEnum, LogLevel} from "./LoggerOptions";
+import {LogLevel} from "./LoggerOptions";
 import {LinkedList} from "./DataStructures";
+import {MessageFormatUtils} from "./MessageUtils";
 
 class Message {
 
@@ -13,7 +13,6 @@ class Message {
     this._ready = ready;
     this._message = message;
   }
-
 
   get ready(): boolean {
     return this._ready;
@@ -153,75 +152,10 @@ export abstract class AbstractLogger implements Logger {
     this._allMessages.clear();
   }
 
-  private createMessage(level: LogLevel, msg: string, date: Date, error?: Error): Message {
-    const lpad = (value: string, chars: number, padWith: string): string => {
-      const howMany = chars - value.length;
-      if(howMany > 0) {
-        let res: string = '';
-        for(let i = 0; i < howMany; i++) {
-          res += padWith;
-        }
-        res += value;
-        return res;
-      }
-      return value;
-    };
-
-    const fullYear = (date: Date): string => {
-      return lpad(date.getFullYear().toString(), 4, '0');
-    };
-
-    const month = (date: Date): string => {
-      return lpad((date.getMonth()+1).toString(), 2, '0');
-    };
-
-    const day = (date: Date): string => {
-      return lpad(date.getDate().toString(), 2, '0');
-    };
-
-    const hours = (date: Date): string => {
-      return lpad(date.getHours().toString(), 2, '0');
-    };
-
-    const minutes = (date: Date): string => {
-      return lpad(date.getMinutes().toString(), 2, '0');
-    };
-
-    const seconds = (date: Date): string => {
-      return lpad(date.getSeconds().toString(), 2, '0');
-    };
-
-    const millis = (date: Date): string => {
-      return date.getMilliseconds().toString();
-    };
-
-    let result: string = "";
-
+  private createMessage(level: LogLevel, msg: string, date: Date, error: Error = null): Message {
+    let result = "";
     if(this.rule.logFormat.showTimeStamp) {
-      const dateSeparator = this.rule.logFormat.dateFormat.dateSeparator;
-      let ds: string = '';
-      switch(this.rule.logFormat.dateFormat.formatEnum) {
-        case DateFormatEnum.Default:
-          // yyyy-mm-dd hh:mm:ss,m
-          ds = fullYear(date) + dateSeparator + month(date) + dateSeparator + day(date) + ' ' +
-               hours(date) + ':' + minutes(date) + ":" + seconds(date) + "," + millis(date);
-          break;
-        case DateFormatEnum.YearMonthDayTime:
-          ds = fullYear(date) + dateSeparator + month(date) + dateSeparator + day(date) + ' ' +
-               hours(date) + ':' + minutes(date) + ":" + seconds(date);
-          break;
-        case DateFormatEnum.YearDayMonthWithFullTime:
-          ds = fullYear(date) + dateSeparator + day(date) + dateSeparator + month(date) + ' ' +
-               hours(date) + ':' + minutes(date) + ":" + seconds(date) + "," + millis(date);
-          break;
-        case DateFormatEnum.YearDayMonthTime:
-          ds = fullYear(date) + dateSeparator + day(date) + dateSeparator + month(date) + ' ' +
-            hours(date) + ':' + minutes(date) + ":" + seconds(date);
-          break;
-        default:
-          throw new Error("Unsupported date format enum: " + this.rule.logFormat.dateFormat.formatEnum);
-      }
-      result += ds + " ";
+      result += MessageFormatUtils.renderDate(date, this.rule.logFormat.dateFormat) + " ";
     }
 
     result += LogLevel[level].toUpperCase() + " ";
@@ -230,20 +164,16 @@ export abstract class AbstractLogger implements Logger {
     }
 
     result += ' ' + msg;
-    if(error !== undefined) {
+    if(error != null) {
       const message = new Message(false);
-      result += '\n' + error.name + ": " + error.message + "\n@";
-      ST.fromError(error, {offline: true}).then((frames: ST.StackFrame[]) => {
-        const stackStr = (frames.map((frame: ST.StackFrame) => {
-          return frame.toString();
-        })).join('\n  ');
 
-        result += '\n' + stackStr;
-
+      MessageFormatUtils.renderError(error).then((stackResult: string) => {
+        result += '\n' + stackResult;
         message.message = result;
         message.ready = true;
         this.processMessages();
       });
+
       return message;
     }
     else {

@@ -1,56 +1,92 @@
 import {CategoryLogger, Category} from "./CategoryLogger";
 import {LogLevel} from "./LoggerOptions";
 import {RuntimeSettings} from "./CategoryService";
+import {LinkedList} from "./DataStructures";
+import {MessageFormatUtils} from "./MessageUtils";
 
-export class RootCategories {
+export interface CategoryLogMessage {
 
-  private rootCategories: Category[] = [];
+  getMessage(): string;
 
-  // TODO when typescript 2.0 is final, use private constructor.
+  /**
+   * Returns the resolved stack (based on error).
+   * Available only when error is present.
+   */
+  getErrorAsStack(): string;
 
-  static INSTANCE = new RootCategories();
+  getError(): Error;
 
+  getCategories(): Category[];
 
-  addCategory(rootCategory: Category): void {
-    if(rootCategory == null || rootCategory === undefined) {
-      throw new Error("Root category CANNOT be null");
-    }
-    const parent = rootCategory.parent;
-    if(parent != null) {
-      throw new Error("Parent must be null for a root category");
-    }
+  getDate(): Date;
 
-    for(let i = 0; i < this.rootCategories.length; i++) {
-      if(this.rootCategories[i].name === rootCategory.name) {
-        throw new Error("Cannot add this rootCategory with name: " + rootCategory.name + ", another root category is already registered with that name.");
-      }
-    }
-
-    this.rootCategories.push(rootCategory);
-  }
-
-  exists(rootCategory: Category): boolean {
-    if(rootCategory == null || rootCategory === undefined) {
-      throw new Error("Root category CANNOT be null");
-    }
-
-    const parent = rootCategory.parent;
-    if(parent != null) {
-      throw new Error("Parent must be null for a root category");
-    }
-
-    return this.rootCategories.indexOf(rootCategory) != -1;
-  }
-
-  static clear(): void {
-    RootCategories.INSTANCE.rootCategories = [];
-  }
+  getLevel(): LogLevel;
 }
 
-export class AbstractCategoryLogger implements CategoryLogger {
+class CategoryLogMessageImpl implements CategoryLogMessage {
+
+  private message: string;
+  private error: Error;
+  private categories: Category[];
+  private date: Date;
+  private level: LogLevel;
+  private ready: boolean;
+
+  private errorAsStack: string = null;
+
+  constructor(message: string, error: Error, categories: Category[], date: Date, level: LogLevel, ready: boolean) {
+    this.message = message;
+    this.error = error;
+    this.categories = categories;
+    this.date = date;
+    this.level = level;
+    this.ready = ready;
+  }
+
+  getMessage(): string {
+    return this.message;
+  }
+
+  getErrorAsStack(): string {
+    return this.errorAsStack;
+  }
+
+  setErrorAsStack(stack: string): void {
+    this.errorAsStack = stack;
+  }
+
+  getError(): Error {
+    return this.error;
+  }
+
+  getCategories(): Category[] {
+    return this.categories;
+  }
+
+  getDate(): Date {
+    return this.date;
+  }
+
+  getLevel(): LogLevel {
+    return this.level;
+  }
+
+  isReady(): boolean {
+    return this.ready;
+  }
+
+  setReady(value: boolean): void {
+    this.ready = value;
+  }
+
+}
+
+export abstract class AbstractCategoryLogger implements CategoryLogger {
 
   private rootCategory: Category;
   private runtimeSettings: RuntimeSettings;
+
+  private allMessages: LinkedList<CategoryLogMessageImpl> = new LinkedList<CategoryLogMessageImpl>();
 
   constructor(rootCategory: Category, runtimeSettings: RuntimeSettings) {
     this.rootCategory = rootCategory;
@@ -115,6 +151,12 @@ export class AbstractCategoryLogger implements CategoryLogger {
     return this.rootCategory;
   }
 
+  protected abstract doLog(msg: CategoryLogMessage): void;
+
+  protected createDefaultMessageline(msg: CategoryLogMessage): string {
+    return msg.getLevel() + " " + msg.getMessage();
+  }
+
   private _log(level: LogLevel, msg: string, error: Error = null, categories: Category[]): void {
     if(categories !== undefined && categories.length > 0) {
       // Get the runtime levels for given categories. If their level is lower than given level, we log.
@@ -130,10 +172,41 @@ export class AbstractCategoryLogger implements CategoryLogger {
         }
 
         if(settings.logLevel <= level) {
-          console.log(msg);
+          if(error == null) {
+            this.allMessages.addTail(new CategoryLogMessageImpl(msg, error, categories, new Date(), level, true));
+            this.processMessages();
+          }
+          else {
+            const logMessage = new CategoryLogMessageImpl(msg, error, categories, new Date(), level, false);
+            this.allMessages.addTail(logMessage);
+            MessageFormatUtils.renderError(error).then((stack: string) => {
+              logMessage.setErrorAsStack(stack);
+              logMessage.setReady(true);
+              this.processMessages();
+            });
+          }
           break;
         }
       }
+    }
+  }
+
+  private processMessages(): void {
+    // Basically we wait until errors are resolved (those messages
+    // may not be ready).
+    const msgs = this.allMessages;
+    if(msgs.getSize() > 0) {
+      do {
+        const msg = msgs.getHead();
+        if(msg != null) {
+          if(!msg.isReady()) {
+            break;
+          }
+          msgs.removeHead();
+          this.doLog(msg);
+        }
+      }
+      while(msgs.getSize() > 0);
     }
   }
 
@@ -143,5 +216,9 @@ export class CategoryConsoleLoggerImpl extends AbstractCategoryLogger {
 
   constructor(rootCategory: Category, runtimeSettings: RuntimeSettings) {
     super(rootCategory, runtimeSettings);
+  }
+
+  protected doLog(msg: CategoryLogMessage): void {
+    console.log(this.createDefaultMessageline(msg));
   }
 }

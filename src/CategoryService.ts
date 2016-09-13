@@ -1,6 +1,6 @@
 import {LogLevel, LoggerType} from "./LoggerOptions";
 import {CategoryLogger, Category, CategoryLogFormat} from "./CategoryLogger";
-import {RootCategories, CategoryConsoleLoggerImpl} from "./CategoryLoggerImpl";
+import {CategoryConsoleLoggerImpl} from "./CategoryLoggerImpl";
 import {SimpleMap} from "./DataStructures";
 
 export class CategoryRuntimeSettings {
@@ -49,16 +49,10 @@ export interface RuntimeSettings {
 
 }
 
-/**
- * Categorized service for logging, where logging is bound to categories which
- * can log horizontally through specific application logic (services, group(s) of components etc).
- * For the standard way of logging like most frameworks do these days, use LFService instead.
- * If you want fine grained control to divide sections of your application in
- * logical units to enable/disable logging for, this is the service you want to use instead.
- */
-export class CategoryService implements RuntimeSettings {
+export class CategoryServiceImpl implements RuntimeSettings {
 
-  private static INSTANCE = new CategoryService();
+  // All registered root categories
+  private rootCategories: Category[] = [];
 
   // Key of map is path of category
   private categoryRuntimeSettings: SimpleMap<CategoryRuntimeSettings> = new SimpleMap<CategoryRuntimeSettings>();
@@ -70,61 +64,74 @@ export class CategoryService implements RuntimeSettings {
   constructor()
   {}
 
-  static getLogger(root: Category): CategoryLogger {
-    if(!RootCategories.INSTANCE.exists(root)) {
+  getLogger(root: Category): CategoryLogger {
+    if(!this.rootCategoryExists(root)) {
       throw new Error("Given category " + root.name + " is not registered as a root category. You must use the root category to retrieve a logger.");
     }
 
-    let logger = CategoryService.INSTANCE.rootLoggers.get(root.name);
+    let logger = this.rootLoggers.get(root.name);
     if(logger != null) {
       return logger;
     }
 
-    CategoryService.INSTANCE.initializeRuntimeSettingsForCategory(root);
-    logger = CategoryService.INSTANCE.createRootLogger(root);
-    CategoryService.INSTANCE.rootLoggers.put(root.name, logger);
+    //this.initializeRuntimeSettingsForCategory(root);
+    logger = this.createRootLogger(root);
+    this.rootLoggers.put(root.name, logger);
 
     return logger;
-    //return CategoryService.CATEGORY_RUNTIME_SETTINGS.get(root.name).;
-
-   /* for(let i = 0; i < CategoryService.ROOT_CATEGORIES.length; i++) {
-      const runtimeSettings = CategoryService.ROOT_CATEGORIES[i];
-      if(runtimeSettings.category == root) {
-        return CategoryService.ROOT_LOGGERS[i];
-      }
-    }
-
-    // Ok not present yet, check that the root is registered.
-    if(!RootCategories.INSTANCE.exists(root)) {
-      throw new Error("Given category " + root.name + " is not registered as a root category. You must use the root category to retrieve a logger.");
-    }
-
-    const logger: CategoryLogger = null;
-
-    CategoryService.ROOT_CATEGORIES.push(new CategoryRuntimeSettings(root));
-    CategoryService.ROOT_LOGGERS.push(logger);
-
-    return logger;*/
   }
 
   /**
    * Clears everything, after this you need to re-register your categories etc.
    */
-  static clear(): void {
-    RootCategories.clear();
-    CategoryService.INSTANCE = new CategoryService();
-  }
-
-  /**
-   * For access to instance methods, in most cases you will not care for this method though.
-   * @return Singleton instance of this service.
-   */
-  static getInstance(): CategoryService {
-    return CategoryService.INSTANCE;
+  clear(): void {
+    this.rootCategories = [];
+    this.categoryRuntimeSettings.clear();
+    this.rootLoggers.clear();
   }
 
   getCategorySettings(category: Category): CategoryRuntimeSettings {
     return this.categoryRuntimeSettings.get(category.getCategoryPath());
+  }
+
+  registerCategory(category: Category): void {
+    if(category == null || category === undefined) {
+      throw new Error("Category CANNOT be null");
+    }
+    const parent = category.parent;
+    if(parent == null) {
+      // Register the root category
+      for (let i = 0; i < this.rootCategories.length; i++) {
+        if (this.rootCategories[i].name === category.name) {
+          throw new Error("Cannot add this rootCategory with name: " + category.name + ", another root category is already registered with that name.");
+        }
+      }
+      this.rootCategories.push(category);
+    }
+    this.initializeRuntimeSettingsForCategory(category);
+  }
+
+  private initializeRuntimeSettingsForCategory(category: Category): void {
+    let settings = this.categoryRuntimeSettings.get(category.getCategoryPath());
+    if(settings != null) {
+      throw new Error("Category with path: " + category.getCategoryPath() + " is already registered?");
+    }
+
+    settings = new CategoryRuntimeSettings(category);
+    this.categoryRuntimeSettings.put(category.getCategoryPath(), settings);
+  }
+
+  private rootCategoryExists(rootCategory: Category): boolean {
+    if(rootCategory == null || rootCategory === undefined) {
+      throw new Error("Root category CANNOT be null");
+    }
+
+    const parent = rootCategory.parent;
+    if(parent != null) {
+      throw new Error("Parent must be null for a root category");
+    }
+
+    return this.rootCategories.indexOf(rootCategory) != -1;
   }
 
   private createRootLogger(category: Category): CategoryLogger {
@@ -132,13 +139,30 @@ export class CategoryService implements RuntimeSettings {
     return new CategoryConsoleLoggerImpl(category, this);
   }
 
-  private initializeRuntimeSettingsForCategory(category: Category): void {
-    const settings = new CategoryRuntimeSettings(category);
+}
 
-    this.categoryRuntimeSettings.put(category.getCategoryPath(), settings);
-    for(let i = 0; i < category.children.length; i++) {
-      this.initializeRuntimeSettingsForCategory(category.children[i]);
-    }
+export const CATEGORY_SERVICE_IMPL = new CategoryServiceImpl();
+
+/**
+ * Categorized service for logging, where logging is bound to categories which
+ * can log horizontally through specific application logic (services, group(s) of components etc).
+ * For the standard way of logging like most frameworks do these days, use LFService instead.
+ * If you want fine grained control to divide sections of your application in
+ * logical units to enable/disable logging for, this is the service you want to use instead.
+ */
+export class CategoryServiceFactory {
+
+  //private static service: CategoryServiceImpl = new CategoryServiceImpl();
+
+  static getLogger(root: Category): CategoryLogger {
+    return CATEGORY_SERVICE_IMPL.getLogger(root);
   }
 
+  static clear() {
+    return CATEGORY_SERVICE_IMPL.clear();
+  }
+
+  static getRuntimeSettings(): RuntimeSettings {
+    return CATEGORY_SERVICE_IMPL;
+  }
 }

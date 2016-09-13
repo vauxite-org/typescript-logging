@@ -1,5 +1,5 @@
-import {RootCategories} from "./CategoryLoggerImpl";
 import {DateFormat,LogLevel} from "./LoggerOptions";
+import {CATEGORY_SERVICE_IMPL} from "./CategoryService";
 
 
 /**
@@ -13,14 +13,16 @@ export class Category {
   private _logLevel: LogLevel = LogLevel.Error;
 
   constructor(name: string, parent: Category = null) {
+    if(name.indexOf('#') != -1) {
+      throw new Error("Cannot use # in a name of a Category");
+    }
+
     this._name = name;
     this._parent = parent;
     if(this._parent != null) {
       this._parent._children.push(this);
     }
-    else {
-      RootCategories.INSTANCE.addCategory(this);
-    }
+    CATEGORY_SERVICE_IMPL.registerCategory(this);
   }
 
   get name(): string {
@@ -43,7 +45,7 @@ export class Category {
     let result = this.name;
     let cat: Category = this;
     while((cat = cat.parent) != null) {
-      result = cat.name + "." + result;
+      result = cat.name + "#" + result;
     }
     return result;
   }
