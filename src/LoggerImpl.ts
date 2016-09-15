@@ -52,51 +52,51 @@ export abstract class AbstractLogger implements Logger {
   }
 
   trace(msg: string, error?: Error): void {
-    this.log(LogLevel.Trace, msg, error);
+    this._log(LogLevel.Trace, msg, error);
   }
 
   debug(msg: string, error?: Error): void {
-    this.log(LogLevel.Debug, msg, error);
+    this._log(LogLevel.Debug, msg, error);
   }
 
   info(msg: string, error?: Error): void {
-    this.log(LogLevel.Info, msg, error);
+    this._log(LogLevel.Info, msg, error);
   }
 
   warn(msg: string, error?: Error): void {
-    this.log(LogLevel.Warn, msg, error);
+    this._log(LogLevel.Warn, msg, error);
   }
 
   error(msg: string, error?: Error): void {
-    this.log(LogLevel.Error, msg, error);
+    this._log(LogLevel.Error, msg, error);
   }
 
   fatal(msg: string, error?: Error): void {
-    this.log(LogLevel.Fatal, msg, error);
+    this._log(LogLevel.Fatal, msg, error);
   }
 
   tracec(msg: ()=>string, error?: ()=>Error): void {
-    this.logc(LogLevel.Trace, msg, error);
+    this._logc(LogLevel.Trace, msg, error);
   }
 
   debugc(msg: ()=>string, error?: ()=>Error): void {
-    this.logc(LogLevel.Debug, msg, error);
+    this._logc(LogLevel.Debug, msg, error);
   }
 
   infoc(msg: ()=>string, error?: ()=>Error): void {
-    this.logc(LogLevel.Info, msg, error);
+    this._logc(LogLevel.Info, msg, error);
   }
 
   warnc(msg: ()=>string, error?: ()=>Error): void {
-    this.logc(LogLevel.Warn, msg, error);
+    this._logc(LogLevel.Warn, msg, error);
   }
 
   errorc(msg: ()=>string, error?: ()=>Error): void {
-    this.logc(LogLevel.Error, msg, error);
+    this._logc(LogLevel.Error, msg, error);
   }
 
   fatalc(msg: ()=>string, error?: ()=>Error): void {
-    this.logc(LogLevel.Fatal, msg, error);
+    this._logc(LogLevel.Fatal, msg, error);
   }
 
   isTraceEnabled(): boolean {
@@ -127,22 +127,6 @@ export abstract class AbstractLogger implements Logger {
     return this.level;
   }
 
-  log(level: LogLevel, msg: string, error?: Error): void {
-    if(this.open && this.level <= level) {
-      this._allMessages.addTail(this.createMessage(level, msg, new Date(), error));
-      this.processMessages();
-    }
-  }
-
-  logc(level: LogLevel, msg: ()=>string, error?: ()=>Error): void {
-    if(this.open && this.level <= level) {
-      this._allMessages.addTail(this.createMessage(level, msg(), new Date(), error !== undefined ? error() : undefined));
-      this.processMessages();
-    }
-  }
-
-  protected abstract doLog(msg: string): void;
-
   isOpen(): boolean {
     return this.open;
   }
@@ -150,6 +134,23 @@ export abstract class AbstractLogger implements Logger {
   close(): void {
     this.open = false;
     this._allMessages.clear();
+  }
+
+
+  protected abstract doLog(msg: string): void;
+
+  private _log(level: LogLevel, msg: string, error: Error = null): void {
+    if(this.open && this.level <= level) {
+      this._allMessages.addTail(this.createMessage(level, msg, new Date(), error));
+      this.processMessages();
+    }
+  }
+
+  private _logc(level: LogLevel, msg: ()=>string, error: ()=>Error = null): void {
+    if(this.open && this.level <= level) {
+      this._allMessages.addTail(this.createMessage(level, msg(), new Date(), error != null ? error() : null));
+      this.processMessages();
+    }
   }
 
   private createMessage(level: LogLevel, msg: string, date: Date, error: Error = null): Message {

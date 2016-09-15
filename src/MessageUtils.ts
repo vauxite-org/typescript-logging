@@ -73,7 +73,7 @@ export class MessageFormatUtils {
 
   static renderError(error: Error): Promise<string> {
     let result = error.name + ": " + error.message + "\n@";
-    const promise = new Promise<string>(resolve => {
+    return new Promise<string>(resolve => {
 
       // This one has a promise too
       ST.fromError(error, {offline: true}).then((frames: ST.StackFrame[]) => {
@@ -88,7 +88,5 @@ export class MessageFormatUtils {
       });
 
     });
-
-    return promise;
   }
 }

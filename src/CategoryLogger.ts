@@ -1,5 +1,5 @@
-import {DateFormat,LogLevel} from "./LoggerOptions";
-import {CATEGORY_SERVICE_IMPL} from "./CategoryService";
+import {LogLevel} from "./LoggerOptions";
+import {CategoryServiceImpl} from "./CategoryService";
 
 
 /**
@@ -22,7 +22,7 @@ export class Category {
     if(this._parent != null) {
       this._parent._children.push(this);
     }
-    CATEGORY_SERVICE_IMPL.registerCategory(this);
+    CategoryServiceImpl.getInstance().registerCategory(this);
   }
 
   get name(): string {
@@ -51,38 +51,6 @@ export class Category {
   }
 
 }
-
-export class CategoryLogFormat {
-
-  private _dateFormat: DateFormat = new DateFormat();
-  private _showTimeStamp: boolean = true;
-  private _showCategoryName: boolean = true;
-
-  get dateFormat(): DateFormat {
-    return this._dateFormat;
-  }
-
-  set dateFormat(value: DateFormat) {
-    this._dateFormat = value;
-  }
-
-  get showTimeStamp(): boolean {
-    return this._showTimeStamp;
-  }
-
-  set showTimeStamp(value: boolean) {
-    this._showTimeStamp = value;
-  }
-
-  get showCategoryName(): boolean {
-    return this._showCategoryName;
-  }
-
-  set showCategoryName(value: boolean) {
-    this._showCategoryName = value;
-  }
-}
-
 
 export interface CategoryLogger {
 

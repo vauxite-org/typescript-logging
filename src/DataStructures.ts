@@ -151,10 +151,8 @@ export class SimpleMap<V> {
 
   exists(key: string): boolean {
     const value = this.array[key];
-    if(value !== undefined) {
-      return true;
-    }
-    return false;
+    return value !== undefined;
+
   }
 
   remove(key: string): V {
@@ -165,7 +163,56 @@ export class SimpleMap<V> {
     return value;
   }
 
+  keys(): string[] {
+    const keys: string[] = [];
+    for(let key in this.array) {
+      // To prevent random stuff to appear
+      if(this.array.hasOwnProperty(key)) {
+        keys.push(key);
+      }
+    }
+    return keys;
+  }
+
+  values(): V[] {
+    const values: V[] = [];
+    for(let key in this.array) {
+      // To prevent random stuff to appear
+      if(this.array.hasOwnProperty(key)) {
+        values.push(this.get(key));
+      }
+    }
+    return values;
+  }
+
   clear(): void {
     this.array = {};
+  }
+}
+
+export class TuplePair<X,Y> {
+
+  private _x: X;
+  private _y: Y;
+
+  constructor(x: X, y: Y) {
+    this._x = x;
+    this._y = y;
+  }
+
+  get x(): X {
+    return this._x;
+  }
+
+  set x(value: X) {
+    this._x = value;
+  }
+
+  get y(): Y {
+    return this._y;
+  }
+
+  set y(value: Y) {
+    this._y = value;
   }
 }

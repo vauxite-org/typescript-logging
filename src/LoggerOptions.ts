@@ -113,3 +113,40 @@ export class LogFormat {
     return this._showLoggerName;
   }
 }
+
+export class CategoryLogFormat {
+
+  private _dateFormat: DateFormat;
+  private _showTimeStamp: boolean;
+  private _showCategoryName: boolean;
+
+  constructor(dateFormat: DateFormat = new DateFormat(), showTimeStamp: boolean = true, showCategoryName: boolean = true) {
+    this._dateFormat = dateFormat;
+    this._showTimeStamp = showTimeStamp;
+    this._showCategoryName = showCategoryName;
+  }
+
+  get dateFormat(): DateFormat {
+    return this._dateFormat;
+  }
+
+  set dateFormat(value: DateFormat) {
+    this._dateFormat = value;
+  }
+
+  get showTimeStamp(): boolean {
+    return this._showTimeStamp;
+  }
+
+  set showTimeStamp(value: boolean) {
+    this._showTimeStamp = value;
+  }
+
+  get showCategoryName(): boolean {
+    return this._showCategoryName;
+  }
+
+  set showCategoryName(value: boolean) {
+    this._showCategoryName = value;
+  }
+}
