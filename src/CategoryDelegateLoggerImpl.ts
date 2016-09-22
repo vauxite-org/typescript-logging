@@ -76,6 +76,10 @@ export class CategoryDelegateLoggerImpl implements CategoryLogger {
     this._delegate.fatalc(msg, error, ...categories);
   }
 
+  resolvedc(msg: ()=>string, error: ()=>Error, ...categories: Category[]): void {
+    this._delegate.resolvedc(msg, error, ...categories);
+  }
+
   logc(level: LogLevel, msg: ()=>string, error: ()=>Error, ...categories: Category[]): void {
     this._delegate.logc(level, msg,  error, ...categories);
   }

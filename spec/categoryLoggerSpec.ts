@@ -4,11 +4,18 @@ import {LogLevel, LoggerType} from "../src/LoggerOptions";
 import {CategoryDelegateLoggerImpl} from "../src/CategoryDelegateLoggerImpl";
 import {CategoryMessageBufferLoggerImpl} from "../src/CategoryMessageBufferImpl";
 
-const getMessages = (logger: CategoryLogger) => {
+const getMessagesAsString = (logger: CategoryLogger): string => {
   expect(logger instanceof CategoryDelegateLoggerImpl).toBeTruthy();
   const actualLogger = (<CategoryDelegateLoggerImpl>logger).delegate;
   expect(actualLogger instanceof CategoryMessageBufferLoggerImpl).toBeTruthy();
   return (<CategoryMessageBufferLoggerImpl>actualLogger).toString();
+};
+
+const getMessages = (logger: CategoryLogger): string[] => {
+  expect(logger instanceof CategoryDelegateLoggerImpl).toBeTruthy();
+  const actualLogger = (<CategoryDelegateLoggerImpl>logger).delegate;
+  expect(actualLogger instanceof CategoryMessageBufferLoggerImpl).toBeTruthy();
+  return (<CategoryMessageBufferLoggerImpl>actualLogger).getMessages();
 };
 
 describe("CategoryLogger...", () => {
@@ -29,8 +36,8 @@ describe("CategoryLogger...", () => {
   });
 
   it("Default logs to error", () => {
-    // Need to switch to messagebuffer by default or it will go to console.
-    CategoryServiceFactory.setDefaultConfiguration(new CategoryDefaultConfiguration(LogLevel.Error, LoggerType.MessageBuffer));
+    // Need to switch to messagebuffer for testing, by default or it will go to console.
+    CategoryServiceFactory.setDefaultConfiguration(new CategoryDefaultConfiguration(LogLevel.Error, LoggerType.MessageBuffer), true);
 
     const logger = CategoryServiceFactory.getLogger(catRoot);
     logger.trace("Trace", catRoot);
@@ -39,7 +46,7 @@ describe("CategoryLogger...", () => {
     logger.warn("Warn", catRoot);
     logger.error("Error", null, catRoot);
 
-    let msg = getMessages(logger);
+    let msg = getMessagesAsString(logger);
     expect(msg).not.toContain("[root] Trace");
     expect(msg).not.toContain("[root] Debug");
     expect(msg).not.toContain("[root] Info");
@@ -47,9 +54,31 @@ describe("CategoryLogger...", () => {
     expect(msg).toContain("[root] Error");
 
     logger.error("Fatal", null, catRoot);
-    msg = getMessages(logger);
+    msg = getMessagesAsString(logger);
     expect(msg).toContain("[root] Error");
     expect(msg).toContain("[root] Fatal");
   });
 
+  it("Logs to different levels", () => {
+    CategoryServiceFactory.setDefaultConfiguration(new CategoryDefaultConfiguration(LogLevel.Trace, LoggerType.MessageBuffer), true);
+
+    const logger = CategoryServiceFactory.getLogger(catRoot);
+    logger.trace("Trace", catRoot);
+    logger.debug("Debug", catRoot);
+    logger.info("Info", catRoot);
+    logger.warn("Warn", catRoot);
+    logger.error("Error", null, catRoot);
+    logger.error("Fatal", null, catRoot);
+
+    const messages = getMessages(logger);
+    expect(messages.length).toEqual(6);
+    expect(messages[0]).toContain("[root] Trace");
+    expect(messages[1]).toContain("[root] Debug");
+    expect(messages[2]).toContain("[root] Info");
+    expect(messages[3]).toContain("[root] Warn");
+    expect(messages[4]).toContain("[root] Error");
+    expect(messages[5]).toContain("[root] Fatal");
+
+
+  });
 });

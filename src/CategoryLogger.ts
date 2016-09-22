@@ -52,6 +52,10 @@ export class Category {
 
 }
 
+/**
+ * CategoryLogger. Methods ending with c are closure methods and will only be called when
+ * they need to be logged, this may be cheaper if some of your logging is expensive (network/calculating wise).
+ */
 export interface CategoryLogger {
 
   trace(msg: string, ...categories: Category[]): void;
@@ -66,6 +70,15 @@ export interface CategoryLogger {
 
   fatal(msg: string, error: Error, ...categories: Category[]): void;
 
+  /**
+   * This is a special opinionated way to log, that an exception (Error)
+   * occurred, but your code dealt with it in a proper way. That way
+   * we can say, there was an Error/Exception but we resolved it.
+   * This will be logged as: Error (resolved) in the log.
+   * @param msg Message
+   * @param error Error
+   * @param categories Categories to log for
+   */
   resolved(msg: string, error: Error, ...categories: Category[]): void;
 
   log(level: LogLevel, msg: string, error: Error, ...categories: Category[]): void;
@@ -81,6 +94,17 @@ export interface CategoryLogger {
   errorc(msg:() => string, error:() => Error, ...categories: Category[]): void;
 
   fatalc(msg:() => string, error:() => Error, ...categories: Category[]): void;
+
+  /**
+   * This is a special opinionated way to log, that an exception (Error)
+   * occurred, but your code dealt with it in a proper way. That way
+   * we can say, there was an Error/Exception but we resolved it.
+   * This will be logged as: Error (resolved) in the log.
+   * @param msg Message as closure
+   * @param error Error as closure
+   * @param categories Categories to log for
+   */
+  resolvedc(msg:() => string, error:() => Error, ...categories: Category[]): void;
 
   logc(level: LogLevel, msg:() => string, error:() => Error, ...categories: Category[]): void;
 
