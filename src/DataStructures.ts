@@ -185,10 +185,20 @@ export class SimpleMap<V> {
     return values;
   }
 
+  size(): number {
+    // Todo improve...
+    return this.keys().length;
+  }
+
+  isEmpty(): boolean {
+    return this.size() == 0;
+  }
+
   clear(): void {
     this.array = {};
   }
 }
+
 
 export class TuplePair<X,Y> {
 
