@@ -1,6 +1,6 @@
-import {LFService, LoggerFactoryOptions, LogGroupRule} from "../src/LoggerFactoryService";
-import {LogLevel} from "../src/LoggerOptions";
-import {Logger} from "../src/Logger";
+import {LFService, LoggerFactoryOptions, LogGroupRule} from "../src/logging/LoggerFactoryService";
+import {LogLevel} from "../src/logging/LoggerOptions";
+import {Logger} from "../src/logging/Logger";
 
 
 describe("LoggerFactory configuration", () => {

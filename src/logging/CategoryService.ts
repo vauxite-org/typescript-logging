@@ -134,8 +134,7 @@ export class CategoryServiceImpl implements RuntimeSettings {
   // Key is name of root logger.
   private rootLoggers: SimpleMap<TuplePair<Category,CategoryLogger>> = new SimpleMap<TuplePair<Category,CategoryLogger>>();
 
-  // TODO: Make private with typescript 2 when final
-  constructor()
+  private constructor()
   {}
 
   static getInstance(): CategoryServiceImpl {
@@ -272,7 +271,10 @@ export class CategoryServiceImpl implements RuntimeSettings {
 export class CategoryServiceFactory {
 
   // TODO: Add private constructor with typescript 2 final
-
+  private constructor()
+  {
+    // Private constructor.
+  }
   /**
    * Return a CategoryLogger for given ROOT category (thus has no parent).
    * You can only retrieve loggers for their root, when logging
