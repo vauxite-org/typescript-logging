@@ -1,6 +1,7 @@
 import {AbstractCategoryLogger, CategoryLogMessage} from "./AbstractCategoryLogger";
 import {Category} from "./CategoryLogger";
 import {RuntimeSettings} from "./CategoryService";
+import {ExtensionHelper} from "./ExtensionHelper";
 
 export class CategoryExtensionLoggerImpl extends AbstractCategoryLogger {
 
@@ -9,9 +10,8 @@ export class CategoryExtensionLoggerImpl extends AbstractCategoryLogger {
   }
 
   protected doLog(msg: CategoryLogMessage): void {
-    console.log("Called with: " + msg.getMessage());
     if(typeof window !== "undefined") {
-      window.postMessage({ type: "category-extension-logger", text: msg.getMessage() }, "*");
+      ExtensionHelper.sendLogMessage(msg)
     }
     else {
       console.log("window is not available, you must be running in a browser for this. Dropped message.");

@@ -226,3 +226,35 @@ export class TuplePair<X,Y> {
     this._y = value;
   }
 }
+
+
+
+export class StringBuilder {
+
+  private data: string[] = [];
+
+  append(line : string): StringBuilder {
+    if(line === undefined || line == null) {
+      throw new Error("String must be set, cannot append null or undefined");
+    }
+    this.data.push(line);
+    return this;
+  }
+
+  appendLine(line: string): StringBuilder {
+    this.data.push(line + "\n");
+    return this;
+  }
+
+  isEmpty(): boolean {
+    return this.data.length == 0;
+  }
+
+  clear(): void {
+    this.data = [];
+  }
+
+  toString(separator: string = ""): string {
+    return this.data.join(separator);
+  }
+}

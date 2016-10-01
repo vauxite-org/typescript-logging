@@ -237,6 +237,13 @@ export class CategoryServiceImpl implements RuntimeSettings {
     });
   }
 
+  /**
+   * Return all root categories currently registered.
+   */
+  getRootCategories(): Category[] {
+    return this.rootCategories.slice(0);
+  }
+
   private initializeRuntimeSettingsForCategory(category: Category): void {
     let settings = this.categoryRuntimeSettings.get(category.getCategoryPath());
     if(settings != null) {

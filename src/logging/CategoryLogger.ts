@@ -7,6 +7,10 @@ import {CategoryServiceImpl} from "./CategoryService";
  */
 export class Category {
 
+  private static currentId: number = 1;
+
+  private _id: number;
+
   private _name: string;
   private _parent: Category;
   private _children: Category[] = [];
@@ -17,6 +21,7 @@ export class Category {
       throw new Error("Cannot use # in a name of a Category");
     }
 
+    this._id = Category.nextId();
     this._name = name;
     this._parent = parent;
     if(this._parent != null) {
@@ -48,6 +53,19 @@ export class Category {
       result = cat.name + "#" + result;
     }
     return result;
+  }
+
+  /**
+   * Returns the id for this category (this
+   * is for internal purposes only).
+   * @returns {number} Id
+   */
+  get id(): number {
+    return this._id;
+  }
+
+  private static nextId(): number {
+    return Category.currentId++;
   }
 
 }

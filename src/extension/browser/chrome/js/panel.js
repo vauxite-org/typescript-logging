@@ -1,24 +1,28 @@
 
 window.addEventListener("message", function(event) {
-  // We only accept messages from ourselves
-  //if (event.source != window) {
-  //  return;
-  //}
 
-  //if (event.data.type && event.data.type == "FROM_PAGE") {
-  //  console.log("Content script received: " + event.data.text);
-    //port.postMessage(event.data.text);
-  //}
+  // TODO: This should not go here.
+  if(event.data && typeof event.data === "string") {
+    var data = JSON.parse(event.data);
 
-  //logger.info("Test test");
+    console.log("Panel received: " + event.data);
 
-  //if(event.data.type && event.data.type == "category-extension-logger") {
-    //console.log("Fuck you: " + event.data.text);
-    //logger.info("Category extension logger: " + data.text);
-  //}
-  logger.info(event.data.text);
+    switch(data.type) {
+      case "log-message":
+        var elem = document.getElementById('logPanel');
+        elem.innerText = elem.innerText + '\n' + data.value;
+        break;
+      default:
+        throw new Error("Unsupported type: " + event.data);
+    }
+  }
+
 }, false);
 
+/**
+ * OUR extension logging, do not confuse with logging we monitor.
+ * @param msg Message
+ */
 function sendLogMessage(msg) {
   logger.info(msg);
 }

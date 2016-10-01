@@ -78,7 +78,15 @@ describe("CategoryLogger...", () => {
     expect(messages[3]).toContain("[root] Warn");
     expect(messages[4]).toContain("[root] Error");
     expect(messages[5]).toContain("[root] Fatal");
+  });
 
+  it("Logs to root category by default", () => {
+    CategoryServiceFactory.setDefaultConfiguration(new CategoryDefaultConfiguration(LogLevel.Trace, LoggerType.MessageBuffer), true);
+    const logger = CategoryServiceFactory.getLogger(catRoot);
 
+    logger.info("Hello");
+    const messages = getMessages(logger);
+    expect(messages.length).toEqual(1);
+    expect(messages[0]).toContain("[root] Hello");
   });
 });

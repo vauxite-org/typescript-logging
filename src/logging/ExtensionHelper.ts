@@ -1,4 +1,48 @@
 import {CategoryServiceImpl} from "./CategoryService";
+import {Category} from "./CategoryLogger";
+import {JSONHelper, JSONObject, JSONArray} from "./JSONHelper";
+import {CategoryLogMessage} from "./AbstractCategoryLogger";
+import {LogLevel} from "./LoggerOptions";
+
+/*
+
+   Messages we send/receive must always look like:
+
+   From the extension to us:
+
+   // Request to configure the framework.
+   {
+     from: "tsl-extension"
+     data: {
+       type: "configure",
+       value: ""
+     }
+   }
+
+
+   From us to the extension:
+
+   // Us sending the root categories and their structure
+   {
+     from: "tsl-logging"
+     data: {
+       type: "root-categories-tree",
+       value: [...]
+     }
+   },
+
+   // Sending a log message
+   {
+     from: "tsl-logging"
+     data: {
+       type: "log-message",
+       value: {
+       }
+     }
+   }
+
+ */
+
 export class ExtensionHelper {
 
   static registered: boolean = false;
@@ -9,19 +53,31 @@ export class ExtensionHelper {
     // Private constructor
   }
 
+  /**
+   * Enables the window event listener to listen to messages (from extensions).
+   * Can be registered/enabled only once.
+   */
   static register(): void {
     if(!ExtensionHelper.registered) {
       if(typeof window !== "undefined") {
-        window.addEventListener("message", (ev: MessageEvent) => {
-          if (ev.source != window) {
+        window.addEventListener("message", (evt: MessageEvent) => {
+          if(evt.source != window) {
             return;
           }
 
-          if (ev.data && ev.data.type == "tsl-chrome-extension") {
-            if (ev.data.text == "configure-for-extension") {
-              console.log("Will configure for chrome extension");
+          if(evt.data && evt.data.from && evt.data.data && evt.data.from === "tsl-extension") {
 
-              CategoryServiceImpl.getInstance().enableExtensionIntegration();
+            switch(evt.data.data.type) {
+              case "configure":
+                console.log("Will configure logger framework for use with chrome extension...");
+
+                CategoryServiceImpl.getInstance().enableExtensionIntegration();
+                // Send root categories
+                ExtensionHelper.sendRootCategoriesToExtension();
+                break;
+              default:
+                console.log("Unknown command for tsl, command was: " + evt.data.data.type);
+                break;
             }
           }
 
@@ -31,4 +87,68 @@ export class ExtensionHelper {
     }
   }
 
+  /**
+   * If extension integration is enabled, will send the root categories over to the extension.
+   * Otherwise does nothing.
+   */
+  static sendRootCategoriesToExtension(): void {
+    if(!ExtensionHelper.registered) {
+      return;
+    }
+
+    const message = new JSONObject();
+    const dataObject = new JSONObject();
+    message.addString("from","tsl-logging");
+    message.addObject("data", dataObject);
+
+    const valueArray = new JSONArray<JSONObject>();
+    dataObject.addString("type","root-categories-tree");
+    dataObject.addArray("value", valueArray);
+
+    // The value objects sends over nested arrays like:
+    /*
+      [
+          {categoryTreeStructure here}, {each category as element}
+      ]
+     */
+
+    CategoryServiceImpl.getInstance().getRootCategories().forEach((cat: Category) => {
+      valueArray.add(JSONHelper.categoryTreeToJSON(cat));
+    });
+
+    ExtensionHelper.sendMessage(message.toString());
+  }
+
+  // TODO: Deal with message, also js when logging millis, drops the 0, fix that in general.
+  // Consider using error/warn of console, if present in console logger.
+  static sendLogMessage(msg: CategoryLogMessage): void {
+    if(!ExtensionHelper.registered) {
+      return;
+    }
+
+    // log-message
+    const message = new JSONObject();
+    const dataObject = new JSONObject();
+    message.addString("from","tsl-logging");
+    message.addObject("data", dataObject);
+
+    dataObject.addString("type","log-message");
+    dataObject.addString("value", msg.getMessage());
+
+    ExtensionHelper.sendMessage(message.toString());
+  }
+
+  private static sendMessage(msg: string): void {
+    if(!ExtensionHelper.registered) {
+      return;
+    }
+
+    if(typeof window !== "undefined") {
+      console.log("Sending message to extension: " + msg);
+
+      window.postMessage(msg, "*");
+    }
+  }
 }
+
+
