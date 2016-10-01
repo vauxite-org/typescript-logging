@@ -12,6 +12,7 @@
     "node_modules",
     "dist",
     "dist-test",
-    "spec"
+    "spec",
+    "src/extension"
   ]
 }

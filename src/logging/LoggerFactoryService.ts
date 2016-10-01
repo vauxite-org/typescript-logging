@@ -2,6 +2,7 @@ import {LoggerFactory} from "./LoggerFactory";
 import {AbstractLogger} from "./LoggerImpl";
 import {LoggerFactoryImpl} from "./LoggerFactoryImpl";
 import {LogFormat,LogLevel, LoggerType} from "./LoggerOptions";
+import {ExtensionHelper} from "./ExtensionHelper";
 
 
 /**
@@ -109,7 +110,7 @@ export class LFService {
    * @returns {LoggerFactory}
    */
   static createLoggerFactory(options?: LoggerFactoryOptions): LoggerFactory {
-    let factory: LoggerFactory;
+    let factory: LoggerFactoryImpl;
 
     if(options !== undefined) {
       factory = new LoggerFactoryImpl(options);
@@ -117,6 +118,11 @@ export class LFService {
     else {
       factory = new LoggerFactoryImpl(this.createDefaultOptions());
     }
+    LFService._loggerFactories.push(factory);
+
+    // Allow extensions to talk with us.
+    ExtensionHelper.register();
+
     return factory;
   }
 

@@ -4,6 +4,8 @@ import {Category, CategoryLogger} from "./CategoryLogger";
 import {CategoryConsoleLoggerImpl} from "./CategoryConsoleLoggerImpl";
 import {CategoryMessageBufferLoggerImpl} from "./CategoryMessageBufferImpl";
 import {CategoryDelegateLoggerImpl} from "./CategoryDelegateLoggerImpl";
+import {ExtensionHelper} from "./ExtensionHelper";
+import {CategoryExtensionLoggerImpl} from "./CategoryExtensionLoggerImpl";
 
 /**
  * RuntimeSettings for a category, at runtime these are associated to a category.
@@ -135,7 +137,10 @@ export class CategoryServiceImpl implements RuntimeSettings {
   private rootLoggers: SimpleMap<TuplePair<Category,CategoryLogger>> = new SimpleMap<TuplePair<Category,CategoryLogger>>();
 
   private constructor()
-  {}
+  {
+    // Allow extensions to talk with us.
+    ExtensionHelper.register();
+  }
 
   static getInstance(): CategoryServiceImpl {
     return CategoryServiceImpl.INSTANCE;
@@ -220,6 +225,18 @@ export class CategoryServiceImpl implements RuntimeSettings {
     this.initializeRuntimeSettingsForCategory(category);
   }
 
+  /**
+   * Used to enable integration with chrome extension. Do not use manually, the
+   * extension and the logger framework deal with this.
+   */
+  enableExtensionIntegration(): void {
+    this.rootLoggers.values().forEach((pair: TuplePair<Category,CategoryLogger>) => {
+      // Set the new logger type
+      console.log("Reconfiguring root logger for root category: " + pair.x.name);
+      (<CategoryDelegateLoggerImpl>pair.y).delegate = new CategoryExtensionLoggerImpl(pair.x, this);
+    });
+  }
+
   private initializeRuntimeSettingsForCategory(category: Category): void {
     let settings = this.categoryRuntimeSettings.get(category.getCategoryPath());
     if(settings != null) {
@@ -270,7 +287,6 @@ export class CategoryServiceImpl implements RuntimeSettings {
  */
 export class CategoryServiceFactory {
 
-  // TODO: Add private constructor with typescript 2 final
   private constructor()
   {
     // Private constructor.
