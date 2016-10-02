@@ -1,4 +1,6 @@
 import * as React from "react";
+import {observable} from "mobx";
+import {observer} from "mobx-react";
 
 export interface Update {
 
@@ -6,18 +8,33 @@ export interface Update {
 
 }
 
+export class LogDataModel {
+
+  @observable
+  private _message:string;
+
+  get message(): string {
+    return this._message;
+  }
+
+  set message(value: string) {
+    this._message = value;
+  }
+}
+
 export interface LogProps {
 
-  message: () => string;
+  model: LogDataModel;
 
   update: Update;
 }
 
+@observer
 class LogPanelComponent extends React.Component<LogProps,{}> {
 
   private doSomething = () => {
-    console.log("doSomething: " + this.props.message());
-    this.forceUpdate();
+    console.log("doSomething: " + this.props.model.message);
+    //this.forceUpdate();
   }
 
   constructor(props: LogProps) {
@@ -26,11 +43,10 @@ class LogPanelComponent extends React.Component<LogProps,{}> {
   }
 
   render () {
-    const message = this.props.message();
     return (
       <div>
         <h1>Log Panel</h1>
-        <p>{message}</p>
+        <p>{this.props.model.message}</p>
       </div>
     )
   }
@@ -39,7 +55,7 @@ class LogPanelComponent extends React.Component<LogProps,{}> {
 
 export class LogPanelConnector {
 
-  private _message: string = "initial value";
+  private _dataModel: LogDataModel = new LogDataModel();
   private _function: Function;
 
   private _updateFunction: Update = {
@@ -54,13 +70,9 @@ export class LogPanelConnector {
     // Private constructor
   }
 
-  get message(): string {
-    return this._message;
-  }
-
   set message(value: string) {
     console.log("Change message: " + value);
-    this._message = value;
+    this._dataModel.message = value;
     console.log("My function looks like: " + this._function);
     this._function();
   }
@@ -69,13 +81,18 @@ export class LogPanelConnector {
     return this._updateFunction;
   }
 
+
+  get dataModel(): LogDataModel {
+    return this._dataModel;
+  }
+
   static INSTANCE = new LogPanelConnector();
 }
 
 
 const LogPanelComponentWrapper = () => {
   return (
-    <LogPanelComponent message={() => LogPanelConnector.INSTANCE.message} update={LogPanelConnector.INSTANCE.updateFunction} />
+    <LogPanelComponent model={LogPanelConnector.INSTANCE.dataModel} update={LogPanelConnector.INSTANCE.updateFunction} />
   );
 }
 

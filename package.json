@@ -43,6 +43,8 @@
     "@types/react-dom": "^0.14.17",
     "@types/react-router": "^2.0.36",
     "@types/stacktrace-js": "0.0.30",
+    "mobx": "^2.5.2",
+    "mobx-react": "^3.5.6",
     "react": "^15.3.2",
     "react-dom": "^15.3.2",
     "react-router": "^2.8.1",
