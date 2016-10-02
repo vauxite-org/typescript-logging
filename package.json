@@ -30,12 +30,17 @@
     "jasmine": "^2.4.1",
     "jasmine-node": "^1.14.5",
     "shelljs": "^0.7.4",
+    "source-map-loader": "^0.1.5",
+    "ts-loader": "^0.8.2",
     "typescript": "^2.0.0",
     "typings": "^1.3.2",
     "webpack": "^1.13.2"
   },
   "typings": "./dist/commonjs/typescript-logging.d.ts",
   "dependencies": {
+    "react": "^15.3.2",
+    "react-dom": "^15.3.2",
+    "react-router": "^2.8.1",
     "stacktrace-js": "^1.3.1"
   }
 }
