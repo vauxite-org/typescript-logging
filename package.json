@@ -6,7 +6,7 @@
   "scripts": {
     "test": "tsc -p tsconfig-test.json && jasmine-node --verbose ./dist-test/spec",
     "build": "tsc && webpack --config webpack.config.bundle.js && webpack --config webpack.config.bundle-min.js && npm run extension",
-    "extension": "node build-extensions.js"
+    "extension": "node build-extensions.js && webpack --config webpack.config.extension.js"
   },
   "repository": {
     "type": "git",
@@ -39,6 +39,9 @@
   "dependencies": {
     "@types/es6-promise": "0.0.32",
     "@types/jasmine-node": "^1.14.30",
+    "@types/react": "^0.14.37",
+    "@types/react-dom": "^0.14.17",
+    "@types/react-router": "^2.0.36",
     "@types/stacktrace-js": "0.0.30",
     "react": "^15.3.2",
     "react-dom": "^15.3.2",

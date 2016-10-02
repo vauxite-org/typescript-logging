@@ -2,7 +2,7 @@ var webpack = require('webpack');
 var path = require('path');
 var CommonsChunkPlugin = require("webpack/lib/optimize/CommonsChunkPlugin");
 
-var BUILD_BUNDLE_DIR = './dist/extension/browser/chrome/js';
+var BUILD_BUNDLE_DIR = './dist/extension/browser/chrome/js-gen';
 var APP_SRC_DIR = './src/extension/browser/core';
 
 var config = {
@@ -15,6 +15,7 @@ var config = {
 
 
    output: {
+     library: "RCT",
      path: BUILD_BUNDLE_DIR,
      filename: "[name].react.js"
    },
@@ -40,6 +41,9 @@ var config = {
     ]
   },
 
+  ts: {
+    configFileName: "tsconfig-extension.json"
+  } ,
 
   plugins: [
     new webpack.HotModuleReplacementPlugin(),

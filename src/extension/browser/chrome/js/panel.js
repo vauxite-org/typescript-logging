@@ -9,8 +9,9 @@ window.addEventListener("message", function(event) {
 
     switch(data.type) {
       case "log-message":
-        var elem = document.getElementById('logPanel');
-        elem.innerText = elem.innerText + '\n' + data.value;
+        //var elem = document.getElementById('logPanel');
+        //elem.innerText = elem.innerText + '\n' + data.value;
+        RCT.connector.message = data.value;
         break;
       default:
         throw new Error("Unsupported type: " + event.data);
