@@ -3,6 +3,7 @@ import {Category} from "./CategoryLogger";
 import {JSONHelper, JSONObject, JSONArray} from "./JSONHelper";
 import {CategoryLogMessage} from "./AbstractCategoryLogger";
 import {LogLevel} from "./LoggerOptions";
+import {MessageFormatUtils} from "./MessageUtils";
 
 /*
 
@@ -133,7 +134,21 @@ export class ExtensionHelper {
     message.addObject("data", dataObject);
 
     dataObject.addString("type","log-message");
-    dataObject.addString("value", msg.getMessage());
+    const logObject = new JSONObject();
+    dataObject.addObject("value", logObject);
+
+    logObject.addString("logLevel", LogLevel[msg.getLevel()].toString());
+
+    const categories = new JSONArray<number>();
+    msg.getCategories().forEach((cat : Category) => {
+      categories.add(cat.id);
+    });
+    logObject.addArray("categories", categories);
+    logObject.addBoolean("resolvedErrorMessage", msg.isResolvedErrorMessage());
+
+    logObject.addString("errorAsStack", msg.getErrorAsStack());
+    logObject.addString("message", msg.getMessage());
+    logObject.addString("formattedMessage", MessageFormatUtils.renderDefaultMessage(msg));
 
     ExtensionHelper.sendMessage(message.toString());
   }

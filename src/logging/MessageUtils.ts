@@ -1,5 +1,7 @@
-import {DateFormat, DateFormatEnum} from "./LoggerOptions";
+import {DateFormat, DateFormatEnum, LogLevel} from "./LoggerOptions";
 import * as ST from "stacktrace-js";
+import {CategoryLogMessage} from "./AbstractCategoryLogger";
+import {Category} from "./CategoryLogger";
 
 export class MessageFormatUtils {
 
@@ -69,6 +71,41 @@ export class MessageFormatUtils {
         throw new Error("Unsupported date format enum: " + dateFormat.formatEnum);
     }
     return ds;
+  }
+
+  static renderDefaultMessage(msg: CategoryLogMessage): string
+  {
+    let result: string = "";
+
+    const logFormat = msg.getLogFormat();
+    if(logFormat.showTimeStamp) {
+      result += MessageFormatUtils.renderDate(msg.getDate(), logFormat.dateFormat) + " ";
+    }
+
+    result += LogLevel[msg.getLevel()].toUpperCase();
+    if(msg.isResolvedErrorMessage()) {
+      result += " (resolved)";
+    }
+    result += ' ';
+
+    if(logFormat.showCategoryName) {
+      result += "[";
+      msg.getCategories().forEach((value: Category, idx: number) => {
+        if(idx > 0) {
+          result += ', ';
+        }
+        result += value.name;
+      });
+      result += "]";
+    }
+
+    result += ' ' + msg.getMessage();
+
+    if(msg.getErrorAsStack() != null) {
+      result += '\n' + msg.getErrorAsStack();
+    }
+
+    return result;
   }
 
   static renderError(error: Error): Promise<string> {

@@ -5,16 +5,22 @@ window.addEventListener("message", function(event) {
   if(event.data && typeof event.data === "string") {
     var data = JSON.parse(event.data);
 
-    console.log("Panel received: " + event.data);
 
-    switch(data.type) {
-      case "log-message":
-        //var elem = document.getElementById('logPanel');
-        //elem.innerText = elem.innerText + '\n' + data.value;
-        RCT.connector.message = data.value;
-        break;
-      default:
-        throw new Error("Unsupported type: " + event.data);
+    // {"type":"log-message","value":{}" }
+    if(data.type && data.value) {
+
+      switch(data.type) {
+        case "log-message":
+          var logMessage = RCT.extensionMessageTransformer.createLogMessage(data.value);
+          logger.info("Converted to logMessage: " + JSON.stringify(logMessage));
+          RCT.connector.addMessage(logMessage);
+          break;
+        default:
+          throw new Error("Unsupported type: " + actualData.type);
+      }
+    }
+    else {
+      logger.debug("Dropping message (invalid/unsupported format): " + event.data);
     }
   }
 

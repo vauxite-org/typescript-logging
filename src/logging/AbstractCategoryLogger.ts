@@ -195,37 +195,7 @@ export abstract class AbstractCategoryLogger implements CategoryLogger {
   protected abstract doLog(msg: CategoryLogMessage): void;
 
   protected createDefaultLogMessage(msg: CategoryLogMessage): string {
-    let result: string = "";
-
-    const logFormat = msg.getLogFormat();
-    if(logFormat.showTimeStamp) {
-      result += MessageFormatUtils.renderDate(msg.getDate(), logFormat.dateFormat) + " ";
-    }
-
-    result += LogLevel[msg.getLevel()].toUpperCase();
-    if(msg.isResolvedErrorMessage()) {
-      result += " (resolved)";
-    }
-    result += ' ';
-
-    if(logFormat.showCategoryName) {
-      result += "[";
-      msg.getCategories().forEach((value: Category, idx: number) => {
-        if(idx > 0) {
-          result += ', ';
-        }
-        result += value.name;
-      });
-      result += "]";
-    }
-
-    result += ' ' + msg.getMessage();
-
-    if(msg.getErrorAsStack() != null) {
-      result += '\n' + msg.getErrorAsStack();
-    }
-
-    return result;
+    return MessageFormatUtils.renderDefaultMessage(msg);
   }
 
   private _log(level: LogLevel, msg: string, error: Error = null, resolved: boolean = false, ...categories: Category[]): void {
