@@ -63,9 +63,10 @@ port.onMessage.addListener(function(msg) {
       if (msgData.type && msgData.value) {
         switch (msgData.type) {
           case "log-message":
-            windowMainPanel.postMessage(JSON.stringify(msgData), "*");
+            windowMainPanel.postMessage(msgData, "*");
             break;
           case "root-categories-tree":
+            windowMainPanel.postMessage(msgData, "*");
             break;
           default:
             throw new Error("Unsupported message type was sent: " + msg);

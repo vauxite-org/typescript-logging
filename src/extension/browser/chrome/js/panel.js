@@ -1,28 +1,39 @@
 
 window.addEventListener("message", function(event) {
 
-  // TODO: This should not go here.
-  if(event.data && typeof event.data === "string") {
-    var data = JSON.parse(event.data);
 
+  var data = event.data;
 
-    // {"type":"log-message","value":{}" }
-    if(data.type && data.value) {
+  // {"type":"log-message","value":{}" }
+  if(data.type && data.value) {
 
-      switch(data.type) {
-        case "log-message":
-          var logMessage = RCT.extensionMessageTransformer.createLogMessage(data.value);
-          logger.info("Converted to logMessage: " + JSON.stringify(logMessage));
-          RCT.connector.addMessage(logMessage);
-          break;
-        default:
-          throw new Error("Unsupported type: " + actualData.type);
-      }
-    }
-    else {
-      logger.debug("Dropping message (invalid/unsupported format): " + event.data);
+    switch(data.type) {
+      case "log-message":
+        var logMessage = RCT.extensionMessageTransformer.createLogMessage(data.value);
+        logger.info("Converted to logMessage: " + JSON.stringify(logMessage));
+        RCT.connector.addMessage(logMessage);
+        break;
+      case "root-categories-tree":
+        if(!(data.value instanceof Array)) {
+          logger.error("Expected value to be array with categories, not an array, got: " + JSON.stringify(data.value));
+          return;
+        }
+
+        data.value.forEach(function(cat) {
+          var extensionCategory = RCT.extensionMessageTransformer.createRootCategory(cat);
+          // Do NOT use stringify, circular structure. cba to fix that for stringify.
+          logger.info("Converted to extensionCategory: " + extensionCategory.name);
+          RCT.connector.addRootCategory(extensionCategory);
+        });
+        break;
+      default:
+        throw new Error("Unsupported type: " + actualData.type);
     }
   }
+  else {
+    logger.warn("Dropping message (invalid/unsupported format): " + event.data);
+  }
+
 
 }, false);
 

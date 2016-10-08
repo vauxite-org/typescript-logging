@@ -1,5 +1,6 @@
 import {LogDataModel} from "./LogDataModel";
 import {ExtensionLogMessage} from "./ExtensionLogMessage";
+import {ExtensionCategory} from "./ExtensionCategory";
 
 export class LogPanelConnector {
 
@@ -12,6 +13,10 @@ export class LogPanelConnector {
 
   addMessage(msg: ExtensionLogMessage): void {
     this._dataModel.addMessage(msg);
+  }
+
+  addRootCategory(cat: ExtensionCategory): void {
+    this._dataModel.addRootCategory(cat);
   }
 
   get dataModel(): LogDataModel {

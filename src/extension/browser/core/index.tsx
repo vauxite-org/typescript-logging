@@ -3,7 +3,7 @@ import * as ReactDOM from "react-dom";
 import {Router, IndexRoute, Route, hashHistory } from "react-router";
 import {ExtensionMessageTransformer} from "./api/ExtensionMessageTransformer";
 import {LogPanelConnector} from "./api/LogPanelConnector";
-import {LogPanel} from "./components/LogPanel";
+import {LogPanel} from "./components/LogPanelComponent";
 
 export const connector = LogPanelConnector.INSTANCE;
 export const extensionMessageTransformer = ExtensionMessageTransformer.INSTANCE;
