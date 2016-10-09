@@ -137,7 +137,7 @@ export abstract class AbstractLogger implements Logger {
   }
 
 
-  protected abstract doLog(msg: string): void;
+  protected abstract doLog(msg: string, logLevel?: LogLevel): void;
 
   private _log(level: LogLevel, msg: string, error: Error = null): void {
     if(this.open && this.level <= level) {
@@ -177,9 +177,7 @@ export abstract class AbstractLogger implements Logger {
 
       return message;
     }
-    else {
-      return new Message(true, result);
-    }
+    return new Message(true, result);
   }
 
   private processMessages(): void {
@@ -211,9 +209,51 @@ export class ConsoleLoggerImpl extends AbstractLogger {
     super(name, rule);
   }
 
-  protected doLog(msg: string): void {
+  protected doLog(msg: string, logLevel: LogLevel): void {
     if(console !== undefined) {
-      console.log(msg);
+      let logged = false;
+      switch(logLevel) {
+        case LogLevel.Trace:
+          if(console.trace)
+          {
+            console.trace(msg);
+            logged = true;
+          }
+          break;
+        case LogLevel.Debug:
+          if(console.debug)
+          {
+            console.debug(msg);
+            logged = true;
+          }
+          break;
+        case LogLevel.Info:
+          if(console.info)
+          {
+            console.info(msg);
+            logged = true;
+          }
+          break;
+        case LogLevel.Warn:
+          if(console.warn)
+          {
+            console.warn(msg);
+            logged = true;
+          }
+          break;
+        case LogLevel.Error:
+        case LogLevel.Fatal:
+          if(console.error)
+          {
+            console.error(msg);
+            logged = true;
+          }
+          break;
+      }
+
+      if(!logged) {
+        console.log(msg);
+      }
     }
     else {
       throw new Error("Console is not defined, cannot log msg: " + msg);
@@ -235,7 +275,7 @@ export class MessageBufferLoggerImpl extends AbstractLogger {
     super(name, rule);
   }
 
-  protected doLog(msg: string): void {
+  protected doLog(msg: string, logLevel: LogLevel): void {
     this.messages.push(msg);
   }
 

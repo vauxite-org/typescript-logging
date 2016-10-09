@@ -13,7 +13,7 @@ class CustomLoggerImpl extends AbstractLogger {
     super(name, rule);
   }
 
-  protected doLog(msg: string): void {
+  protected doLog(msg: string, logLevel: LogLevel): void {
     this._message = msg;
   }
 
