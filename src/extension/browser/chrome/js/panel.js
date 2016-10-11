@@ -26,6 +26,20 @@ window.addEventListener("message", function(event) {
           RCT.connector.addRootCategory(extensionCategory);
         });
         break;
+      case "categories-rt-update":
+        if(!(data.value instanceof Array)) {
+          logger.error("Expected value to be array with categories, not an array, got: " + JSON.stringify(data.value));
+          return;
+        }
+        data.value.forEach(function(cat) {
+          var extensionCategory = RCT.connector.getCategoryById(cat.id);
+          if(extensionCategory != null) {
+            // Do NOT use stringify, circular structure. cba to fix that for stringify.
+            extensionCategory.applyLogLevel(cat.logLevel);
+            logger.info("Found extensionCategory: " + extensionCategory.name + ", applied logLevel");
+          }
+        });
+        break;
       default:
         throw new Error("Unsupported type: " + actualData.type);
     }
@@ -36,6 +50,13 @@ window.addEventListener("message", function(event) {
 
 
 }, false);
+
+
+function sendMessageToDevTools(msg) {
+  chrome.runtime.sendMessage(null, msg);
+  //portToDevTools.postMessage(msg);
+}
+
 
 /**
  * OUR extension logging, do not confuse with logging we monitor.

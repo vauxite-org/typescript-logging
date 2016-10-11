@@ -13,6 +13,7 @@
     "node_modules",
     "dist",
     "dist-test",
+    "dist-tmp",
     "downloads",
     "spec",
     "src/logging"

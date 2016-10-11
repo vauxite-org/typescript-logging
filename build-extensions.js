@@ -22,4 +22,6 @@ shell.cp('-R', dirInputChrome, dirOutput);
 // Grab the logger bundle, non minified, since it's an extension anyway we ship it readable - that allows for more easily debugging if needed.
 shell.cp(logBundle, dirOutputChrome + '/js/typescript-logging-bundle.js');
 
+console.log("Extension built.");
+
 

@@ -35,7 +35,7 @@ var port = chrome.extension.connect({ name: "background-comm" });
 // Handle response received from background page.
 port.onMessage.addListener(function(msg) {
    /*
-   Take action on each message from the login framework (not ours, the page we monitor!)
+   Take action on each message from the logging framework (not ours, the page we monitor!)
    Message from the extension will always look like this, where type differs and value obviously depends
    on the type.
    {
@@ -68,6 +68,9 @@ port.onMessage.addListener(function(msg) {
           case "root-categories-tree":
             windowMainPanel.postMessage(msgData, "*");
             break;
+          case "categories-rt-update":
+            windowMainPanel.postMessage(msgData, "*");
+            break;
           default:
             throw new Error("Unsupported message type was sent: " + msg);
         }
@@ -75,6 +78,21 @@ port.onMessage.addListener(function(msg) {
       else {
         throw new Error("Invalid message was sent: " + msg);
       }
+    }
+    else if(data.from && data.data && data.from === "tsl-extension") {
+      console.log("Going to send to logging framework: " + msg);
+
+      chrome.devtools.inspectedWindow.eval(
+        "window.postMessage(" + msg + ",'*')",
+        function(result, isException) {
+          if(isException) {
+            windowMainPanel.sendLogMessage("Configuration for log level was not send successfully.");
+          }
+          else {
+            windowMainPanel.sendLogMessage("Configuration for log level was successfully sent.");
+          }
+        }
+      );
     }
   }
 });

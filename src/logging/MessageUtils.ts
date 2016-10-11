@@ -44,7 +44,7 @@ export class MessageFormatUtils {
     };
 
     const millis = (date: Date): string => {
-      return date.getMilliseconds().toString();
+      return lpad(date.getMilliseconds().toString(), 3, '0');
     };
 
     const dateSeparator = dateFormat.dateSeparator;
@@ -110,7 +110,7 @@ export class MessageFormatUtils {
 
   static renderError(error: Error): Promise<string> {
     let result = error.name + ": " + error.message + "\n@";
-    return new Promise<string>(resolve => {
+    return new Promise<string>((resolve: any) => {
 
       // This one has a promise too
       ST.fromError(error, {offline: true}).then((frames: ST.StackFrame[]) => {

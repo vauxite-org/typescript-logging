@@ -9,6 +9,37 @@ export enum LogLevel {
   Warn,
   Error,
   Fatal
+}
+
+export module LogLevel {
+
+  /**
+   * Returns LogLevel based on string representation
+   * @param val Value
+   * @returns {LogLevel}, Error is thrown if invalid.
+   */
+  export function fromString(val: string): LogLevel {
+    if(val == null) {
+      throw new Error("Argument must be set");
+    }
+
+    switch(val.toLowerCase()) {
+      case "trace":
+        return LogLevel.Trace;
+      case "debug":
+        return LogLevel.Debug;
+      case "info":
+        return LogLevel.Info;
+      case "warn":
+        return LogLevel.Warn;
+      case "error":
+        return LogLevel.Error;
+      case "fatal":
+        return LogLevel.Fatal;
+      default:
+        throw new Error("Unsupported value for conversion: " + val);
+    }
+  }
 
 }
 

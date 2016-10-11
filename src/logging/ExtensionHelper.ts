@@ -20,6 +20,18 @@ import {MessageFormatUtils} from "./MessageUtils";
      }
    }
 
+   // Sending change of log level
+   {
+     from: "tsl-extension"
+     data: {
+       type: "configure-log-level",
+       value: {
+         categoryId: 1,
+         logLevel: "Debug",
+         recursive: true
+       }
+     }
+   }
 
    From us to the extension:
 
@@ -40,7 +52,16 @@ import {MessageFormatUtils} from "./MessageUtils";
        value: {
        }
      }
-   }
+   },
+
+   // Update one or more categories
+   {
+     from: "tsl-logging"
+     data: {
+       type: "categories-rt-update",
+       value: [...]
+     }
+   },
 
  */
 
@@ -49,7 +70,7 @@ export class ExtensionHelper {
   static registered: boolean = false;
 
 
-  private ExtensionHelper()
+  private constructor()
   {
     // Private constructor
   }
@@ -75,6 +96,34 @@ export class ExtensionHelper {
                 CategoryServiceImpl.getInstance().enableExtensionIntegration();
                 // Send root categories
                 ExtensionHelper.sendRootCategoriesToExtension();
+                break;
+              case "configure-log-level":
+
+
+                /*
+                  The value is represented as:
+                   value: {
+                     categoryId: 1,
+                     logLevel: "Debug",
+                     recursive: true
+                   }
+                 */
+                if(evt.data.data.value) {
+                  const dataValue: any = evt.data.data.value;
+                  const catId: number = dataValue.categoryId;
+                  const logLevel: string = dataValue.logLevel;
+                  const recursive: boolean = dataValue.recursive;
+
+                  const catsApplied = ExtensionHelper.applyLogLevel(catId, logLevel, recursive);
+                  if(catsApplied.length > 0) {
+                    // Send changes back
+                    ExtensionHelper.sendCategoriesRuntimeUpdateMessage(catsApplied);
+                  }
+                }
+                else {
+                  console.log("Dropping configure-log-level message, it is not valid");
+                }
+
                 break;
               default:
                 console.log("Unknown command for tsl, command was: " + evt.data.data.type);
@@ -114,14 +163,12 @@ export class ExtensionHelper {
      */
 
     CategoryServiceImpl.getInstance().getRootCategories().forEach((cat: Category) => {
-      valueArray.add(JSONHelper.categoryTreeToJSON(cat));
+      valueArray.add(JSONHelper.categoryToJSON(cat, true));
     });
 
     ExtensionHelper.sendMessage(message.toString());
   }
 
-  // TODO: Deal with message, also js when logging millis, drops the 0, fix that in general.
-  // Consider using error/warn of console, if present in console logger.
   static sendLogMessage(msg: CategoryLogMessage): void {
     if(!ExtensionHelper.registered) {
       return;
@@ -151,6 +198,70 @@ export class ExtensionHelper {
     logObject.addString("formattedMessage", MessageFormatUtils.renderDefaultMessage(msg));
 
     ExtensionHelper.sendMessage(message.toString());
+  }
+
+  static sendCategoriesRuntimeUpdateMessage(categories: Category[]): void {
+    if(!ExtensionHelper.registered) {
+      return;
+    }
+
+    const message = new JSONObject();
+    const dataObject = new JSONObject();
+    message.addString("from","tsl-logging");
+    message.addObject("data", dataObject);
+
+    const valueArray = new JSONArray<JSONObject>();
+    dataObject.addString("type","categories-rt-update");
+    dataObject.addArray("value", valueArray);
+
+    // The value objects sends over nested arrays like:
+    /*
+     [
+     {id: 1,logLevel:"Debug"}, {id: 2,logLevel:"Warn"}
+     ]
+     */
+    const service = CategoryServiceImpl.getInstance();
+
+    categories.forEach((cat: Category) => {
+
+      const value = new JSONObject();
+      value.addNumber("id", cat.id);
+      value.addString("logLevel", LogLevel[service.getCategorySettings(cat).logLevel].toString());
+      valueArray.add(value);
+    });
+
+    ExtensionHelper.sendMessage(message.toString());
+  }
+
+  private static applyLogLevel(categoryId: number, logLevel: string, recursive: boolean): Category[] {
+    console.log("Will change log level for category with id: " + categoryId + ", to logLevel=" + logLevel + ", recursive=" + recursive);
+
+    const cats: Category[] = [];
+
+    const category = CategoryServiceImpl.getInstance().getCategoryById(categoryId);
+    if(category != null) {
+      ExtensionHelper._applyLogLevelRecursive(category, LogLevel.fromString(logLevel), recursive, cats);
+    }
+    else
+    {
+      console.log("Could not change log level, failed to find category with id: " + categoryId);
+    }
+
+    return cats;
+  }
+
+  private static _applyLogLevelRecursive(category: Category, logLevel: LogLevel, recursive: boolean, cats: Category[]): void {
+    CategoryServiceImpl.getInstance().getCategorySettings(category).logLevel = logLevel;
+
+    cats.push(category);
+
+    console.log("LogLevel for category: " + category.name + ", changed to level: " + LogLevel[logLevel].toString());
+
+    if(recursive) {
+      category.children.forEach((child : Category) => {
+        ExtensionHelper._applyLogLevelRecursive(child, logLevel, recursive, cats);
+      });
+    }
   }
 
   private static sendMessage(msg: string): void {

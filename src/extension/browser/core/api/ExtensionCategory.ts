@@ -1,12 +1,21 @@
 import {SimpleMap} from "../../../../logging/DataStructures";
+import {observable} from "mobx";
 
 export class ExtensionCategory {
 
+  @observable
   private _id: number;
+
+  @observable
   private _name: string;
+
+  @observable
   private _logLevel: string;
+
+  @observable
   private _parent: ExtensionCategory;
 
+  @observable
   private _children: ExtensionCategory[] = [];
 
 
@@ -41,6 +50,13 @@ export class ExtensionCategory {
     return this._children;
   }
 
+  /**
+   * Only applies logLevel
+   */
+  applyLogLevel(logLevel: string): void {
+    this._logLevel = logLevel;
+  }
+
   static create(data: any): ExtensionCategory {
     /*
      {
@@ -71,19 +87,7 @@ export class ExtensionCategory {
 
     const categories = data.categories;
     categories.forEach((cat: any) => {
-      if(!cat.id) {
-        throw new Error("Missing id field, category: " + JSON.stringify(cat));
-      }
-      if(!cat.name) {
-        throw new Error("Missing name field, category: " + JSON.stringify(cat));
-      }
-      if(cat.parent === undefined) {
-        throw new Error("Missing parent field, category: " + JSON.stringify(cat));
-      }
-      if(!cat.logLevel) {
-        throw new Error("Missing logLevel field, category: " + JSON.stringify(cat));
-      }
-
+      ExtensionCategory.validateJSONCategory(cat);
 
       const id = <number>cat.id;
       const name = <string>cat.name;
@@ -117,5 +121,20 @@ export class ExtensionCategory {
     }
 
     return rootCategory;
+  }
+
+  private static validateJSONCategory(cat: any): void {
+    if(!cat.id) {
+      throw new Error("Missing id field, category: " + JSON.stringify(cat));
+    }
+    if(!cat.name) {
+      throw new Error("Missing name field, category: " + JSON.stringify(cat));
+    }
+    if(cat.parent === undefined) {
+      throw new Error("Missing parent field, category: " + JSON.stringify(cat));
+    }
+    if(!cat.logLevel) {
+      throw new Error("Missing logLevel field, category: " + JSON.stringify(cat));
+    }
   }
 }

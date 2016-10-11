@@ -239,7 +239,7 @@ export class JSONArray<T extends ArrayType> {
  */
 export class JSONHelper {
 
-  static categoryTreeToJSON(cat: Category): JSONObject {
+  static categoryToJSON(cat: Category, recursive: boolean): JSONObject {
     /*
     {
      "categories":
@@ -259,13 +259,13 @@ export class JSONHelper {
    */
 
     const arr = new JSONArray<JSONObject>();
-    JSONHelper._categoryToJSON(cat, arr);
+    JSONHelper._categoryToJSON(cat, arr, recursive);
     const object = new JSONObject();
     object.addArray("categories", arr);
     return object;
   }
 
-  private static _categoryToJSON(cat: Category, arr: JSONArray<JSONObject>): void {
+  private static _categoryToJSON(cat: Category, arr: JSONArray<JSONObject>, recursive: boolean): void {
     const object = new JSONObject();
     object.addNumber("id", cat.id);
     object.addString("name", cat.name);
@@ -279,9 +279,11 @@ export class JSONHelper {
 
     arr.add(object);
 
-    cat.children.forEach((child: Category) => {
-      JSONHelper._categoryToJSON(child, arr);
-    });
+    if(recursive) {
+      cat.children.forEach((child: Category) => {
+        JSONHelper._categoryToJSON(child, arr, recursive);
+      });
+    }
   }
 
 }

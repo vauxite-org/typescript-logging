@@ -9,11 +9,9 @@ var config = {
 
   entry: {
 
-    vendor: ["react","react-dom", "react-router"],
+    vendor: ["mobx","mobx-react","react","react-dom", "react-router","stacktrace-js"],
     index: [APP_SRC_DIR + '/index.tsx'],
   },
-
-
    output: {
      library: "RCT",
      path: BUILD_BUNDLE_DIR,
@@ -26,13 +24,13 @@ var config = {
 
   resolve: {
     // Add '.ts' and '.tsx' as resolvable extensions.
-    extensions: ["", ".webpack.js", ".web.js", ".ts", ".tsx", ".js"]
+    extensions: ["", ".webpack.config.extension.js", ".web.js", ".ts", ".tsx", ".js"]
   },
 
   module: {
     loaders: [
-      // All files with a '.ts' or '.tsx' extension will be handled by 'ts-loader'.
-      { test: /\.tsx?$/, loaders: ["ts-loader"] }
+      // All files with a '.ts' or '.tsx' extension will be handled by 'awesome-typescript-loader'.
+      { test: /\.tsx?$/, loaders: ["awesome-typescript-loader?tsconfig=tsconfig-extension.json"] }
     ],
 
     preLoaders: [
@@ -41,9 +39,12 @@ var config = {
     ]
   },
 
+  /*
+  This was for ts-loader, leaving it here for the time being.
   ts: {
-    configFileName: "tsconfig-extension.json"
-  } ,
+    tsconfig: "tsconfig-extension.json"
+  },
+  */
 
   plugins: [
     new webpack.HotModuleReplacementPlugin(),

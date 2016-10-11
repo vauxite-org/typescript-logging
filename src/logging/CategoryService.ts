@@ -244,6 +244,19 @@ export class CategoryServiceImpl implements RuntimeSettings {
     return this.rootCategories.slice(0);
   }
 
+  /**
+   * Return Category by id
+   * @param id The id of the category to find
+   * @returns {Category} or null if not found
+   */
+  getCategoryById(id: number): Category {
+    const result = this.categoryRuntimeSettings.values().filter((cat: CategoryRuntimeSettings) => cat.category.id == id).map((cat: CategoryRuntimeSettings) => cat.category);
+    if(result.length == 1) {
+      return result[0];
+    }
+    return null;
+  }
+
   private initializeRuntimeSettingsForCategory(category: Category): void {
     let settings = this.categoryRuntimeSettings.get(category.getCategoryPath());
     if(settings != null) {

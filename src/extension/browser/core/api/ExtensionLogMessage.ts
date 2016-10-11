@@ -63,3 +63,5 @@ export class ExtensionLogMessage {
   }
 
 }
+
+export const ALL_LOG_LEVELS_CATEGORY = ["Fatal","Error","Warn","Info","Debug","Trace"];
