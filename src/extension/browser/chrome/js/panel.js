@@ -9,8 +9,9 @@ window.addEventListener("message", function(event) {
 
     switch(data.type) {
       case "log-message":
-        var logMessage = RCT.extensionMessageTransformer.createLogMessage(data.value);
-        logger.info("Converted to logMessage: " + JSON.stringify(logMessage));
+        var logMessage = RCT.extensionMessageTransformer.createLogMessage(data.value, RCT.connector.dataModel);
+        // Do not stringify (json recursion category)
+        logger.info("Converted to logMessage: " + logMessage.message);
         RCT.connector.addMessage(logMessage);
         break;
       case "root-categories-tree":

@@ -1,5 +1,6 @@
 import {ExtensionLogMessage} from "./ExtensionLogMessage";
 import {ExtensionCategory} from "./ExtensionCategory";
+import {LogDataModel} from "./LogDataModel";
 
 export class ExtensionMessageTransformer {
 
@@ -8,8 +9,8 @@ export class ExtensionMessageTransformer {
     // Private constructor
   }
 
-  createLogMessage(data: any): ExtensionLogMessage {
-    return ExtensionLogMessage.create(data);
+  createLogMessage(data: any, dataModel: LogDataModel): ExtensionLogMessage {
+    return ExtensionLogMessage.create(data, dataModel);
   }
 
   createRootCategory(data: any): ExtensionCategory {

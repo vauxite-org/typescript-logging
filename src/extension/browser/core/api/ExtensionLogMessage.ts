@@ -1,4 +1,7 @@
 
+import {ExtensionCategory} from "./ExtensionCategory";
+import {LogDataModel} from "./LogDataModel";
+
 export class ExtensionLogMessage {
 
   private _logLevel = "Error";
@@ -8,7 +11,7 @@ export class ExtensionLogMessage {
   private _errorAsStack: string = null;
   private _resolvedErrorMessage: boolean = false;
 
-  private _categories: string[] = [];
+  private _categories: ExtensionCategory[] = [];
 
   get logLevel(): string {
     return this._logLevel;
@@ -30,11 +33,11 @@ export class ExtensionLogMessage {
     return this._resolvedErrorMessage;
   }
 
-  get categories(): string[] {
+  get categories(): ExtensionCategory[] {
     return this._categories;
   }
 
-  static create(data: any): ExtensionLogMessage {
+  static create(data: any, logDataModel: LogDataModel): ExtensionLogMessage {
     const logMessage = new ExtensionLogMessage();
 
     if(data.message) {
@@ -55,7 +58,10 @@ export class ExtensionLogMessage {
 
     if(data.categories) {
       data.categories.forEach((id : number) => {
-
+        const category = logDataModel.getCategoryById(id);
+        if(category != null) {
+          logMessage._categories.push(category);
+        }
       });
     }
 

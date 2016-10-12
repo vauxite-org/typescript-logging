@@ -195,7 +195,7 @@ export class ExtensionHelper {
 
     logObject.addString("errorAsStack", msg.getErrorAsStack());
     logObject.addString("message", msg.getMessage());
-    logObject.addString("formattedMessage", MessageFormatUtils.renderDefaultMessage(msg));
+    logObject.addString("formattedMessage", MessageFormatUtils.renderDefaultMessage(msg, false));
 
     ExtensionHelper.sendMessage(message.toString());
   }

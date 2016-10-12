@@ -195,7 +195,7 @@ export abstract class AbstractCategoryLogger implements CategoryLogger {
   protected abstract doLog(msg: CategoryLogMessage): void;
 
   protected createDefaultLogMessage(msg: CategoryLogMessage): string {
-    return MessageFormatUtils.renderDefaultMessage(msg);
+    return MessageFormatUtils.renderDefaultMessage(msg, true);
   }
 
   private _log(level: LogLevel, msg: string, error: Error = null, resolved: boolean = false, ...categories: Category[]): void {

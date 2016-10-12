@@ -73,7 +73,7 @@ export class MessageFormatUtils {
     return ds;
   }
 
-  static renderDefaultMessage(msg: CategoryLogMessage): string
+  static renderDefaultMessage(msg: CategoryLogMessage, addStack: boolean): string
   {
     let result: string = "";
 
@@ -101,7 +101,7 @@ export class MessageFormatUtils {
 
     result += ' ' + msg.getMessage();
 
-    if(msg.getErrorAsStack() != null) {
+    if(addStack && msg.getErrorAsStack() != null) {
       result += '\n' + msg.getErrorAsStack();
     }
 

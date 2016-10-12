@@ -1,0 +1,37 @@
+.logFatal {
+  color: darkred;
+}
+
+.logError {
+  color: red;
+}
+
+.logWarn {
+  color: orange;
+}
+
+.logInfo {
+  color: green;
+}
+
+.logDebug {
+  color: limegreen;
+}
+
+.logTrace {
+  color: lightgreen;
+}
+
+div.errorStack {
+  background-color: lightyellow;
+  color: black;
+}
+
+div#logMessagesPanel {
+  font-family: Monospaced, Courier;
+  font-size: 9pt;
+  background-color: black;
+}
+
+div#logMessages {
+}
