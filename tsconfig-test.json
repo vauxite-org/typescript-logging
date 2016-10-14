@@ -11,8 +11,6 @@
     "node_modules",
     "dist",
     "dist-test",
-    "dist-tmp",
-    "downloads",
-    "src/extension"
+    "downloads"
   ]
 }

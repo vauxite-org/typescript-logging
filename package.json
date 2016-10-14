@@ -5,8 +5,7 @@
   "main": "dist/commonjs/typescript-logging",
   "scripts": {
     "test": "tsc -p tsconfig-test.json && jasmine-node --verbose ./dist-test/spec",
-    "build": "tsc && webpack --config webpack.config.bundle.js && webpack --config webpack.config.bundle-min.js && npm run extension",
-    "extension": "node build-extensions.js && webpack --config webpack.config.extension.js"
+    "build": "tsc && webpack --config webpack.config.bundle.js && webpack --config webpack.config.bundle-min.js"
   },
   "repository": {
     "type": "git",

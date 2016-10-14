@@ -6,4 +6,3 @@ downloads
 # Dist is what we publish so won't ignore for npm, except for the extension.
 dist/extension
 dist-test
-dist-tmp
