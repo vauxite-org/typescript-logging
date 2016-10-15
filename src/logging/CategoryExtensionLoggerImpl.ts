@@ -11,7 +11,7 @@ export class CategoryExtensionLoggerImpl extends AbstractCategoryLogger {
 
   protected doLog(msg: CategoryLogMessage): void {
     if(typeof window !== "undefined") {
-      ExtensionHelper.sendLogMessage(msg)
+      ExtensionHelper.sendCategoryLogMessage(msg)
     }
     else {
       console.log("window is not available, you must be running in a browser for this. Dropped message.");

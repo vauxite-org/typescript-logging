@@ -183,6 +183,7 @@ export class CategoryServiceImpl implements RuntimeSettings {
    * applied as well, pass in reset=true (the default is false). All
    * categories will be reset then as well.
    * @param config
+   * @param reset
    */
   setDefaultConfiguration(config: CategoryDefaultConfiguration, reset: boolean = false): void {
     this.defaultConfig = config;
