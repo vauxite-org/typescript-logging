@@ -6,7 +6,7 @@ import {MessageFormatUtils} from "./MessageUtils";
 import {ExtensionMessageContentJSON, ExtensionMessageJSON} from "./json/ExtensionMessageJSON";
 import {
   ExtensionCategoryJSON, ExtensionCategoryLogMessageJSON,
-  ExtensionCategoriesUpdateMessageJSON, ExtensionRequestChangeLogLevel
+  ExtensionCategoriesUpdateMessageJSON, ExtensionRequestChangeLogLevelJSON
 } from "./json/ExtensionMessagesJSON";
 
 export class ExtensionHelper {
@@ -51,7 +51,7 @@ export class ExtensionHelper {
       const data = msg.data;
       switch(data.type) {
         case 'request-change-loglevel':
-          const valueRequest = data.value as ExtensionRequestChangeLogLevel;
+          const valueRequest = data.value as ExtensionRequestChangeLogLevelJSON;
           const catsApplied = ExtensionHelper.applyLogLevel(valueRequest.categoryId, valueRequest.logLevel, valueRequest.recursive);
           if(catsApplied.length > 0) {
             // Send changes back

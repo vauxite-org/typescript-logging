@@ -44,7 +44,7 @@ export interface ExtensionCategoriesUpdateMessageJSON {
 }
 
 
-export interface ExtensionRequestChangeLogLevel {
+export interface ExtensionRequestChangeLogLevelJSON {
 
   categoryId: number;
 

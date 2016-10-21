@@ -232,9 +232,12 @@ export class CategoryServiceImpl implements RuntimeSettings {
    */
   enableExtensionIntegration(): void {
     this.rootLoggers.values().forEach((pair: TuplePair<Category,CategoryLogger>) => {
-      // Set the new logger type
-      console.log("Reconfiguring root logger for root category: " + pair.x.name);
-      (<CategoryDelegateLoggerImpl>pair.y).delegate = new CategoryExtensionLoggerImpl(pair.x, this);
+      // Set the new logger type if needed.
+      const delegateLogger = <CategoryDelegateLoggerImpl>pair.y;
+      if(!(delegateLogger instanceof CategoryExtensionLoggerImpl)) {
+        console.log("Reconfiguring root logger for root category: " + pair.x.name);
+        (<CategoryDelegateLoggerImpl>pair.y).delegate = new CategoryExtensionLoggerImpl(pair.x, this);
+      }
     });
   }
 
