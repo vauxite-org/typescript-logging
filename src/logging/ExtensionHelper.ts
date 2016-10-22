@@ -38,8 +38,15 @@ export class ExtensionHelper {
       return;
     }
 
-    CategoryServiceImpl.getInstance().enableExtensionIntegration();
+    const instance = CategoryServiceImpl.getInstance();
+    instance.enableExtensionIntegration();
+
+    // Send over all categories
     ExtensionHelper.sendRootCategoriesToExtension();
+
+    // Send over the current runtime levels
+    const cats = ExtensionHelper.getAllCategories();
+    ExtensionHelper.sendCategoriesRuntimeUpdateMessage(cats);
   }
 
   static processMessageFromExtension(msg: ExtensionMessageJSON<any>): void {
@@ -195,6 +202,23 @@ export class ExtensionHelper {
     }
   }
 
+  private static getAllCategories(): Category[] {
+    const cats: Category[] = [];
+
+    const addCats = (cat: Category, allCats: Category[]) => {
+      allCats.push(cat);
+
+      cat.children.forEach((cat: Category) => {
+        addCats(cat, allCats);
+      })
+    }
+
+    CategoryServiceImpl.getInstance().getRootCategories().forEach((cat: Category) => {
+      addCats(cat, cats);
+    });
+
+    return cats;
+  }
 
   private static sendMessage(msg: ExtensionMessageJSON<any>): void {
     if(!ExtensionHelper.registered) {
