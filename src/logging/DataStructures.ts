@@ -1,3 +1,4 @@
+
 class LinkedNode<T> {
 
   private _value: T;
@@ -106,6 +107,26 @@ export class LinkedList<T> {
 
   getSize(): number {
     return this.size;
+  }
+
+  filter(f: (value: T)=> boolean): T[] {
+    const recurse = (f: (value: T)=> boolean, node: LinkedNode<T>, values: T[]) => {
+      if(f(node.value)) {
+        values.push(node.value);
+      }
+
+      const nextNode = node.next;
+      if(nextNode != null) {
+        recurse(f, nextNode, values);
+      }
+    }
+
+    const result: T[] = [];
+    const node = this.head;
+    if(node != null) {
+      recurse(f, node, result);
+    }
+    return result;
   }
 
   private createHeadIfNeeded(value: T): boolean {
