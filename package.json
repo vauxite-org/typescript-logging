@@ -25,19 +25,18 @@
   },
   "homepage": "https://github.com/mreuvers/typescript-logging#readme",
   "devDependencies": {
-    "awesome-typescript-loader": "^2.2.4",
-    "jasmine": "^2.4.1",
-    "jasmine-node": "^1.14.5",
-    "source-map-loader": "^0.1.5",
-    "typescript": "^2.0.0",
-    "typings": "^1.3.2",
-    "webpack": "^1.13.2"
+    "source-map-loader": "0.1.5",
+    "ts-loader": "1.3.2",
+    "typescript": "2.1.1",
+    "webpack": "1.14.0",
+    "jasmine": "2.5.2",
+    "jasmine-node": "1.14.5"
   },
   "typings": "./dist/commonjs/typescript-logging.d.ts",
   "dependencies": {
     "@types/es6-promise": "0.0.32",
-    "@types/jasmine-node": "^1.14.30",
+    "@types/jasmine-node": "1.14.30",
     "@types/stacktrace-js": "0.0.30",
-    "stacktrace-js": "^1.3.1"
+    "stacktrace-js": "1.3.1"
   }
 }
