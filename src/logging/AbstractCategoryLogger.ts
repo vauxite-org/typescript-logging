@@ -4,6 +4,9 @@ import {RuntimeSettings} from "./CategoryService";
 import {LinkedList} from "./DataStructures";
 import {MessageFormatUtils} from "./MessageUtils";
 
+/**
+ * Contains information about a single log message.
+ */
 export interface CategoryLogMessage {
 
   getMessage(): string;
@@ -192,6 +195,10 @@ export abstract class AbstractCategoryLogger implements CategoryLogger {
     return this.rootCategory;
   }
 
+  /**
+   * Implement this method in your custom logger
+   * @param msg Message
+   */
   protected abstract doLog(msg: CategoryLogMessage): void;
 
   protected createDefaultLogMessage(msg: CategoryLogMessage): string {

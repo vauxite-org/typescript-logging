@@ -3,6 +3,9 @@ import {Category} from "./CategoryLogger";
 import {RuntimeSettings} from "./CategoryService";
 import {ExtensionHelper} from "./ExtensionHelper";
 
+/**
+ * This class should not be used directly, it is used for communication with the extension only.
+ */
 export class CategoryExtensionLoggerImpl extends AbstractCategoryLogger {
 
   constructor(rootCategory: Category, runtimeSettings: RuntimeSettings) {

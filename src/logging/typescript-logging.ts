@@ -14,7 +14,6 @@ export {DateFormat,DateFormatEnum,LogFormat,LoggerType,LogLevel} from "./LoggerO
 export {MessageFormatUtils} from "./MessageUtils";
 
 // Public stuff we export for extension
-export {ExtensionMessageJSON, ExtensionMessageContentJSON} from "./json/ExtensionMessageJSON";
 export * from "./json/ExtensionMessagesJSON";
 export {SimpleMap,LinkedList} from "./DataStructures";
 export * from "./JSONHelper";

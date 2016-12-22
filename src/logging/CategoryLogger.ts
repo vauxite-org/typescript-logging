@@ -3,7 +3,10 @@ import {CategoryServiceImpl} from "./CategoryService";
 
 
 /**
- * Category for categorized logging.
+ * Category for use with categorized logging.
+ * At minimum you need one category, which will serve as the root category.
+ * You can create child categories (like a tree). You can have multiple root
+ * categories.
  */
 export class Category {
 
