@@ -17,7 +17,7 @@ export class LogGroupRule {
   private _level: LogLevel;
   private _loggerType: LoggerType;
   private _logFormat: LogFormat;
-  private _callBackLogger: (name: string, logGroupRule: LogGroupRule) => AbstractLogger;
+  private _callBackLogger: ((name: string, logGroupRule: LogGroupRule) => AbstractLogger) | null;
 
   /**
    * Create a LogGroupRule. Basically you define what logger name(s) match for this group, what level should be used what logger type (where to log)
@@ -28,7 +28,7 @@ export class LogGroupRule {
    * @param loggerType Type of logger, if Custom, make sure to implement callBackLogger and pass in, this will be called so you can return your own logger.
    * @param callBackLogger Callback function to return a new clean custom logger (yours!)
    */
-  constructor(regExp: RegExp, level: LogLevel, logFormat: LogFormat = new LogFormat(), loggerType: LoggerType = LoggerType.Console, callBackLogger?: (name: string, logGroupRule: LogGroupRule)=>AbstractLogger) {
+  constructor(regExp: RegExp, level: LogLevel, logFormat: LogFormat = new LogFormat(), loggerType: LoggerType = LoggerType.Console, callBackLogger: ((name: string, logGroupRule: LogGroupRule)=>AbstractLogger) | null = null) {
     this._regExp = regExp;
     this._level = level;
     this._logFormat = logFormat;
@@ -52,7 +52,7 @@ export class LogGroupRule {
     return this._logFormat;
   }
 
-  get callBackLogger(): (name: string, logGroupRule: LogGroupRule)=>AbstractLogger {
+  get callBackLogger(): ((name: string, logGroupRule: LogGroupRule) => AbstractLogger) | null {
     return this._callBackLogger;
   }
 }

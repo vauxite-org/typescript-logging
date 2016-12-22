@@ -17,9 +17,9 @@ export class CategoryRuntimeSettings {
   private _loggerType: LoggerType;
   private _logFormat: CategoryLogFormat;
 
-  private _callBackLogger: (rootCategory: Category, runtimeSettings: RuntimeSettings) => CategoryLogger;
+  private _callBackLogger: ((rootCategory: Category, runtimeSettings: RuntimeSettings) => CategoryLogger) | null;
 
-  constructor(category: Category, logLevel: LogLevel = LogLevel.Error, loggerType: LoggerType = LoggerType.Console, logFormat: CategoryLogFormat = new CategoryLogFormat(), callBackLogger: (rootCategory: Category, runtimeSettings: RuntimeSettings)=>CategoryLogger = null) {
+  constructor(category: Category, logLevel: LogLevel = LogLevel.Error, loggerType: LoggerType = LoggerType.Console, logFormat: CategoryLogFormat = new CategoryLogFormat(), callBackLogger: ((rootCategory: Category, runtimeSettings: RuntimeSettings)=>CategoryLogger) | null = null) {
     this._category = category;
     this._logLevel = logLevel;
     this._loggerType = loggerType;
@@ -55,11 +55,11 @@ export class CategoryRuntimeSettings {
     this._logFormat = value;
   }
 
-  get callBackLogger(): (rootCategory: Category, runtimeSettings: RuntimeSettings)=>CategoryLogger {
+  get callBackLogger(): ((rootCategory: Category, runtimeSettings: RuntimeSettings) => CategoryLogger) | null {
     return this._callBackLogger;
   }
 
-  set callBackLogger(value: (rootCategory: Category, runtimeSettings: RuntimeSettings)=>CategoryLogger) {
+  set callBackLogger(value: ((rootCategory: Category, runtimeSettings: RuntimeSettings) => CategoryLogger) | null) {
     this._callBackLogger = value;
   }
 }
@@ -69,7 +69,7 @@ export class CategoryRuntimeSettings {
  */
 export interface RuntimeSettings {
 
-  getCategorySettings(category: Category): CategoryRuntimeSettings;
+  getCategorySettings(category: Category): CategoryRuntimeSettings | null;
 
 }
 
@@ -85,9 +85,9 @@ export class CategoryDefaultConfiguration {
   private _loggerType: LoggerType;
   private _logFormat: CategoryLogFormat;
 
-  private _callBackLogger: (rootCategory: Category, runtimeSettings: RuntimeSettings) => CategoryLogger;
+  private _callBackLogger: ((rootCategory: Category, runtimeSettings: RuntimeSettings) => CategoryLogger) | null;
 
-  constructor(logLevel: LogLevel = LogLevel.Error, loggerType: LoggerType = LoggerType.Console, logFormat: CategoryLogFormat = new CategoryLogFormat(), callBackLogger: (rootCategory: Category, runtimeSettings: RuntimeSettings)=>CategoryLogger = null) {
+  constructor(logLevel: LogLevel = LogLevel.Error, loggerType: LoggerType = LoggerType.Console, logFormat: CategoryLogFormat = new CategoryLogFormat(), callBackLogger: ((rootCategory: Category, runtimeSettings: RuntimeSettings) => CategoryLogger) | null = null) {
     this._logLevel = logLevel;
     this._loggerType = loggerType;
     this._logFormat = logFormat;
@@ -110,7 +110,7 @@ export class CategoryDefaultConfiguration {
     return this._logFormat;
   }
 
-  get callBackLogger(): (rootCategory: Category, runtimeSettings: RuntimeSettings)=>CategoryLogger {
+  get callBackLogger(): ((rootCategory: Category, runtimeSettings: RuntimeSettings) => CategoryLogger) | null {
     return this._callBackLogger;
   }
 }
@@ -173,7 +173,7 @@ export class CategoryServiceImpl implements RuntimeSettings {
     this.setDefaultConfiguration(new CategoryDefaultConfiguration());
   }
 
-  getCategorySettings(category: Category): CategoryRuntimeSettings {
+  getCategorySettings(category: Category): CategoryRuntimeSettings | null {
     return this.categoryRuntimeSettings.get(category.getCategoryPath());
   }
 
@@ -192,8 +192,14 @@ export class CategoryServiceImpl implements RuntimeSettings {
       const newRuntimeSettings: SimpleMap<CategoryRuntimeSettings> = new SimpleMap<CategoryRuntimeSettings>();
 
       this.categoryRuntimeSettings.keys().forEach((key: string) => {
-        const settings = new CategoryRuntimeSettings(this.categoryRuntimeSettings.get(key).category, this.defaultConfig.logLevel, this.defaultConfig.loggerType, this.defaultConfig.logFormat, this.defaultConfig.callBackLogger);
-        newRuntimeSettings.put(key, settings);
+        const setting = this.categoryRuntimeSettings.get(key);
+        if(setting != null) {
+          const settings = new CategoryRuntimeSettings(setting.category, this.defaultConfig.logLevel, this.defaultConfig.loggerType, this.defaultConfig.logFormat, this.defaultConfig.callBackLogger);
+          newRuntimeSettings.put(key, settings);
+        }
+        else {
+          throw new Error("No setting associated with key=" + key);
+        }
       });
 
       this.categoryRuntimeSettings.clear();
@@ -253,7 +259,7 @@ export class CategoryServiceImpl implements RuntimeSettings {
    * @param id The id of the category to find
    * @returns {Category} or null if not found
    */
-  getCategoryById(id: number): Category {
+  getCategoryById(id: number): Category | null {
     const result = this.categoryRuntimeSettings.values().filter((cat: CategoryRuntimeSettings) => cat.category.id == id).map((cat: CategoryRuntimeSettings) => cat.category);
     if(result.length == 1) {
       return result[0];
@@ -293,7 +299,12 @@ export class CategoryServiceImpl implements RuntimeSettings {
       case LoggerType.MessageBuffer:
         return new CategoryMessageBufferLoggerImpl(category, this);
       case LoggerType.Custom:
-        return this.defaultConfig.callBackLogger(category, this);
+        if(this.defaultConfig.callBackLogger == null) {
+          throw new Error("Cannot create custom logger, custom callback is null");
+        }
+        else {
+          return this.defaultConfig.callBackLogger(category, this)
+        }
       default:
         throw new Error("Cannot create a Logger for LoggerType: " + this.defaultConfig.loggerType);
     }

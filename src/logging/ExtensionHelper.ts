@@ -109,7 +109,7 @@ export class ExtensionHelper {
       return;
     }
     const service = CategoryServiceImpl.getInstance();
-    const catLevels: {categories: [{id : number, logLevel: string}]} = {categories: []} as ExtensionCategoriesUpdateMessageJSON;
+    const catLevels: {categories: [{id : number, logLevel: string}]} =  {categories: [{}]} as ExtensionCategoriesUpdateMessageJSON;
     categories.forEach((cat: Category) => {
       const catSettings = service.getCategorySettings(cat);
       if(catSettings != null) {
@@ -189,16 +189,19 @@ export class ExtensionHelper {
   }
 
   private static _applyLogLevelRecursive(category: Category, logLevel: LogLevel, recursive: boolean, cats: Category[]): void {
-    CategoryServiceImpl.getInstance().getCategorySettings(category).logLevel = logLevel;
+    const categorySettings = CategoryServiceImpl.getInstance().getCategorySettings(category);
+    if(categorySettings != null) {
+      categorySettings.logLevel = logLevel;
 
-    cats.push(category);
+      cats.push(category);
 
-    console.log("LogLevel for category: " + category.name + ", changed to level: " + LogLevel[logLevel].toString());
+      console.log("LogLevel for category: " + category.name + ", changed to level: " + LogLevel[logLevel].toString());
 
-    if(recursive) {
-      category.children.forEach((child : Category) => {
-        ExtensionHelper._applyLogLevelRecursive(child, logLevel, recursive, cats);
-      });
+      if (recursive) {
+        category.children.forEach((child: Category) => {
+          ExtensionHelper._applyLogLevelRecursive(child, logLevel, recursive, cats);
+        });
+      }
     }
   }
 
@@ -211,7 +214,7 @@ export class ExtensionHelper {
       cat.children.forEach((cat: Category) => {
         addCats(cat, allCats);
       })
-    }
+    };
 
     CategoryServiceImpl.getInstance().getRootCategories().forEach((cat: Category) => {
       addCats(cat, cats);

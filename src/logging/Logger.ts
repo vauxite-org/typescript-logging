@@ -30,29 +30,29 @@ import {LogLevel} from "./LoggerOptions";
  */
 export interface Logger {
 
-  trace(msg: string, error?: Error): void;
+  trace(msg: string, error?: Error | null): void;
 
-  debug(msg: string, error?: Error): void;
+  debug(msg: string, error?: Error | null): void;
 
-  info(msg: string,  error?: Error): void;
+  info(msg: string, error?: Error | null): void;
 
-  warn(msg: string, error?: Error): void;
+  warn(msg: string, error?: Error | null): void;
 
-  error(msg: string, error?: Error): void;
+  error(msg: string, error?: Error | null): void;
 
-  fatal(msg: string, error?: Error): void;
+  fatal(msg: string, error?: Error | null): void;
 
-  tracec(msg:() => string, error?:() => Error): void;
+  tracec(msg:() => string, error: ()=>Error | null): void;
 
-  debugc(msg:() => string, error?:() => Error): void;
+  debugc(msg:() => string, error: ()=>Error | null): void;
 
-  infoc(msg:() => string, error?:() => Error): void;
+  infoc(msg:() => string, error: ()=>Error | null): void;
 
-  warnc(msg:() => string, error?:() => Error): void;
+  warnc(msg:() => string, error: ()=>Error | null): void;
 
-  errorc(msg:() => string, error?:() => Error): void;
+  errorc(msg:() => string, error: ()=>Error | null): void;
 
-  fatalc(msg:() => string, error?:() => Error): void;
+  fatalc(msg:() => string, error: ()=>Error | null): void;
 
   isTraceEnabled(): boolean;
 

@@ -10,7 +10,7 @@ export interface JSONType<T> {
 
 }
 
-export type ArrayType = boolean | string | number | JSONObject;
+export type ArrayType = boolean | string | number | JSONObject | null;
 
 abstract class JSONTypeImpl<T> implements JSONType<T> {
 
@@ -128,21 +128,21 @@ export class JSONObject {
 
   addBoolean(name: string, value: boolean): JSONObject {
     this.checkName(name);
-    this.checkValue(value);
+    JSONObject.checkValue(value);
     this.values.put(name, new JSONBooleanType(value));
     return this;
   }
 
   addNumber(name: string, value: number): JSONObject {
     this.checkName(name);
-    this.checkValue(value);
+    JSONObject.checkValue(value);
     this.values.put(name, new JSONNumberType(value));
     return this;
   }
 
   addString(name: string, value: string): JSONObject {
     this.checkName(name);
-    this.checkValue(value);
+    JSONObject.checkValue(value);
     this.values.put(name, new JSONStringType(value));
     return this;
   }
@@ -155,7 +155,7 @@ export class JSONObject {
 
   addArray(name: string, array: JSONArray<ArrayType>): JSONObject {
     this.checkName(name);
-    this.checkValue(array);
+    JSONObject.checkValue(array);
     if(array == null) {
       throw new Error("Cannot add array as null");
     }
@@ -165,7 +165,7 @@ export class JSONObject {
 
   addObject(name: string, object: JSONObject): JSONObject {
     this.checkName(name);
-    this.checkValue(object);
+    JSONObject.checkValue(object);
     if(object == null) {
       throw new Error("Cannot add object as null");
     }
@@ -178,12 +178,15 @@ export class JSONObject {
     const buffer = new StringBuilder();
     buffer.append("{");
     this.values.keys().forEach((key: string) => {
-      if(comma) {
-        buffer.append(",");
-      }
       const value = this.values.get(key);
-      buffer.append('"').append(key).append('":').append(value.toString());
-      comma = true;
+      if(value != null) {
+        if (comma) {
+          buffer.append(",");
+        }
+
+        buffer.append('"').append(key).append('":').append(value.toString());
+        comma = true;
+      }
     });
     buffer.append("}");
     return buffer.toString();
@@ -198,7 +201,7 @@ export class JSONObject {
     }
   }
 
-  private checkValue(value: any): void {
+  private static checkValue(value: any): void {
     if(value === undefined) {
       throw new Error("Value is undefined");
     }

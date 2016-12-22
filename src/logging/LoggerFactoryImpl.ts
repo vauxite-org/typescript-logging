@@ -60,7 +60,12 @@ export class LoggerFactoryImpl implements LoggerFactory {
           case LoggerType.MessageBuffer:
             return new MessageBufferLoggerImpl(named, logGroupRule);
           case LoggerType.Custom:
-            return logGroupRule.callBackLogger(named, logGroupRule);
+            if(logGroupRule.callBackLogger != null) {
+              return logGroupRule.callBackLogger(named, logGroupRule);
+            }
+            else {
+              throw new Error("Cannot create a custom logger, custom callback is null");
+            }
           default:
             throw new Error("Cannot create a Logger for LoggerType: " + logGroupRule.loggerType);
         }

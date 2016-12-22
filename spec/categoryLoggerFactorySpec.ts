@@ -40,8 +40,8 @@ describe("Categories", () => {
 
 describe("CategoryServiceFactory", () => {
 
-  let root1: Category, child1: Category, child11: Category, child12: Category;
-  let logger: CategoryLogger;
+  let root1: Category | null, child1: Category | null, child11: Category | null, child12: Category | null;
+  let logger: CategoryLogger | null;
 
   beforeEach(() => {
     CategoryServiceFactory.clear();

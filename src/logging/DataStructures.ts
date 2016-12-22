@@ -2,26 +2,26 @@
 class LinkedNode<T> {
 
   private _value: T;
-  private _previous: LinkedNode<T> = null;
-  private _next: LinkedNode<T> = null;
+  private _previous: LinkedNode<T> | null = null;
+  private _next: LinkedNode<T> | null = null;
 
   constructor(value: T) {
     this._value = value;
   }
 
-  get previous(): LinkedNode<T> {
+  get previous(): LinkedNode<T> | null {
     return this._previous;
   }
 
-  set previous(value: LinkedNode<T>) {
+  set previous(value: LinkedNode<T> | null) {
     this._previous = value;
   }
 
-  get next(): LinkedNode<T> {
+  get next(): LinkedNode<T> | null {
     return this._next;
   }
 
-  set next(value: LinkedNode<T>) {
+  set next(value: LinkedNode<T> | null) {
     this._next = value;
   }
 
@@ -32,18 +32,23 @@ class LinkedNode<T> {
 
 export class LinkedList<T> {
 
-  private head: LinkedNode<T> = null;
+  private head: LinkedNode<T> | null = null;
   private size: number = 0;
 
   addHead(value: T): void {
     if(!this.createHeadIfNeeded(value)) {
-      const nextNode = this.head.next;
-      const newHeadNode = new LinkedNode<T>(value);
-      if(nextNode != null) {
-        nextNode.previous = newHeadNode;
-        newHeadNode.next = nextNode;
+      if(this.head != null) {
+        const nextNode = this.head.next;
+        const newHeadNode = new LinkedNode<T>(value);
+        if (nextNode != null) {
+          nextNode.previous = newHeadNode;
+          newHeadNode.next = nextNode;
+        }
+        this.head = newHeadNode;
       }
-      this.head = newHeadNode;
+      else {
+        throw new Error("This should never happen, list implementation broken");
+      }
     }
     this.size++;
   }
@@ -51,9 +56,14 @@ export class LinkedList<T> {
   addTail(value : T): void {
     if(!this.createHeadIfNeeded(value)) {
       const oldTailNode = this.getTailNode();
-      const newTailNode = new LinkedNode<T>(value);
-      oldTailNode.next = newTailNode;
-      newTailNode.previous = oldTailNode;
+      if(oldTailNode != null) {
+        const newTailNode = new LinkedNode<T>(value);
+        oldTailNode.next = newTailNode;
+        newTailNode.previous = oldTailNode;
+      }
+      else {
+        throw new Error("List implementation broken");
+      }
     }
     this.size++;
   }
@@ -63,14 +73,14 @@ export class LinkedList<T> {
     this.size = 0;
   }
 
-  getHead(): T {
+  getHead(): T | null {
     if(this.head != null) {
       return this.head.value;
     }
     return null;
   }
 
-  removeHead(): T {
+  removeHead(): T | null {
     if(this.head != null) {
       const oldHead = this.head;
       const value = oldHead.value;
@@ -81,7 +91,7 @@ export class LinkedList<T> {
     return null;
   }
 
-  getTail(): T {
+  getTail(): T | null {
     const node = this.getTailNode();
     if(node != null) {
       return node.value;
@@ -89,7 +99,7 @@ export class LinkedList<T> {
     return null;
   }
 
-  removeTail(): T {
+  removeTail(): T | null {
     const node = this.getTailNode();
     if(node != null) {
       if(node === this.head) {
@@ -97,7 +107,12 @@ export class LinkedList<T> {
       }
       else {
         const previousNode = node.previous;
-        previousNode.next = null;
+        if(previousNode != null) {
+          previousNode.next = null;
+        }
+        else {
+          throw new Error("List implementation is broken");
+        }
       }
       this.size--;
       return node.value;
@@ -119,7 +134,7 @@ export class LinkedList<T> {
       if(nextNode != null) {
         recurse(f, nextNode, values);
       }
-    }
+    };
 
     const result: T[] = [];
     const node = this.head;
@@ -137,7 +152,7 @@ export class LinkedList<T> {
     return false;
   }
 
-  private getTailNode(): LinkedNode<T> {
+  private getTailNode(): LinkedNode<T> | null {
     if(this.head == null) {
       return null;
     }
@@ -153,16 +168,16 @@ export class LinkedList<T> {
 
 export class SimpleMap<V> {
 
-  private array: { [key: string]: V } = {};
+  private array: { [key: string]: V | null } = {};
 
-  put(key: string, value: V): void {
+  put(key: string, value: V | null): void {
     if(value === undefined) {
       throw new Error("Undefined value is not allowed, null is.");
     }
     this.array[key] = value;
   }
 
-  get(key: string): V {
+  get(key: string): V | null {
     const value = this.array[key];
     if(value !== undefined) {
       return value;
@@ -176,7 +191,7 @@ export class SimpleMap<V> {
 
   }
 
-  remove(key: string): V {
+  remove(key: string): V | null {
     const value = this.array[key];
     if(value !== undefined) {
       delete this.array[key];
@@ -195,8 +210,8 @@ export class SimpleMap<V> {
     return keys;
   }
 
-  values(): V[] {
-    const values: V[] = [];
+  values(): (V | null)[] {
+    const values: (V | null)[] = [];
     for(let key in this.array) {
       // To prevent random stuff to appear
       if(this.array.hasOwnProperty(key)) {

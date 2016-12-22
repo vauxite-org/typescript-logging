@@ -7,9 +7,9 @@ import {MessageFormatUtils} from "./MessageUtils";
 class Message {
 
   private _ready: boolean;
-  private _message: string;
+  private _message: string | null;
 
-  constructor(ready: boolean, message?: string) {
+  constructor(ready: boolean, message: string | null = null) {
     this._ready = ready;
     this._message = message;
   }
@@ -22,11 +22,11 @@ class Message {
     this._ready = value;
   }
 
-  get message(): string {
+  get message(): string | null {
     return this._message;
   }
 
-  set message(value: string) {
+  set message(value: string | null) {
     this._message = value;
   }
 }
@@ -51,51 +51,51 @@ export abstract class AbstractLogger implements Logger {
     this.level = rule.level;
   }
 
-  trace(msg: string, error?: Error): void {
+  trace(msg: string, error: Error | null = null): void {
     this._log(LogLevel.Trace, msg, error);
   }
 
-  debug(msg: string, error?: Error): void {
+  debug(msg: string, error: Error | null = null): void {
     this._log(LogLevel.Debug, msg, error);
   }
 
-  info(msg: string, error?: Error): void {
+  info(msg: string, error: Error | null = null): void {
     this._log(LogLevel.Info, msg, error);
   }
 
-  warn(msg: string, error?: Error): void {
+  warn(msg: string, error: Error | null = null): void {
     this._log(LogLevel.Warn, msg, error);
   }
 
-  error(msg: string, error?: Error): void {
+  error(msg: string, error: Error | null = null): void {
     this._log(LogLevel.Error, msg, error);
   }
 
-  fatal(msg: string, error?: Error): void {
+  fatal(msg: string, error: Error | null = null): void {
     this._log(LogLevel.Fatal, msg, error);
   }
 
-  tracec(msg: ()=>string, error?: ()=>Error): void {
+  tracec(msg: ()=>string, error?: ()=>Error | null): void {
     this._logc(LogLevel.Trace, msg, error);
   }
 
-  debugc(msg: ()=>string, error?: ()=>Error): void {
+  debugc(msg: ()=>string, error?: ()=>Error | null): void {
     this._logc(LogLevel.Debug, msg, error);
   }
 
-  infoc(msg: ()=>string, error?: ()=>Error): void {
+  infoc(msg: ()=>string, error?: ()=>Error | null): void {
     this._logc(LogLevel.Info, msg, error);
   }
 
-  warnc(msg: ()=>string, error?: ()=>Error): void {
+  warnc(msg: ()=>string, error?: ()=>Error | null): void {
     this._logc(LogLevel.Warn, msg, error);
   }
 
-  errorc(msg: ()=>string, error?: ()=>Error): void {
+  errorc(msg: ()=>string, error?: ()=>Error | null): void {
     this._logc(LogLevel.Error, msg, error);
   }
 
-  fatalc(msg: ()=>string, error?: ()=>Error): void {
+  fatalc(msg: ()=>string, error?: ()=>Error | null): void {
     this._logc(LogLevel.Fatal, msg, error);
   }
 
@@ -139,21 +139,21 @@ export abstract class AbstractLogger implements Logger {
 
   protected abstract doLog(msg: string, logLevel?: LogLevel): void;
 
-  private _log(level: LogLevel, msg: string, error: Error = null): void {
+  private _log(level: LogLevel, msg: string, error: Error | null = null): void {
     if(this.open && this.level <= level) {
       this._allMessages.addTail(this.createMessage(level, msg, new Date(), error));
       this.processMessages();
     }
   }
 
-  private _logc(level: LogLevel, msg: ()=>string, error: ()=>Error = null): void {
+  private _logc(level: LogLevel, msg: ()=>string, error: ()=>Error | null): void {
     if(this.open && this.level <= level) {
       this._allMessages.addTail(this.createMessage(level, msg(), new Date(), error != null ? error() : null));
       this.processMessages();
     }
   }
 
-  private createMessage(level: LogLevel, msg: string, date: Date, error: Error = null): Message {
+  private createMessage(level: LogLevel, msg: string, date: Date, error: Error | null = null): Message {
     let result = "";
     if(this.rule.logFormat.showTimeStamp) {
       result += MessageFormatUtils.renderDate(date, this.rule.logFormat.dateFormat) + " ";
@@ -192,7 +192,10 @@ export abstract class AbstractLogger implements Logger {
             break;
           }
           msgs.removeHead();
-          this.doLog(msg.message);
+          // This can never be null normally, but strict null checking ...
+          if(msg.message != null) {
+            this.doLog(msg.message);
+          }
         }
       }
       while(msgs.getSize() > 0);
