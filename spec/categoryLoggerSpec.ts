@@ -89,4 +89,14 @@ describe("CategoryLogger...", () => {
     expect(messages.length).toEqual(1);
     expect(messages[0]).toContain("[root] Hello");
   });
+
+  it("Logs to different levels", () => {
+    CategoryServiceFactory.setDefaultConfiguration(new CategoryDefaultConfiguration(LogLevel.Info, LoggerType.MessageBuffer), true);
+    const logger = CategoryServiceFactory.getLogger(catRoot);
+    logger.infoc(() => "Dance", catRoot);
+    const messages = getMessages(logger);
+    expect(messages.length).toEqual(1);
+    expect(messages[0]).toContain("[root] Dance");
+
+  });
 });
