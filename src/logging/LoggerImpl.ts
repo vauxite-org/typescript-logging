@@ -146,9 +146,9 @@ export abstract class AbstractLogger implements Logger {
     }
   }
 
-  private _logc(level: LogLevel, msg: ()=>string, error: ()=>Error | null): void {
+  private _logc(level: LogLevel, msg: ()=>string, error?: ()=>Error | null): void {
     if(this.open && this.level <= level) {
-      this._allMessages.addTail(this.createMessage(level, msg(), new Date(), error != null ? error() : null));
+      this._allMessages.addTail(this.createMessage(level, msg(), new Date(), error !== undefined && error != null ? error() : null));
       this.processMessages();
     }
   }

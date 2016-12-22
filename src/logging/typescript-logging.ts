@@ -15,6 +15,7 @@ export {MessageFormatUtils} from "./MessageUtils";
 
 // Public stuff we export for extension
 export * from "./json/ExtensionMessagesJSON";
+export * from "./json/ExtensionMessageJSON";
 export {SimpleMap,LinkedList} from "./DataStructures";
 export * from "./JSONHelper";
 export {ExtensionHelper} from "./ExtensionHelper"
