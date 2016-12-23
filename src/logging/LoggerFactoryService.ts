@@ -1,9 +1,8 @@
-import {LoggerFactory} from "./LoggerFactory";
-import {AbstractLogger} from "./LoggerImpl";
-import {LoggerFactoryImpl} from "./LoggerFactoryImpl";
-import {LogFormat,LogLevel, LoggerType} from "./LoggerOptions";
 import {ExtensionHelper} from "./ExtensionHelper";
-
+import {LoggerFactory} from "./LoggerFactory";
+import {LoggerFactoryImpl} from "./LoggerFactoryImpl";
+import {AbstractLogger} from "./LoggerImpl";
+import {LogFormat, LoggerType, LogLevel} from "./LoggerOptions";
 
 /**
  * Defines a LogGroupRule, this allows you to either have everything configured the same way
@@ -28,7 +27,9 @@ export class LogGroupRule {
    * @param loggerType Type of logger, if Custom, make sure to implement callBackLogger and pass in, this will be called so you can return your own logger.
    * @param callBackLogger Callback function to return a new clean custom logger (yours!)
    */
-  constructor(regExp: RegExp, level: LogLevel, logFormat: LogFormat = new LogFormat(), loggerType: LoggerType = LoggerType.Console, callBackLogger: ((name: string, logGroupRule: LogGroupRule)=>AbstractLogger) | null = null) {
+  constructor(regExp: RegExp, level: LogLevel, logFormat: LogFormat = new LogFormat(),
+              loggerType: LoggerType = LoggerType.Console,
+              callBackLogger: ((name: string, logGroupRule: LogGroupRule) => AbstractLogger) | null = null) {
     this._regExp = regExp;
     this._level = level;
     this._logFormat = logFormat;
@@ -70,7 +71,7 @@ export class LoggerFactoryOptions {
    * @param rule Rule to add
    * @returns {LoggerFactoryOptions} returns itself
    */
-  addLogGroupRule(rule: LogGroupRule): LoggerFactoryOptions {
+  public addLogGroupRule(rule: LogGroupRule): LoggerFactoryOptions {
     this._logGroupRules.push(rule);
     return this;
   }
@@ -80,7 +81,7 @@ export class LoggerFactoryOptions {
    * @param enabled True for enabled (default)
    * @returns {LoggerFactoryOptions} returns itself
    */
-  setEnabled(enabled: boolean): LoggerFactoryOptions {
+  public setEnabled(enabled: boolean): LoggerFactoryOptions {
     this._enabled = enabled;
     return this;
   }
@@ -93,7 +94,6 @@ export class LoggerFactoryOptions {
     return this._enabled;
   }
 }
-
 
 /**
  * Create and configure your LoggerFactory from here.
@@ -109,10 +109,10 @@ export class LFService {
    * @param options Options, optional.
    * @returns {LoggerFactory}
    */
-  static createLoggerFactory(options?: LoggerFactoryOptions): LoggerFactory {
+  public static createLoggerFactory(options?: LoggerFactoryOptions): LoggerFactory {
     let factory: LoggerFactoryImpl;
 
-    if(options !== undefined) {
+    if (options !== undefined) {
       factory = new LoggerFactoryImpl(options);
     }
     else {
@@ -131,9 +131,9 @@ export class LFService {
    * After this call, all previously fetched Loggers (from their
    * factories) are unusable. The factories remain as they were.
    */
-  static closeLoggers(): void {
-    for(let i = 0; i <  this._loggerFactories.length; i++) {
-      this._loggerFactories[i].closeLoggers();
+  public static closeLoggers(): void {
+    for (const loggerFactory of this._loggerFactories) {
+      loggerFactory.closeLoggers();
     }
     this._loggerFactories = [];
   }
@@ -141,6 +141,4 @@ export class LFService {
   private static createDefaultOptions(): LoggerFactoryOptions {
     return new LoggerFactoryOptions().addLogGroupRule(new LogGroupRule(new RegExp(".+"), LogLevel.Info));
   }
-
 }
-

@@ -1,6 +1,6 @@
 import {AbstractCategoryLogger, CategoryLogMessage} from "./AbstractCategoryLogger";
-import {RuntimeSettings} from "./CategoryService";
 import {Category} from "./CategoryLogger";
+import {RuntimeSettings} from "./CategoryService";
 import {LogLevel} from "./LoggerOptions";
 
 /**
@@ -14,50 +14,50 @@ export class CategoryConsoleLoggerImpl extends AbstractCategoryLogger {
 
   protected doLog(msg: CategoryLogMessage): void {
     const fullMsg = this.createDefaultLogMessage(msg);
-    if(console !== undefined) {
+    if (console !== undefined) {
       let logged = false;
-      switch(msg.getLevel()) {
+
+      /* tslint:disable:no-console */
+      switch (msg.getLevel()) {
         case LogLevel.Trace:
-          if(console.trace)
-          {
+          if (console.trace) {
             console.trace(fullMsg);
             logged = true;
           }
           break;
         case LogLevel.Debug:
-          if(console.debug)
-          {
+          if (console.debug) {
             console.debug(fullMsg);
             logged = true;
           }
           break;
         case LogLevel.Info:
-          if(console.info)
-          {
+          if (console.info) {
             console.info(fullMsg);
             logged = true;
           }
           break;
         case LogLevel.Warn:
-          if(console.warn)
-          {
+          if (console.warn) {
             console.warn(fullMsg);
             logged = true;
           }
           break;
         case LogLevel.Error:
         case LogLevel.Fatal:
-          if(console.error)
-          {
+          if (console.error) {
             console.error(fullMsg);
             logged = true;
           }
           break;
+        default:
+          throw new Error("Unsupported level: " + msg.getLevel());
       }
 
-      if(!logged) {
+      if (!logged) {
         console.log(fullMsg);
       }
+      /* tslint:enable:no-console */
     }
     else {
       throw new Error("Console is not defined, cannot log msg: " + fullMsg);

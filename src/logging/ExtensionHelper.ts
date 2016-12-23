@@ -1,21 +1,19 @@
-import {CategoryServiceImpl} from "./CategoryService";
-import {Category} from "./CategoryLogger";
 import {CategoryLogMessage} from "./AbstractCategoryLogger";
-import {LogLevel} from "./LoggerOptions";
-import {MessageFormatUtils} from "./MessageUtils";
+import {Category} from "./CategoryLogger";
+import {CategoryServiceImpl} from "./CategoryService";
 import {ExtensionMessageContentJSON, ExtensionMessageJSON} from "./json/ExtensionMessageJSON";
 import {
-  ExtensionCategoryJSON, ExtensionCategoryLogMessageJSON,
-  ExtensionCategoriesUpdateMessageJSON, ExtensionRequestChangeLogLevelJSON
+  ExtensionCategoriesUpdateMessageJSON, ExtensionCategoryJSON, ExtensionCategoryLogMessageJSON,
+  ExtensionRequestChangeLogLevelJSON
 } from "./json/ExtensionMessagesJSON";
+import {LogLevel} from "./LoggerOptions";
+import {MessageFormatUtils} from "./MessageUtils";
 
 export class ExtensionHelper {
 
-  static registered: boolean = false;
+  private static registered: boolean = false;
 
-
-  private constructor()
-  {
+  private constructor() {
     // Private constructor
   }
 
@@ -23,8 +21,8 @@ export class ExtensionHelper {
    * Enables the window event listener to listen to messages (from extensions).
    * Can be registered/enabled only once.
    */
-  static register(): void {
-    if(!ExtensionHelper.registered) {
+  public static register(): void {
+    if (!ExtensionHelper.registered) {
       ExtensionHelper.registered = true;
     }
   }
@@ -33,8 +31,8 @@ export class ExtensionHelper {
    *  Extension framework will call this to enable the integration between two,
    *  after this call the framework will respond with postMessage() messages.
    */
-  static enableExtensionIntegration(): void {
-    if(!ExtensionHelper.registered) {
+  public static enableExtensionIntegration(): void {
+    if (!ExtensionHelper.registered) {
       return;
     }
 
@@ -49,18 +47,18 @@ export class ExtensionHelper {
     ExtensionHelper.sendCategoriesRuntimeUpdateMessage(cats);
   }
 
-  static processMessageFromExtension(msg: ExtensionMessageJSON<any>): void {
-    if(!ExtensionHelper.registered) {
+  public static processMessageFromExtension(msg: ExtensionMessageJSON<any>): void {
+    if (!ExtensionHelper.registered) {
       return;
     }
-
-    if(msg.from === 'tsl-extension') {
+    /* tslint:disable:no-console */
+    if (msg.from === "tsl-extension") {
       const data = msg.data;
-      switch(data.type) {
-        case 'request-change-loglevel':
+      switch (data.type) {
+        case "request-change-loglevel":
           const valueRequest = data.value as ExtensionRequestChangeLogLevelJSON;
           const catsApplied = ExtensionHelper.applyLogLevel(valueRequest.categoryId, valueRequest.logLevel, valueRequest.recursive);
-          if(catsApplied.length > 0) {
+          if (catsApplied.length > 0) {
             // Send changes back
             ExtensionHelper.sendCategoriesRuntimeUpdateMessage(catsApplied);
           }
@@ -73,9 +71,10 @@ export class ExtensionHelper {
     else {
       console.log("Dropping message (not from tsl-extension): " + msg.from);
     }
+    /* tslint:enable:no-console */
   }
 
-  static sendCategoryLogMessage(msg: CategoryLogMessage): void {
+  public static sendCategoryLogMessage(msg: CategoryLogMessage): void {
     if (!ExtensionHelper.registered) {
       return;
     }
@@ -85,53 +84,53 @@ export class ExtensionHelper {
     });
 
     const content = {
-      type: 'log-message',
+      type: "log-message",
       value: {
-        logLevel: LogLevel[msg.getLevel()].toString(),
         categories: categoryIds,
-        message: msg.getMessage(),
         errorAsStack: msg.getErrorAsStack(),
         formattedMessage: MessageFormatUtils.renderDefaultMessage(msg, false),
-        resolvedErrorMessage: msg.isResolvedErrorMessage(),
+        logLevel: LogLevel[msg.getLevel()].toString(),
+        message: msg.getMessage(),
+        resolvedErrorMessage: msg.isResolvedErrorMessage()
       }
     } as ExtensionMessageContentJSON<ExtensionCategoryLogMessageJSON>;
 
     const message = {
-      from: 'tsl-logging',
-      data: content
+      data: content,
+      from: "tsl-logging",
     } as ExtensionMessageJSON<ExtensionCategoryLogMessageJSON>;
 
     ExtensionHelper.sendMessage(message);
   }
 
   private static sendCategoriesRuntimeUpdateMessage(categories: Category[]): void {
-    if(!ExtensionHelper.registered) {
+    if (!ExtensionHelper.registered) {
       return;
     }
     const service = CategoryServiceImpl.getInstance();
-    const catLevels: {categories: [{id : number, logLevel: string}]} =  {categories: [{}]} as ExtensionCategoriesUpdateMessageJSON;
+    const catLevels: {categories: [{id: number, logLevel: string}]} = {categories: [{}]} as ExtensionCategoriesUpdateMessageJSON;
     categories.forEach((cat: Category) => {
       const catSettings = service.getCategorySettings(cat);
-      if(catSettings != null) {
-        catLevels.categories.push({ id: cat.id, logLevel: LogLevel[catSettings.logLevel].toString() });
+      if (catSettings != null) {
+        catLevels.categories.push({id: cat.id, logLevel: LogLevel[catSettings.logLevel].toString()});
       }
     });
 
     const content = {
-      type: 'categories-rt-update',
+      type: "categories-rt-update",
       value: catLevels,
     } as ExtensionMessageContentJSON<ExtensionCategoriesUpdateMessageJSON>;
 
     const message = {
-      from: 'tsl-logging',
-      data: content
+      data: content,
+      from: "tsl-logging"
     } as ExtensionMessageJSON<ExtensionCategoriesUpdateMessageJSON>;
 
     ExtensionHelper.sendMessage(message);
   }
 
   private static sendRootCategoriesToExtension(): void {
-    if(!ExtensionHelper.registered) {
+    if (!ExtensionHelper.registered) {
       return;
     }
 
@@ -140,49 +139,47 @@ export class ExtensionHelper {
     });
 
     const content = {
-      type: 'root-categories-tree',
+      type: "root-categories-tree",
       value: categories
     } as ExtensionMessageContentJSON<ExtensionCategoryJSON[]>;
 
     const message = {
-      from: 'tsl-logging',
-      data: content
+      data: content,
+      from: "tsl-logging"
     } as ExtensionMessageJSON<ExtensionCategoryJSON[]>;
 
     ExtensionHelper.sendMessage(message);
   }
-
 
   /**
    * If extension integration is enabled, will send the root categories over to the extension.
    * Otherwise does nothing.
    */
   private static getCategoryAsJSON(cat: Category): ExtensionCategoryJSON {
-    const children = cat.children.map((child) => {
+    const childCategories = cat.children.map((child) => {
       return ExtensionHelper.getCategoryAsJSON(child);
     });
 
     return {
+      children: childCategories,
       id: cat.id,
       logLevel: LogLevel[cat.logLevel].toString(),
       name: cat.name,
       parentId: (cat.parent != null ? cat.parent.id : null),
-      children: children,
     } as ExtensionCategoryJSON;
   }
 
   private static applyLogLevel(categoryId: number, logLevel: string, recursive: boolean): Category[] {
-    console.log("Will change log level for category with id: " + categoryId + ", to logLevel=" + logLevel + ", recursive=" + recursive);
-
     const cats: Category[] = [];
 
     const category = CategoryServiceImpl.getInstance().getCategoryById(categoryId);
-    if(category != null) {
+    if (category != null) {
       ExtensionHelper._applyLogLevelRecursive(category, LogLevel.fromString(logLevel), recursive, cats);
     }
-    else
-    {
+    else {
+      /* tslint:disable:no-console */
       console.log("Could not change log level, failed to find category with id: " + categoryId);
+      /* tslint:enable:no-console */
     }
 
     return cats;
@@ -190,12 +187,10 @@ export class ExtensionHelper {
 
   private static _applyLogLevelRecursive(category: Category, logLevel: LogLevel, recursive: boolean, cats: Category[]): void {
     const categorySettings = CategoryServiceImpl.getInstance().getCategorySettings(category);
-    if(categorySettings != null) {
+    if (categorySettings != null) {
       categorySettings.logLevel = logLevel;
 
       cats.push(category);
-
-      console.log("LogLevel for category: " + category.name + ", changed to level: " + LogLevel[logLevel].toString());
 
       if (recursive) {
         category.children.forEach((child: Category) => {
@@ -211,9 +206,9 @@ export class ExtensionHelper {
     const addCats = (cat: Category, allCats: Category[]) => {
       allCats.push(cat);
 
-      cat.children.forEach((cat: Category) => {
-        addCats(cat, allCats);
-      })
+      cat.children.forEach((catChild: Category) => {
+        addCats(catChild, allCats);
+      });
     };
 
     CategoryServiceImpl.getInstance().getRootCategories().forEach((cat: Category) => {
@@ -224,16 +219,15 @@ export class ExtensionHelper {
   }
 
   private static sendMessage(msg: ExtensionMessageJSON<any>): void {
-    if(!ExtensionHelper.registered) {
+    if (!ExtensionHelper.registered) {
       return;
     }
 
-    if(typeof window !== "undefined") {
+    if (typeof window !== "undefined") {
+      /* tslint:disable:no-console */
       console.log("Sending message to extension, message type: " + msg.data.type);
-
+      /* tslint:enable:no-console */
       window.postMessage(msg, "*");
     }
   }
 }
-
-

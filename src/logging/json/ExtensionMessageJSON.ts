@@ -1,4 +1,6 @@
-
+/**
+ * Send a message.
+ */
 export interface ExtensionMessageJSON<D> {
 
   from: string;
@@ -7,6 +9,9 @@ export interface ExtensionMessageJSON<D> {
 
 }
 
+/**
+ * Content for the message.
+ */
 export interface ExtensionMessageContentJSON<D> {
 
   type: string;

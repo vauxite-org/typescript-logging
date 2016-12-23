@@ -1,0 +1,17 @@
+{
+  "extends": "tslint:recommended",
+  "rules": {
+    "interface-name": false,
+    "max-classes-per-file": [true, 12],
+    "max-line-length": [true, 160],
+    "member-ordering": [true, { "order":
+                                ["private-static-field","protected-static-field","public-static-field","private-instance-field","protected-instance-field","public-instance-field",
+                                  "constructor","public-static-method","protected-static-method","public-instance-method","protected-instance-method","private-instance-method","private-static-method"
+                                ]
+                              }
+                       ],
+    "one-line": [true, "check-open-brace", "check-whitespace"],
+    "trailing-comma": false,
+    "variable-name": [true, "ban-keywords", "check-format", "allow-leading-underscore"]
+  }
+}

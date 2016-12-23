@@ -13,11 +13,13 @@ export class CategoryExtensionLoggerImpl extends AbstractCategoryLogger {
   }
 
   protected doLog(msg: CategoryLogMessage): void {
-    if(typeof window !== "undefined") {
-      ExtensionHelper.sendCategoryLogMessage(msg)
+    if (typeof window !== "undefined") {
+      ExtensionHelper.sendCategoryLogMessage(msg);
     }
     else {
+      /* tslint:disable:no-console */
       console.log("window is not available, you must be running in a browser for this. Dropped message.");
+      /* tslint:enable:no-console */
     }
   }
 

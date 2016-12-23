@@ -1,16 +1,25 @@
-import {DateFormat, DateFormatEnum, LogLevel} from "./LoggerOptions";
 import * as ST from "stacktrace-js";
 import {CategoryLogMessage} from "./AbstractCategoryLogger";
 import {Category} from "./CategoryLogger";
+import {DateFormat, DateFormatEnum, LogLevel} from "./LoggerOptions";
 
+/**
+ * Some utilities to format messages.
+ */
 export class MessageFormatUtils {
 
-  static renderDate(date: Date, dateFormat: DateFormat): string {
+  /**
+   * Render given date in given DateFormat and return as String.
+   * @param date Date
+   * @param dateFormat Format
+   * @returns {string} Formatted date
+   */
+  public static renderDate(date: Date, dateFormat: DateFormat): string {
     const lpad = (value: string, chars: number, padWith: string): string => {
       const howMany = chars - value.length;
-      if(howMany > 0) {
-        let res: string = '';
-        for(let i = 0; i < howMany; i++) {
+      if (howMany > 0) {
+        let res: string = "";
+        for (let i = 0; i < howMany; i++) {
           res += padWith;
         }
         res += value;
@@ -19,53 +28,53 @@ export class MessageFormatUtils {
       return value;
     };
 
-    const fullYear = (date: Date): string => {
-      return lpad(date.getFullYear().toString(), 4, '0');
+    const fullYear = (d: Date): string => {
+      return lpad(d.getFullYear().toString(), 4, "0");
     };
 
-    const month = (date: Date): string => {
-      return lpad((date.getMonth()+1).toString(), 2, '0');
+    const month = (d: Date): string => {
+      return lpad((d.getMonth() + 1).toString(), 2, "0");
     };
 
-    const day = (date: Date): string => {
-      return lpad(date.getDate().toString(), 2, '0');
+    const day = (d: Date): string => {
+      return lpad(d.getDate().toString(), 2, "0");
     };
 
-    const hours = (date: Date): string => {
-      return lpad(date.getHours().toString(), 2, '0');
+    const hours = (d: Date): string => {
+      return lpad(d.getHours().toString(), 2, "0");
     };
 
-    const minutes = (date: Date): string => {
-      return lpad(date.getMinutes().toString(), 2, '0');
+    const minutes = (d: Date): string => {
+      return lpad(d.getMinutes().toString(), 2, "0");
     };
 
-    const seconds = (date: Date): string => {
-      return lpad(date.getSeconds().toString(), 2, '0');
+    const seconds = (d: Date): string => {
+      return lpad(d.getSeconds().toString(), 2, "0");
     };
 
-    const millis = (date: Date): string => {
-      return lpad(date.getMilliseconds().toString(), 3, '0');
+    const millis = (d: Date): string => {
+      return lpad(d.getMilliseconds().toString(), 3, "0");
     };
 
     const dateSeparator = dateFormat.dateSeparator;
-    let ds: string = '';
-    switch(dateFormat.formatEnum) {
+    let ds: string = "";
+    switch (dateFormat.formatEnum) {
       case DateFormatEnum.Default:
         // yyyy-mm-dd hh:mm:ss,m
-        ds = fullYear(date) + dateSeparator + month(date) + dateSeparator + day(date) + ' ' +
-          hours(date) + ':' + minutes(date) + ":" + seconds(date) + "," + millis(date);
+        ds = fullYear(date) + dateSeparator + month(date) + dateSeparator + day(date) + " " +
+          hours(date) + ":" + minutes(date) + ":" + seconds(date) + "," + millis(date);
         break;
       case DateFormatEnum.YearMonthDayTime:
-        ds = fullYear(date) + dateSeparator + month(date) + dateSeparator + day(date) + ' ' +
-          hours(date) + ':' + minutes(date) + ":" + seconds(date);
+        ds = fullYear(date) + dateSeparator + month(date) + dateSeparator + day(date) + " " +
+          hours(date) + ":" + minutes(date) + ":" + seconds(date);
         break;
       case DateFormatEnum.YearDayMonthWithFullTime:
-        ds = fullYear(date) + dateSeparator + day(date) + dateSeparator + month(date) + ' ' +
-          hours(date) + ':' + minutes(date) + ":" + seconds(date) + "," + millis(date);
+        ds = fullYear(date) + dateSeparator + day(date) + dateSeparator + month(date) + " " +
+          hours(date) + ":" + minutes(date) + ":" + seconds(date) + "," + millis(date);
         break;
       case DateFormatEnum.YearDayMonthTime:
-        ds = fullYear(date) + dateSeparator + day(date) + dateSeparator + month(date) + ' ' +
-          hours(date) + ':' + minutes(date) + ":" + seconds(date);
+        ds = fullYear(date) + dateSeparator + day(date) + dateSeparator + month(date) + " " +
+          hours(date) + ":" + minutes(date) + ":" + seconds(date);
         break;
       default:
         throw new Error("Unsupported date format enum: " + dateFormat.formatEnum);
@@ -73,42 +82,52 @@ export class MessageFormatUtils {
     return ds;
   }
 
-  static renderDefaultMessage(msg: CategoryLogMessage, addStack: boolean): string
-  {
+  /**
+   * Renders given category log message
+   * @param msg Message to format
+   * @param addStack If true adds the stack to the output, otherwise skips it
+   * @returns {string} Formatted message
+   */
+  public static renderDefaultMessage(msg: CategoryLogMessage, addStack: boolean): string {
     let result: string = "";
 
     const logFormat = msg.getLogFormat();
-    if(logFormat.showTimeStamp) {
+    if (logFormat.showTimeStamp) {
       result += MessageFormatUtils.renderDate(msg.getDate(), logFormat.dateFormat) + " ";
     }
 
     result += LogLevel[msg.getLevel()].toUpperCase();
-    if(msg.isResolvedErrorMessage()) {
+    if (msg.isResolvedErrorMessage()) {
       result += " (resolved)";
     }
-    result += ' ';
+    result += " ";
 
-    if(logFormat.showCategoryName) {
+    if (logFormat.showCategoryName) {
       result += "[";
       msg.getCategories().forEach((value: Category, idx: number) => {
-        if(idx > 0) {
-          result += ', ';
+        if (idx > 0) {
+          result += ", ";
         }
         result += value.name;
       });
       result += "]";
     }
 
-    result += ' ' + msg.getMessage();
+    result += " " + msg.getMessage();
 
-    if(addStack && msg.getErrorAsStack() != null) {
-      result += '\n' + msg.getErrorAsStack();
+    if (addStack && msg.getErrorAsStack() != null) {
+      result += "\n" + msg.getErrorAsStack();
     }
 
     return result;
   }
 
-  static renderError(error: Error): Promise<string> {
+  /**
+   * Render error as stack
+   * @param error Return error as Promise
+   * @returns {Promise<string>|Promise} Promise for stack
+   */
+  public static renderError(error: Error): Promise<string> {
     let result = error.name + ": " + error.message + "\n@";
     return new Promise<string>((resolve: any) => {
 
@@ -116,9 +135,9 @@ export class MessageFormatUtils {
       ST.fromError(error, {offline: true}).then((frames: ST.StackFrame[]) => {
         const stackStr = (frames.map((frame: ST.StackFrame) => {
           return frame.toString();
-        })).join('\n  ');
+        })).join("\n  ");
 
-        result += '\n' + stackStr;
+        result += "\n" + stackStr;
 
         // This resolves our returned promise
         resolve(result);

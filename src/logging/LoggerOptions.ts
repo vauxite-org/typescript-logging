@@ -11,7 +11,8 @@ export enum LogLevel {
   Fatal
 }
 
-export module LogLevel {
+/* tslint:disable:no-namespace */
+export namespace LogLevel {
 
   /**
    * Returns LogLevel based on string representation
@@ -19,11 +20,11 @@ export module LogLevel {
    * @returns {LogLevel}, Error is thrown if invalid.
    */
   export function fromString(val: string): LogLevel {
-    if(val == null) {
+    if (val == null) {
       throw new Error("Argument must be set");
     }
 
-    switch(val.toLowerCase()) {
+    switch (val.toLowerCase()) {
       case "trace":
         return LogLevel.Trace;
       case "debug":
@@ -42,6 +43,7 @@ export module LogLevel {
   }
 
 }
+/* tslint:disable:enable-namespace */
 
 /**
  * Where to log to? Pick one of the constants. Custom requires a callback to be present, see LFService.createLoggerFactory(...)
@@ -97,7 +99,7 @@ export class DateFormat {
    * @param formatEnum DateFormatEnum
    * @param dateSeparator Separator used between dates
    */
-  constructor(formatEnum: DateFormatEnum = DateFormatEnum.Default, dateSeparator: string = '-') {
+  constructor(formatEnum: DateFormatEnum = DateFormatEnum.Default, dateSeparator: string = "-") {
     this._formatEnum = formatEnum;
     this._dateSeparator = dateSeparator;
   }
@@ -145,6 +147,9 @@ export class LogFormat {
   }
 }
 
+/**
+ * Information about the log format, what will a log line look like?
+ */
 export class CategoryLogFormat {
 
   private _dateFormat: DateFormat;

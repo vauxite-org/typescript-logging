@@ -1,7 +1,7 @@
+import {LinkedList} from "./DataStructures";
 import {Logger} from "./Logger";
 import {LogGroupRule} from "./LoggerFactoryService";
 import {LogLevel} from "./LoggerOptions";
-import {LinkedList} from "./DataStructures";
 import {MessageFormatUtils} from "./MessageUtils";
 
 class Message {
@@ -51,103 +51,102 @@ export abstract class AbstractLogger implements Logger {
     this.level = rule.level;
   }
 
-  trace(msg: string, error: Error | null = null): void {
+  public trace(msg: string, error: Error | null = null): void {
     this._log(LogLevel.Trace, msg, error);
   }
 
-  debug(msg: string, error: Error | null = null): void {
+  public debug(msg: string, error: Error | null = null): void {
     this._log(LogLevel.Debug, msg, error);
   }
 
-  info(msg: string, error: Error | null = null): void {
+  public info(msg: string, error: Error | null = null): void {
     this._log(LogLevel.Info, msg, error);
   }
 
-  warn(msg: string, error: Error | null = null): void {
+  public warn(msg: string, error: Error | null = null): void {
     this._log(LogLevel.Warn, msg, error);
   }
 
-  error(msg: string, error: Error | null = null): void {
+  public error(msg: string, error: Error | null = null): void {
     this._log(LogLevel.Error, msg, error);
   }
 
-  fatal(msg: string, error: Error | null = null): void {
+  public fatal(msg: string, error: Error | null = null): void {
     this._log(LogLevel.Fatal, msg, error);
   }
 
-  tracec(msg: ()=>string, error?: ()=>Error | null): void {
+  public tracec(msg: () => string, error?: () => Error | null): void {
     this._logc(LogLevel.Trace, msg, error);
   }
 
-  debugc(msg: ()=>string, error?: ()=>Error | null): void {
+  public debugc(msg: () => string, error?: () => Error | null): void {
     this._logc(LogLevel.Debug, msg, error);
   }
 
-  infoc(msg: ()=>string, error?: ()=>Error | null): void {
+  public infoc(msg: () => string, error?: () => Error | null): void {
     this._logc(LogLevel.Info, msg, error);
   }
 
-  warnc(msg: ()=>string, error?: ()=>Error | null): void {
+  public warnc(msg: () => string, error?: () => Error | null): void {
     this._logc(LogLevel.Warn, msg, error);
   }
 
-  errorc(msg: ()=>string, error?: ()=>Error | null): void {
+  public errorc(msg: () => string, error?: () => Error | null): void {
     this._logc(LogLevel.Error, msg, error);
   }
 
-  fatalc(msg: ()=>string, error?: ()=>Error | null): void {
+  public fatalc(msg: () => string, error?: () => Error | null): void {
     this._logc(LogLevel.Fatal, msg, error);
   }
 
-  isTraceEnabled(): boolean {
-    return this.level == LogLevel.Trace;
+  public isTraceEnabled(): boolean {
+    return this.level === LogLevel.Trace;
   }
 
-  isDebugEnabled(): boolean {
+  public isDebugEnabled(): boolean {
     return this.level <= LogLevel.Debug;
   }
 
-  isInfoEnabled(): boolean {
+  public isInfoEnabled(): boolean {
     return this.level <= LogLevel.Info;
   }
 
-  isWarnEnabled(): boolean {
+  public isWarnEnabled(): boolean {
     return this.level <= LogLevel.Warn;
   }
 
-  isErrorEnabled(): boolean {
+  public isErrorEnabled(): boolean {
     return this.level <= LogLevel.Error;
   }
 
-  isFatalEnabled(): boolean {
+  public isFatalEnabled(): boolean {
     return this.level <= LogLevel.Fatal;
   }
 
-  getLogLevel(): LogLevel {
+  public getLogLevel(): LogLevel {
     return this.level;
   }
 
-  isOpen(): boolean {
+  public isOpen(): boolean {
     return this.open;
   }
 
-  close(): void {
+  public close(): void {
     this.open = false;
     this._allMessages.clear();
   }
 
-
   protected abstract doLog(msg: string, logLevel?: LogLevel): void;
 
   private _log(level: LogLevel, msg: string, error: Error | null = null): void {
-    if(this.open && this.level <= level) {
+    if (this.open && this.level <= level) {
       this._allMessages.addTail(this.createMessage(level, msg, new Date(), error));
       this.processMessages();
     }
   }
 
-  private _logc(level: LogLevel, msg: ()=>string, error?: ()=>Error | null): void {
-    if(this.open && this.level <= level) {
+  private _logc(level: LogLevel, msg: () => string, error?: () => Error | null): void {
+    if (this.open && this.level <= level) {
       this._allMessages.addTail(this.createMessage(level, msg(), new Date(), error !== undefined && error != null ? error() : null));
       this.processMessages();
     }
@@ -155,21 +154,21 @@ export abstract class AbstractLogger implements Logger {
 
   private createMessage(level: LogLevel, msg: string, date: Date, error: Error | null = null): Message {
     let result = "";
-    if(this.rule.logFormat.showTimeStamp) {
+    if (this.rule.logFormat.showTimeStamp) {
       result += MessageFormatUtils.renderDate(date, this.rule.logFormat.dateFormat) + " ";
     }
 
     result += LogLevel[level].toUpperCase() + " ";
-    if(this.rule.logFormat.showLoggerName) {
+    if (this.rule.logFormat.showLoggerName) {
       result += "[" + this.name + "]";
     }
 
-    result += ' ' + msg;
-    if(error != null) {
+    result += " " + msg;
+    if (error != null) {
       const message = new Message(false);
 
       MessageFormatUtils.renderError(error).then((stackResult: string) => {
-        result += '\n' + stackResult;
+        result += "\n" + stackResult;
         message.message = result;
         message.ready = true;
         this.processMessages();
@@ -184,21 +183,21 @@ export abstract class AbstractLogger implements Logger {
     // Basically we wait until errors are resolved (those messages
     // may not be ready).
     const msgs = this._allMessages;
-    if(msgs.getSize() > 0) {
+    if (msgs.getSize() > 0) {
       do {
         const msg = msgs.getHead();
-        if(msg != null) {
-          if(!msg.ready) {
+        if (msg != null) {
+          if (!msg.ready) {
             break;
           }
           msgs.removeHead();
           // This can never be null normally, but strict null checking ...
-          if(msg.message != null) {
+          if (msg.message != null) {
             this.doLog(msg.message);
           }
         }
       }
-      while(msgs.getSize() > 0);
+      while (msgs.getSize() > 0);
     }
   }
 }
@@ -213,50 +212,45 @@ export class ConsoleLoggerImpl extends AbstractLogger {
   }
 
   protected doLog(msg: string, logLevel: LogLevel): void {
-    if(console !== undefined) {
+    if (console !== undefined) {
       let logged = false;
-      switch(logLevel) {
+      /* tslint:disable:no-console */
+      switch (logLevel) {
         case LogLevel.Trace:
-          if(console.trace)
-          {
+          if (console.trace) {
             console.trace(msg);
             logged = true;
           }
           break;
         case LogLevel.Debug:
-          if(console.debug)
-          {
+          if (console.debug) {
             console.debug(msg);
             logged = true;
           }
           break;
         case LogLevel.Info:
-          if(console.info)
-          {
+          if (console.info) {
             console.info(msg);
             logged = true;
           }
           break;
         case LogLevel.Warn:
-          if(console.warn)
-          {
+          if (console.warn) {
             console.warn(msg);
             logged = true;
           }
           break;
         case LogLevel.Error:
         case LogLevel.Fatal:
-          if(console.error)
-          {
+          if (console.error) {
             console.error(msg);
             logged = true;
           }
           break;
+        default:
+          throw new Error("Log level not supported: " + logLevel);
       }
-
-      if(!logged) {
-        console.log(msg);
-      }
+      /* tslint:enable:no-console */
     }
     else {
       throw new Error("Console is not defined, cannot log msg: " + msg);
@@ -278,22 +272,23 @@ export class MessageBufferLoggerImpl extends AbstractLogger {
     super(name, rule);
   }
 
-  protected doLog(msg: string, logLevel: LogLevel): void {
-    this.messages.push(msg);
-  }
-
-  close(): void {
+  public close(): void {
     this.messages = [];
     super.close();
   }
 
-  getMessages(): string[] {
+  public getMessages(): string[] {
     return this.messages;
   }
 
-  toString(): string {
-    return this.messages.map(msg => {
+  public toString(): string {
+    return this.messages.map((msg) => {
       return msg;
     }).join("\n");
   }
+
+  protected doLog(msg: string, logLevel: LogLevel): void {
+    this.messages.push(msg);
+  }
+
 }

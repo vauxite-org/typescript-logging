@@ -1,7 +1,7 @@
-import {LogLevel, CategoryLogFormat} from "./LoggerOptions";
-import {CategoryLogger, Category} from "./CategoryLogger";
+import {Category, CategoryLogger} from "./CategoryLogger";
 import {RuntimeSettings} from "./CategoryService";
 import {LinkedList} from "./DataStructures";
+import {CategoryLogFormat, LogLevel} from "./LoggerOptions";
 import {MessageFormatUtils} from "./MessageUtils";
 
 /**
@@ -53,43 +53,43 @@ class CategoryLogMessageImpl implements CategoryLogMessage {
     this.ready = ready;
   }
 
-  getMessage(): string {
+  public getMessage(): string {
     return this.message;
   }
 
-  getErrorAsStack(): string | null {
+  public getErrorAsStack(): string | null {
     return this.errorAsStack;
   }
 
-  setErrorAsStack(stack: string): void {
+  public setErrorAsStack(stack: string): void {
     this.errorAsStack = stack;
   }
 
-  getError(): Error | null {
+  public getError(): Error | null {
     return this.error;
   }
 
-  getCategories(): Category[] {
+  public getCategories(): Category[] {
     return this.categories;
   }
 
-  getDate(): Date {
+  public getDate(): Date {
     return this.date;
   }
 
-  getLevel(): LogLevel {
+  public getLevel(): LogLevel {
     return this.level;
   }
 
-  getLogFormat(): CategoryLogFormat {
+  public getLogFormat(): CategoryLogFormat {
     return this.logFormat;
   }
 
-  isReady(): boolean {
+  public isReady(): boolean {
     return this.ready;
   }
 
-  setReady(value: boolean): void {
+  public setReady(value: boolean): void {
     this.ready = value;
   }
 
@@ -101,11 +101,10 @@ class CategoryLogMessageImpl implements CategoryLogMessage {
     this._resolvedErrorMessage = value;
   }
 
-  isResolvedErrorMessage(): boolean {
+  public isResolvedErrorMessage(): boolean {
     return this._resolvedErrorMessage;
   }
 }
-
 
 /**
  * Abstract category logger, use as your base class for new type of loggers (it
@@ -127,67 +126,67 @@ export abstract class AbstractCategoryLogger implements CategoryLogger {
     this.runtimeSettings = runtimeSettings;
   }
 
-  trace(msg: string, ...categories: Category[]): void {
+  public trace(msg: string, ...categories: Category[]): void {
     this._log(LogLevel.Trace, msg, null, false, ...categories);
   }
 
-  debug(msg: string, ...categories: Category[]): void {
+  public debug(msg: string, ...categories: Category[]): void {
     this._log(LogLevel.Debug, msg, null, false, ...categories);
   }
 
-  info(msg: string, ...categories: Category[]): void {
+  public info(msg: string, ...categories: Category[]): void {
     this._log(LogLevel.Info, msg, null, false, ...categories);
   }
 
-  warn(msg: string, ...categories: Category[]): void {
+  public warn(msg: string, ...categories: Category[]): void {
     this._log(LogLevel.Warn, msg, null, false, ...categories);
   }
 
-  error(msg: string, error: Error, ...categories: Category[]): void {
+  public error(msg: string, error: Error, ...categories: Category[]): void {
     this._log(LogLevel.Error, msg, error, false, ...categories);
   }
 
-  fatal(msg: string, error: Error, ...categories: Category[]): void {
+  public fatal(msg: string, error: Error, ...categories: Category[]): void {
     this._log(LogLevel.Fatal, msg, error, false, ...categories);
   }
 
-  resolved(msg: string, error: Error, ...categories: Category[]): void {
+  public resolved(msg: string, error: Error, ...categories: Category[]): void {
     this._log(LogLevel.Error, msg, error, true, ...categories);
   }
 
-  log(level: LogLevel, msg: string, error: Error, ...categories: Category[]): void {
+  public log(level: LogLevel, msg: string, error: Error, ...categories: Category[]): void {
     this._log(level, msg, error, false, ...categories);
   }
 
-  tracec(msg: ()=>string, ...categories: Category[]): void {
+  public tracec(msg: () => string, ...categories: Category[]): void {
     this._logc(LogLevel.Trace, msg, () => null, false, ...categories);
   }
 
-  debugc(msg: ()=>string, ...categories: Category[]): void {
-    this._logc(LogLevel.Debug, msg, () => null, false,...categories);
+  public debugc(msg: () => string, ...categories: Category[]): void {
+    this._logc(LogLevel.Debug, msg, () => null, false, ...categories);
   }
 
-  infoc(msg: ()=>string, ...categories: Category[]): void {
+  public infoc(msg: () => string, ...categories: Category[]): void {
     this._logc(LogLevel.Info, msg, () => null, false, ...categories);
   }
 
-  warnc(msg: ()=>string, ...categories: Category[]): void {
+  public warnc(msg: () => string, ...categories: Category[]): void {
     this._logc(LogLevel.Warn, msg, () => null, false, ...categories);
   }
 
-  errorc(msg: ()=>string, error: ()=>Error, ...categories: Category[]): void {
+  public errorc(msg: () => string, error: () => Error, ...categories: Category[]): void {
     this._logc(LogLevel.Error, msg, error, false, ...categories);
   }
 
-  fatalc(msg: ()=>string, error: ()=>Error, ...categories: Category[]): void {
+  public fatalc(msg: () => string, error: () => Error, ...categories: Category[]): void {
     this._logc(LogLevel.Fatal, msg, error, false, ...categories);
   }
 
-  resolvedc(msg: ()=>string, error: ()=>Error, ...categories: Category[]): void {
+  public resolvedc(msg: () => string, error: () => Error, ...categories: Category[]): void {
     this._logc(LogLevel.Error, msg, error, true, ...categories);
   }
 
-  logc(level: LogLevel, msg: ()=>string, error: ()=>Error, ...categories: Category[]): void {
+  public logc(level: LogLevel, msg: () => string, error: () => Error, ...categories: Category[]): void {
     this._logc(level, msg, error, false, ...categories);
   }
 
@@ -209,7 +208,7 @@ export abstract class AbstractCategoryLogger implements CategoryLogger {
     this._logInternal(level, () => msg, () => error, resolved, ...categories);
   }
 
-  private _logc(level: LogLevel, msg: ()=>string, error: ()=>Error | null, resolved: boolean = false, ...categories: Category[]): void {
+  private _logc(level: LogLevel, msg: () => string, error: () => Error | null, resolved: boolean = false, ...categories: Category[]): void {
     this._logInternal(level, msg, error, resolved, ...categories);
   }
 
@@ -217,7 +216,7 @@ export abstract class AbstractCategoryLogger implements CategoryLogger {
     let logCateries: Category[];
 
     // Log root category by default if none present
-    if(categories !== undefined && categories.length > 0) {
+    if (categories !== undefined && categories.length > 0) {
       logCateries = categories;
     }
     else {
@@ -227,19 +226,20 @@ export abstract class AbstractCategoryLogger implements CategoryLogger {
 
     // Get the runtime levels for given categories. If their level is lower than given level, we log.
     // In addition we pass along which category/categories we log this statement for.
-    for(let i = 0; i < logCateries.length; i++) {
+    for (let i = 0; i < logCateries.length; i++) {
       const category = logCateries[i];
-      if(category == null) {
+      if (category == null) {
         throw new Error("Cannot have a null element within categories, at index=" + i);
       }
       const settings = this.runtimeSettings.getCategorySettings(category);
-      if(settings == null) {
-        throw new Error("Category with path: " + category.getCategoryPath() + " is not registered with this logger, maybe you registered it with a different root logger?");
+      if (settings == null) {
+        throw new Error("Category with path: " + category.getCategoryPath() + " is not registered with this logger, maybe " +
+          "you registered it with a different root logger?");
       }
 
-      if(settings.logLevel <= level) {
+      if (settings.logLevel <= level) {
         const actualError = error != null ? error() : null;
-        if(actualError == null) {
+        if (actualError == null) {
           const logMessage = new CategoryLogMessageImpl(msg(), actualError, logCateries, new Date(), level, settings.logFormat, true);
           logMessage.resolvedErrorMessage = resolved;
           this.allMessages.addTail(logMessage);
@@ -265,18 +265,18 @@ export abstract class AbstractCategoryLogger implements CategoryLogger {
     // Basically we wait until errors are resolved (those messages
     // may not be ready).
     const msgs = this.allMessages;
-    if(msgs.getSize() > 0) {
+    if (msgs.getSize() > 0) {
       do {
         const msg = msgs.getHead();
-        if(msg != null) {
-          if(!msg.isReady()) {
+        if (msg != null) {
+          if (!msg.isReady()) {
             break;
           }
           msgs.removeHead();
           this.doLog(msg);
         }
       }
-      while(msgs.getSize() > 0);
+      while (msgs.getSize() > 0);
     }
   }
 

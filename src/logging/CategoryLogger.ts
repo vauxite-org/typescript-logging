@@ -1,6 +1,5 @@
-import {LogLevel} from "./LoggerOptions";
 import {CategoryServiceImpl} from "./CategoryService";
-
+import {LogLevel} from "./LoggerOptions";
 
 /**
  * Category for use with categorized logging.
@@ -20,14 +19,14 @@ export class Category {
   private _logLevel: LogLevel = LogLevel.Error;
 
   constructor(name: string, parent: Category | null = null) {
-    if(name.indexOf('#') != -1) {
+    if (name.indexOf("#") !== -1) {
       throw new Error("Cannot use # in a name of a Category");
     }
 
     this._id = Category.nextId();
     this._name = name;
     this._parent = parent;
-    if(this._parent != null) {
+    if (this._parent != null) {
       this._parent._children.push(this);
     }
     CategoryServiceImpl.getInstance().registerCategory(this);
@@ -49,11 +48,14 @@ export class Category {
     return this._logLevel;
   }
 
-  getCategoryPath(): string {
+  public getCategoryPath(): string {
     let result = this.name;
-    let cat: Category | null = this;
-    while((cat = cat.parent) != null) {
+    let cat: Category | null = this.parent;
+
+    while (cat != null) {
       result = cat.name + "#" + result;
+
+      cat = cat.parent;
     }
     return result;
   }
@@ -104,17 +106,17 @@ export interface CategoryLogger {
 
   log(level: LogLevel, msg: string, error: Error | null, ...categories: Category[]): void;
 
-  tracec(msg:() => string, ...categories: Category[]): void;
+  tracec(msg: () => string, ...categories: Category[]): void;
 
-  debugc(msg:() => string, ...categories: Category[]): void;
+  debugc(msg: () => string, ...categories: Category[]): void;
 
-  infoc(msg:() => string, ...categories: Category[]): void;
+  infoc(msg: () => string, ...categories: Category[]): void;
 
-  warnc(msg:() => string, ...categories: Category[]): void;
+  warnc(msg: () => string, ...categories: Category[]): void;
 
-  errorc(msg:() => string, error:() => Error | null, ...categories: Category[]): void;
+  errorc(msg: () => string, error: () => Error | null, ...categories: Category[]): void;
 
-  fatalc(msg:() => string, error:() => Error | null, ...categories: Category[]): void;
+  fatalc(msg: () => string, error: () => Error | null, ...categories: Category[]): void;
 
   /**
    * This is a special opinionated way to log, that an exception (Error)
@@ -125,8 +127,8 @@ export interface CategoryLogger {
    * @param error Error as closure
    * @param categories Categories to log for
    */
-  resolvedc(msg:() => string, error:() => Error | null, ...categories: Category[]): void;
+  resolvedc(msg: () => string, error: () => Error | null, ...categories: Category[]): void;
 
-  logc(level: LogLevel, msg:() => string, error:() => Error | null, ...categories: Category[]): void;
+  logc(level: LogLevel, msg: () => string, error: () => Error | null, ...categories: Category[]): void;
 
 }

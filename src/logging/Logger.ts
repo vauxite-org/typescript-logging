@@ -42,17 +42,17 @@ export interface Logger {
 
   fatal(msg: string, error?: Error | null): void;
 
-  tracec(msg:() => string, error: ()=>Error | null): void;
+  tracec(msg: () => string, error: () => Error | null): void;
 
-  debugc(msg:() => string, error: ()=>Error | null): void;
+  debugc(msg: () => string, error: () => Error | null): void;
 
-  infoc(msg:() => string, error: ()=>Error | null): void;
+  infoc(msg: () => string, error: () => Error | null): void;
 
-  warnc(msg:() => string, error: ()=>Error | null): void;
+  warnc(msg: () => string, error: () => Error | null): void;
 
-  errorc(msg:() => string, error: ()=>Error | null): void;
+  errorc(msg: () => string, error: () => Error | null): void;
 
-  fatalc(msg:() => string, error: ()=>Error | null): void;
+  fatalc(msg: () => string, error: () => Error | null): void;
 
   isTraceEnabled(): boolean;
 

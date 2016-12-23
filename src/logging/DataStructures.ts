@@ -1,4 +1,3 @@
-
 class LinkedNode<T> {
 
   private _value: T;
@@ -30,14 +29,17 @@ class LinkedNode<T> {
   }
 }
 
+/**
+ * Double linkedlist implementation.
+ */
 export class LinkedList<T> {
 
   private head: LinkedNode<T> | null = null;
   private size: number = 0;
 
-  addHead(value: T): void {
-    if(!this.createHeadIfNeeded(value)) {
-      if(this.head != null) {
+  public addHead(value: T): void {
+    if (!this.createHeadIfNeeded(value)) {
+      if (this.head != null) {
         const nextNode = this.head.next;
         const newHeadNode = new LinkedNode<T>(value);
         if (nextNode != null) {
@@ -53,10 +55,10 @@ export class LinkedList<T> {
     this.size++;
   }
 
-  addTail(value : T): void {
-    if(!this.createHeadIfNeeded(value)) {
+  public addTail(value: T): void {
+    if (!this.createHeadIfNeeded(value)) {
       const oldTailNode = this.getTailNode();
-      if(oldTailNode != null) {
+      if (oldTailNode != null) {
         const newTailNode = new LinkedNode<T>(value);
         oldTailNode.next = newTailNode;
         newTailNode.previous = oldTailNode;
@@ -68,46 +70,46 @@ export class LinkedList<T> {
     this.size++;
   }
 
-  clear() {
+  public clear() {
     this.head = null;
     this.size = 0;
   }
 
-  getHead(): T | null {
-    if(this.head != null) {
+  public getHead(): T | null {
+    if (this.head != null) {
       return this.head.value;
     }
     return null;
   }
 
-  removeHead(): T | null {
-    if(this.head != null) {
+  public removeHead(): T | null {
+    if (this.head != null) {
       const oldHead = this.head;
       const value = oldHead.value;
       this.head = oldHead.next;
-      this.size --;
+      this.size--;
       return value;
     }
     return null;
   }
 
-  getTail(): T | null {
+  public getTail(): T | null {
     const node = this.getTailNode();
-    if(node != null) {
+    if (node != null) {
       return node.value;
     }
     return null;
   }
 
-  removeTail(): T | null {
+  public removeTail(): T | null {
     const node = this.getTailNode();
-    if(node != null) {
-      if(node === this.head) {
+    if (node != null) {
+      if (node === this.head) {
         this.head = null;
       }
       else {
         const previousNode = node.previous;
-        if(previousNode != null) {
+        if (previousNode != null) {
           previousNode.next = null;
         }
         else {
@@ -120,32 +122,32 @@ export class LinkedList<T> {
     return null;
   }
 
-  getSize(): number {
+  public getSize(): number {
     return this.size;
   }
 
-  filter(f: (value: T)=> boolean): T[] {
-    const recurse = (f: (value: T)=> boolean, node: LinkedNode<T>, values: T[]) => {
-      if(f(node.value)) {
+  public filter(f: (value: T) => boolean): T[] {
+    const recurse = (fn: (value: T) => boolean, node: LinkedNode<T>, values: T[]) => {
+      if (fn(node.value)) {
         values.push(node.value);
       }
 
       const nextNode = node.next;
-      if(nextNode != null) {
-        recurse(f, nextNode, values);
+      if (nextNode != null) {
+        recurse(fn, nextNode, values);
       }
     };
 
     const result: T[] = [];
     const node = this.head;
-    if(node != null) {
+    if (node != null) {
       recurse(f, node, result);
     }
     return result;
   }
 
   private createHeadIfNeeded(value: T): boolean {
-    if(this.head == null) {
+    if (this.head == null) {
       this.head = new LinkedNode(value);
       return true;
     }
@@ -153,12 +155,12 @@ export class LinkedList<T> {
   }
 
   private getTailNode(): LinkedNode<T> | null {
-    if(this.head == null) {
+    if (this.head == null) {
       return null;
     }
 
     let node = this.head;
-    while(node.next != null) {
+    while (node.next != null) {
       node = node.next;
     }
 
@@ -166,77 +168,82 @@ export class LinkedList<T> {
   }
 }
 
+/**
+ * Map implementation keyed by string (always). Note that the get/remove return either value or null.
+ * This map does not support undefined in any fasion (on purpose).
+ */
 export class SimpleMap<V> {
 
-  private array: { [key: string]: V | null } = {};
+  private array: {[key: string]: V | null} = {};
 
-  put(key: string, value: V | null): void {
-    if(value === undefined) {
+  public put(key: string, value: V | null): void {
+    if (value === undefined) {
       throw new Error("Undefined value is not allowed, null is.");
     }
     this.array[key] = value;
   }
 
-  get(key: string): V | null {
+  public get(key: string): V | null {
     const value = this.array[key];
-    if(value !== undefined) {
+    if (value !== undefined) {
       return value;
     }
     return null;
   }
 
-  exists(key: string): boolean {
+  public exists(key: string): boolean {
     const value = this.array[key];
     return value !== undefined;
 
   }
 
-  remove(key: string): V | null {
+  public remove(key: string): V | null {
     const value = this.array[key];
-    if(value !== undefined) {
+    if (value !== undefined) {
       delete this.array[key];
     }
     return value;
   }
 
-  keys(): string[] {
+  public keys(): string[] {
     const keys: string[] = [];
-    for(let key in this.array) {
+    for (let key in this.array) {
       // To prevent random stuff to appear
-      if(this.array.hasOwnProperty(key)) {
+      if (this.array.hasOwnProperty(key)) {
         keys.push(key);
       }
     }
     return keys;
   }
 
-  values(): (V | null)[] {
-    const values: (V | null)[] = [];
-    for(let key in this.array) {
+  public values(): Array<V | null> {
+    const values: Array<V | null> = [];
+    for (let key in this.array) {
       // To prevent random stuff to appear
-      if(this.array.hasOwnProperty(key)) {
+      if (this.array.hasOwnProperty(key)) {
         values.push(this.get(key));
       }
     }
     return values;
   }
 
-  size(): number {
-    // Todo improve...
+  public size(): number {
     return this.keys().length;
   }
 
-  isEmpty(): boolean {
-    return this.size() == 0;
+  public isEmpty(): boolean {
+    return this.size() === 0;
   }
 
-  clear(): void {
+  public clear(): void {
     this.array = {};
   }
 }
 
-
-export class TuplePair<X,Y> {
+/**
+ * Tuple to hold two values.
+ */
+export class TuplePair<X, Y> {
 
   private _x: X;
   private _y: Y;
@@ -263,34 +270,35 @@ export class TuplePair<X,Y> {
   }
 }
 
-
-
+/**
+ * Utility class to build up a string.
+ */
 export class StringBuilder {
 
   private data: string[] = [];
 
-  append(line : string): StringBuilder {
-    if(line === undefined || line == null) {
+  public append(line: string): StringBuilder {
+    if (line === undefined || line == null) {
       throw new Error("String must be set, cannot append null or undefined");
     }
     this.data.push(line);
     return this;
   }
 
-  appendLine(line: string): StringBuilder {
+  public appendLine(line: string): StringBuilder {
     this.data.push(line + "\n");
     return this;
   }
 
-  isEmpty(): boolean {
-    return this.data.length == 0;
+  public isEmpty(): boolean {
+    return this.data.length === 0;
   }
 
-  clear(): void {
+  public clear(): void {
     this.data = [];
   }
 
-  toString(separator: string = ""): string {
+  public toString(separator: string = ""): string {
     return this.data.join(separator);
   }
 }

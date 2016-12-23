@@ -1,11 +1,11 @@
-import {LogLevel, LoggerType, CategoryLogFormat} from "./LoggerOptions";
-import {SimpleMap, TuplePair} from "./DataStructures";
-import {Category, CategoryLogger} from "./CategoryLogger";
 import {CategoryConsoleLoggerImpl} from "./CategoryConsoleLoggerImpl";
-import {CategoryMessageBufferLoggerImpl} from "./CategoryMessageBufferImpl";
 import {CategoryDelegateLoggerImpl} from "./CategoryDelegateLoggerImpl";
-import {ExtensionHelper} from "./ExtensionHelper";
 import {CategoryExtensionLoggerImpl} from "./CategoryExtensionLoggerImpl";
+import {Category, CategoryLogger} from "./CategoryLogger";
+import {CategoryMessageBufferLoggerImpl} from "./CategoryMessageBufferImpl";
+import {SimpleMap, TuplePair} from "./DataStructures";
+import {ExtensionHelper} from "./ExtensionHelper";
+import {CategoryLogFormat, LoggerType, LogLevel} from "./LoggerOptions";
 
 /**
  * RuntimeSettings for a category, at runtime these are associated to a category.
@@ -19,7 +19,9 @@ export class CategoryRuntimeSettings {
 
   private _callBackLogger: ((rootCategory: Category, runtimeSettings: RuntimeSettings) => CategoryLogger) | null;
 
-  constructor(category: Category, logLevel: LogLevel = LogLevel.Error, loggerType: LoggerType = LoggerType.Console, logFormat: CategoryLogFormat = new CategoryLogFormat(), callBackLogger: ((rootCategory: Category, runtimeSettings: RuntimeSettings)=>CategoryLogger) | null = null) {
+  constructor(category: Category, logLevel: LogLevel = LogLevel.Error, loggerType: LoggerType = LoggerType.Console,
+              logFormat: CategoryLogFormat = new CategoryLogFormat(),
+              callBackLogger: ((rootCategory: Category, runtimeSettings: RuntimeSettings) => CategoryLogger) | null = null) {
     this._category = category;
     this._logLevel = logLevel;
     this._loggerType = loggerType;
@@ -69,10 +71,14 @@ export class CategoryRuntimeSettings {
  */
 export interface RuntimeSettings {
 
+  /**
+   * Get the runtimesettings for given category
+   * @param category
+   * @return {Category} Category or null
+   */
   getCategorySettings(category: Category): CategoryRuntimeSettings | null;
 
 }
-
 
 /**
  * Default configuration, can be used to initially set a different default configuration
@@ -87,13 +93,15 @@ export class CategoryDefaultConfiguration {
 
   private _callBackLogger: ((rootCategory: Category, runtimeSettings: RuntimeSettings) => CategoryLogger) | null;
 
-  constructor(logLevel: LogLevel = LogLevel.Error, loggerType: LoggerType = LoggerType.Console, logFormat: CategoryLogFormat = new CategoryLogFormat(), callBackLogger: ((rootCategory: Category, runtimeSettings: RuntimeSettings) => CategoryLogger) | null = null) {
+  constructor(logLevel: LogLevel = LogLevel.Error, loggerType: LoggerType = LoggerType.Console,
+              logFormat: CategoryLogFormat = new CategoryLogFormat(),
+              callBackLogger: ((rootCategory: Category, runtimeSettings: RuntimeSettings) => CategoryLogger) | null = null) {
     this._logLevel = logLevel;
     this._loggerType = loggerType;
     this._logFormat = logFormat;
     this._callBackLogger = callBackLogger;
 
-    if(this._loggerType == LoggerType.Custom && this.callBackLogger == null) {
+    if (this._loggerType === LoggerType.Custom && this.callBackLogger == null) {
       throw new Error("If you specify loggerType to be Custom, you must provide the callBackLogger argument");
     }
   }
@@ -134,25 +142,24 @@ export class CategoryServiceImpl implements RuntimeSettings {
   private categoryRuntimeSettings: SimpleMap<CategoryRuntimeSettings> = new SimpleMap<CategoryRuntimeSettings>();
 
   // Key is name of root logger.
-  private rootLoggers: SimpleMap<TuplePair<Category,CategoryLogger>> = new SimpleMap<TuplePair<Category,CategoryLogger>>();
+  private rootLoggers: SimpleMap<TuplePair<Category, CategoryLogger>> = new SimpleMap<TuplePair<Category, CategoryLogger>>();
 
-  private constructor()
-  {
+  private constructor() {
     // Allow extensions to talk with us.
     ExtensionHelper.register();
   }
 
-  static getInstance(): CategoryServiceImpl {
+  public static getInstance(): CategoryServiceImpl {
     return CategoryServiceImpl.INSTANCE;
   }
 
-  getLogger(root: Category): CategoryLogger {
-    if(!this.rootCategoryExists(root)) {
+  public getLogger(root: Category): CategoryLogger {
+    if (!this.rootCategoryExists(root)) {
       throw new Error("Given category " + root.name + " is not registered as a root category. You must use the root category to retrieve a logger.");
     }
 
     let pair = this.rootLoggers.get(root.name);
-    if(pair != null) {
+    if (pair != null) {
       return pair.y;
     }
 
@@ -166,14 +173,14 @@ export class CategoryServiceImpl implements RuntimeSettings {
    * Clears everything, including a default configuration you may have set.
    * After this you need to re-register your categories etc.
    */
-  clear(): void {
+  public clear(): void {
     this.rootCategories = [];
     this.categoryRuntimeSettings.clear();
     this.rootLoggers.clear();
     this.setDefaultConfiguration(new CategoryDefaultConfiguration());
   }
 
-  getCategorySettings(category: Category): CategoryRuntimeSettings | null {
+  public getCategorySettings(category: Category): CategoryRuntimeSettings | null {
     return this.categoryRuntimeSettings.get(category.getCategoryPath());
   }
 
@@ -185,16 +192,17 @@ export class CategoryServiceImpl implements RuntimeSettings {
    * @param config
    * @param reset
    */
-  setDefaultConfiguration(config: CategoryDefaultConfiguration, reset: boolean = false): void {
+  public setDefaultConfiguration(config: CategoryDefaultConfiguration, reset: boolean = false): void {
     this.defaultConfig = config;
-    if(reset) {
+    if (reset) {
       // Reset all runtimesettings (this will reset it for roots & children all at once).
       const newRuntimeSettings: SimpleMap<CategoryRuntimeSettings> = new SimpleMap<CategoryRuntimeSettings>();
 
       this.categoryRuntimeSettings.keys().forEach((key: string) => {
         const setting = this.categoryRuntimeSettings.get(key);
-        if(setting != null) {
-          const settings = new CategoryRuntimeSettings(setting.category, this.defaultConfig.logLevel, this.defaultConfig.loggerType, this.defaultConfig.logFormat, this.defaultConfig.callBackLogger);
+        if (setting != null) {
+          const settings = new CategoryRuntimeSettings(setting.category, this.defaultConfig.logLevel,
+            this.defaultConfig.loggerType, this.defaultConfig.logFormat, this.defaultConfig.callBackLogger);
           newRuntimeSettings.put(key, settings);
         }
         else {
@@ -207,23 +215,23 @@ export class CategoryServiceImpl implements RuntimeSettings {
 
       // Now initialize a new logger and put it on the delegate. Loggers we give out
       // are guaranteed to be wrapped inside the delegate logger.
-      this.rootLoggers.values().forEach((pair: TuplePair<Category,CategoryLogger>) => {
+      this.rootLoggers.values().forEach((pair: TuplePair<Category, CategoryLogger>) => {
         // Set the new logger type
-        (<CategoryDelegateLoggerImpl>pair.y).delegate = this.createRootLogger(pair.x);
+        (<CategoryDelegateLoggerImpl> pair.y).delegate = this.createRootLogger(pair.x);
 
       });
     }
   }
 
-  registerCategory(category: Category): void {
-    if(category == null || category === undefined) {
+  public registerCategory(category: Category): void {
+    if (category == null || category === undefined) {
       throw new Error("Category CANNOT be null");
     }
     const parent = category.parent;
-    if(parent == null) {
+    if (parent == null) {
       // Register the root category
-      for (let i = 0; i < this.rootCategories.length; i++) {
-        if (this.rootCategories[i].name === category.name) {
+      for (const rootCategory of this.rootCategories) {
+        if (rootCategory.name === category.name) {
           throw new Error("Cannot add this rootCategory with name: " + category.name + ", another root category is already registered with that name.");
         }
       }
@@ -236,13 +244,15 @@ export class CategoryServiceImpl implements RuntimeSettings {
    * Used to enable integration with chrome extension. Do not use manually, the
    * extension and the logger framework deal with this.
    */
-  enableExtensionIntegration(): void {
-    this.rootLoggers.values().forEach((pair: TuplePair<Category,CategoryLogger>) => {
+  public enableExtensionIntegration(): void {
+    this.rootLoggers.values().forEach((pair: TuplePair<Category, CategoryLogger>) => {
       // Set the new logger type if needed.
-      const delegateLogger = <CategoryDelegateLoggerImpl>pair.y;
-      if(!(delegateLogger instanceof CategoryExtensionLoggerImpl)) {
+      const delegateLogger = <CategoryDelegateLoggerImpl> pair.y;
+      if (!(delegateLogger instanceof CategoryExtensionLoggerImpl)) {
+        /* tslint:disable:no-console */
         console.log("Reconfiguring root logger for root category: " + pair.x.name);
-        (<CategoryDelegateLoggerImpl>pair.y).delegate = new CategoryExtensionLoggerImpl(pair.x, this);
+        /* tslint:enable:no-console */
+        (<CategoryDelegateLoggerImpl> pair.y).delegate = new CategoryExtensionLoggerImpl(pair.x, this);
       }
     });
   }
@@ -250,7 +260,7 @@ export class CategoryServiceImpl implements RuntimeSettings {
   /**
    * Return all root categories currently registered.
    */
-  getRootCategories(): Category[] {
+  public getRootCategories(): Category[] {
     return this.rootCategories.slice(0);
   }
 
@@ -259,9 +269,10 @@ export class CategoryServiceImpl implements RuntimeSettings {
    * @param id The id of the category to find
    * @returns {Category} or null if not found
    */
-  getCategoryById(id: number): Category | null {
-    const result = this.categoryRuntimeSettings.values().filter((cat: CategoryRuntimeSettings) => cat.category.id == id).map((cat: CategoryRuntimeSettings) => cat.category);
-    if(result.length == 1) {
+  public getCategoryById(id: number): Category | null {
+    const result = this.categoryRuntimeSettings.values().filter((cat: CategoryRuntimeSettings) => cat.category.id === id)
+      .map((cat: CategoryRuntimeSettings) => cat.category);
+    if (result.length === 1) {
       return result[0];
     }
     return null;
@@ -269,41 +280,43 @@ export class CategoryServiceImpl implements RuntimeSettings {
 
   private initializeRuntimeSettingsForCategory(category: Category): void {
     let settings = this.categoryRuntimeSettings.get(category.getCategoryPath());
-    if(settings != null) {
+    if (settings != null) {
       throw new Error("Category with path: " + category.getCategoryPath() + " is already registered?");
     }
 
     // Passing the callback is not really needed for child categories, but don't really care.
-    settings = new CategoryRuntimeSettings(category, this.defaultConfig.logLevel, this.defaultConfig.loggerType, this.defaultConfig.logFormat, this.defaultConfig.callBackLogger);
+    settings = new CategoryRuntimeSettings(category, this.defaultConfig.logLevel, this.defaultConfig.loggerType,
+      this.defaultConfig.logFormat, this.defaultConfig.callBackLogger
+    );
     this.categoryRuntimeSettings.put(category.getCategoryPath(), settings);
   }
 
   private rootCategoryExists(rootCategory: Category): boolean {
-    if(rootCategory == null || rootCategory === undefined) {
+    if (rootCategory == null || rootCategory === undefined) {
       throw new Error("Root category CANNOT be null");
     }
 
     const parent = rootCategory.parent;
-    if(parent != null) {
+    if (parent != null) {
       throw new Error("Parent must be null for a root category");
     }
 
-    return this.rootCategories.indexOf(rootCategory) != -1;
+    return this.rootCategories.indexOf(rootCategory) !== -1;
   }
 
   private createRootLogger(category: Category): CategoryLogger {
     // Default is always a console logger
-    switch(this.defaultConfig.loggerType) {
+    switch (this.defaultConfig.loggerType) {
       case LoggerType.Console:
         return new CategoryConsoleLoggerImpl(category, this);
       case LoggerType.MessageBuffer:
         return new CategoryMessageBufferLoggerImpl(category, this);
       case LoggerType.Custom:
-        if(this.defaultConfig.callBackLogger == null) {
+        if (this.defaultConfig.callBackLogger == null) {
           throw new Error("Cannot create custom logger, custom callback is null");
         }
         else {
-          return this.defaultConfig.callBackLogger(category, this)
+          return this.defaultConfig.callBackLogger(category, this);
         }
       default:
         throw new Error("Cannot create a Logger for LoggerType: " + this.defaultConfig.loggerType);
@@ -322,10 +335,10 @@ export class CategoryServiceImpl implements RuntimeSettings {
  */
 export class CategoryServiceFactory {
 
-  private constructor()
-  {
+  private constructor() {
     // Private constructor.
   }
+
   /**
    * Return a CategoryLogger for given ROOT category (thus has no parent).
    * You can only retrieve loggers for their root, when logging
@@ -333,7 +346,7 @@ export class CategoryServiceFactory {
    * @param root Category root (has no parent)
    * @returns {CategoryLogger}
    */
-  static getLogger(root: Category): CategoryLogger {
+  public static getLogger(root: Category): CategoryLogger {
     return CategoryServiceImpl.getInstance().getLogger(root);
   }
 
@@ -341,7 +354,7 @@ export class CategoryServiceFactory {
    * Clears everything, any registered (root)categories and loggers
    * are discarded. Resets to default configuration.
    */
-  static clear() {
+  public static clear() {
     return CategoryServiceImpl.getInstance().clear();
   }
 
@@ -353,7 +366,7 @@ export class CategoryServiceFactory {
    * @param config The new default configuration
    * @param reset If true, will reset *all* runtimesettings for all loggers/categories to these.
    */
-  static setDefaultConfiguration(config: CategoryDefaultConfiguration, reset: boolean = false): void {
+  public static setDefaultConfiguration(config: CategoryDefaultConfiguration, reset: boolean = false): void {
     CategoryServiceImpl.getInstance().setDefaultConfiguration(config, reset);
   }
 
@@ -362,8 +375,7 @@ export class CategoryServiceFactory {
    * RuntimeSettings for categories.
    * @returns {RuntimeSettings}
    */
-  static getRuntimeSettings(): RuntimeSettings {
+  public static getRuntimeSettings(): RuntimeSettings {
     return CategoryServiceImpl.getInstance();
   }
 }
-

@@ -9,18 +9,18 @@ export class CategoryMessageBufferLoggerImpl extends AbstractCategoryLogger {
 
   private messages: string[] = [];
 
-  protected doLog(msg: CategoryLogMessage): void {
-    const fullMsg = this.createDefaultLogMessage(msg);
-    this.messages.push(fullMsg);
-  }
-
-  getMessages(): string[] {
+  public getMessages(): string[] {
     return this.messages;
   }
 
-  toString(): string {
-    return this.messages.map(msg => {
+  public toString(): string {
+    return this.messages.map((msg: string) => {
       return msg;
     }).join("\n");
+  }
+
+  protected doLog(msg: CategoryLogMessage): void {
+    const fullMsg = this.createDefaultLogMessage(msg);
+    this.messages.push(fullMsg);
   }
 }
