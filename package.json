@@ -7,7 +7,7 @@
     "test": "tsc -p tsconfig-test.json && jasmine-node --verbose ./dist-test/spec",
     "tslint": "tslint -c tslint.json -p tsconfig.json src/logging/**",
     "build": "tsc && npm run tslint && webpack --config webpack.config.bundle.js && webpack --config webpack.config.bundle-min.js",
-    "docs": "typedoc --tsconfig tsconfig-docs.json --excludeNotExported --excludePrivate --mode modules --out dist/bundle/docs/api src/logging/typescript-logging.ts && github-markdown docs/latest.md --flavor gfm --title 'TypeScript logging documentation' > dist/bundle/docs/index.html",
+    "docs": "typedoc --tsconfig tsconfig-docs.json --excludeNotExported --excludePrivate --mode modules --out dist/bundle/docs/api src/logging/typescript-logging.ts && github-markdown docs/latest.md --flavor gfm --title 'TypeScript logging documentation' > dist/bundle/docs/index.html && node scripts/process-docs.js dist/bundle",
     "release": "npm run build && npm run test && npm run docs"
   },
   "repository": {
@@ -28,6 +28,7 @@
   },
   "homepage": "https://github.com/mreuvers/typescript-logging#readme",
   "devDependencies": {
+    "archiver": "1.3.0",
     "jasmine": "2.5.2",
     "jasmine-node": "1.14.5",
     "markdown-to-html": "0.0.13",

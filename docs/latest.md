@@ -78,3 +78,8 @@ Output:
 ~~~
 
 ## Api
+
+The full typescript API can be found in the downloads part of github as a .zip file. Download and extract the zip and open the relevant index.html,
+it also contains a copy of this file as html.
+
+You can download both bundles and documentation from here: [Documentation](https://github.com/mreuvers/typescript-logging/tree/master/downloads/bundle/latest)

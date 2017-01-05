@@ -1,7 +1,9 @@
 .idea
+docs
+downloads
 node_modules
 npm-debug.log
+scripts
 spec
-downloads
 # Dist is what we publish so won't ignore for npm
 dist-test
