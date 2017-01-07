@@ -14,6 +14,8 @@ npm install --save typescript-logging
 ~~~
 No additional typings are required, these are included.
 
+Requires typescript 2.1.1+ (tested).
+
 Or download the (minified) javascript bundle and documentation from [here](https://github.com/mreuvers/typescript-logging/tree/master/downloads/bundle/latest).
 
 ## Usage
@@ -104,7 +106,10 @@ If you add/change new functionality and want it merged to master, please open a 
 Some things may not fit the library and could be rejected, so if you are unsure please ask first before wasting your valuable time.
 
 ## History
-* 0.2.0-beta1 (current release)
+* 0.2.0-beta2 (current release)
+  * Fix missing optionals in Logger interface
+  * Hopefully fix @node reference declaration issues by adding typings (compile would fail, feels like a TS bug but not sure).
+* 0.2.0-beta1
   * Categorized logging (new feature)
   * Categorized logging supports chrome developer extension
   * Updated and split documentation (pre 0.2 and latest)

@@ -25,9 +25,9 @@ class CustomLoggerImpl extends AbstractLogger {
 
 describe("Loggers", () => {
 
-  it("Default logs",() => {
+  it("Default logs", () => {
 
-    const loggerFactory = LFService.createLoggerFactory(new LoggerFactoryOptions().addLogGroupRule(new LogGroupRule(new RegExp("Hello.+"),LogLevel.Info, new LogFormat(), LoggerType.MessageBuffer)));
+    const loggerFactory = LFService.createLoggerFactory(new LoggerFactoryOptions().addLogGroupRule(new LogGroupRule(new RegExp("Hello.+"), LogLevel.Info, new LogFormat(), LoggerType.MessageBuffer)));
     const tmpLogger = loggerFactory.getLogger("Hello1");
 
     expect(tmpLogger instanceof MessageBufferLoggerImpl).toBeTruthy();
@@ -60,7 +60,7 @@ describe("Loggers", () => {
   });
 
   it("Can use custom logger", () => {
-    const loggerOptions = new LoggerFactoryOptions().addLogGroupRule(new LogGroupRule(new RegExp("Hello.+"),LogLevel.Info, new LogFormat(), LoggerType.Custom,
+    const loggerOptions = new LoggerFactoryOptions().addLogGroupRule(new LogGroupRule(new RegExp("Hello.+"), LogLevel.Info, new LogFormat(), LoggerType.Custom,
       (name: string, logGroupRule: LogGroupRule) => new CustomLoggerImpl(name, logGroupRule)
     ));
 
@@ -88,7 +88,7 @@ describe("Loggers", () => {
   });
 
   it("Can use closures for logging", () => {
-    const loggerFactory = LFService.createLoggerFactory(new LoggerFactoryOptions().addLogGroupRule(new LogGroupRule(new RegExp(".+"),LogLevel.Info, new LogFormat(), LoggerType.MessageBuffer)));
+    const loggerFactory = LFService.createLoggerFactory(new LoggerFactoryOptions().addLogGroupRule(new LogGroupRule(new RegExp(".+"), LogLevel.Info, new LogFormat(), LoggerType.MessageBuffer)));
     const logger = <MessageBufferLoggerImpl>loggerFactory.getLogger("ABC");
 
     logger.infoc(() => "Hello");
@@ -109,7 +109,7 @@ describe("Loggers", () => {
   });
 
   it("Will log in order", () => {
-    const loggerFactory = LFService.createLoggerFactory(new LoggerFactoryOptions().addLogGroupRule(new LogGroupRule(new RegExp(".+"),LogLevel.Info, new LogFormat(), LoggerType.MessageBuffer)));
+    const loggerFactory = LFService.createLoggerFactory(new LoggerFactoryOptions().addLogGroupRule(new LogGroupRule(new RegExp(".+"), LogLevel.Info, new LogFormat(), LoggerType.MessageBuffer)));
     const logger = <MessageBufferLoggerImpl>loggerFactory.getLogger("ABC");
     logger.info("First");
     logger.info("Second", new Error("fail"));
