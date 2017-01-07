@@ -2,6 +2,8 @@
 
 Documentation matching 0.1.3 (stable version). Contains examples, and API.
 
+**Note**: _This api is NOT supported by the browser extension, please use categorized logging for that instead (see main page)._
+
 ## Examples
 
 Below follow a few examples on how to use the library in typescript.
@@ -84,6 +86,8 @@ All classes can be imported from "typescript-logging".
 
 This describes the more often used part of the typescript API. Keep in mind the javascript API is exactly the same (except you need to call things the javascript way).
 Finally it's recommended to just look in the relevant classes as they contain the most up to date documentation.
+
+The latest documentation also contains the classes below: Download [Documentation](https://github.com/mreuvers/typescript-logging/tree/master/downloads/bundle/latest).
 
 ### LFService
 

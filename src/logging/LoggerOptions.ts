@@ -95,9 +95,9 @@ export class DateFormat {
   private _dateSeparator: string;
 
   /**
-   * Constructor, can be called empty as it uses defaults.
-   * @param formatEnum DateFormatEnum
-   * @param dateSeparator Separator used between dates
+   * Constructor to define the dateformat used for logging, can be called empty as it uses defaults.
+   * @param formatEnum DateFormatEnum, use one of the constants from the enum. Defaults to DateFormatEnum.Default
+   * @param dateSeparator Separator used between dates, defaults to -
    */
   constructor(formatEnum: DateFormatEnum = DateFormatEnum.Default, dateSeparator: string = "-") {
     this._formatEnum = formatEnum;
@@ -156,6 +156,12 @@ export class CategoryLogFormat {
   private _showTimeStamp: boolean;
   private _showCategoryName: boolean;
 
+  /**
+   * Create an instance defining the category log format used.
+   * @param dateFormat Date format (uses default), for details see DateFormat class.
+   * @param showTimeStamp True to show timestamp in the logging, defaults to true.
+   * @param showCategoryName True to show category name in the logging, defaults to true.
+   */
   constructor(dateFormat: DateFormat = new DateFormat(), showTimeStamp: boolean = true, showCategoryName: boolean = true) {
     this._dateFormat = dateFormat;
     this._showTimeStamp = showTimeStamp;

@@ -93,6 +93,14 @@ export class CategoryDefaultConfiguration {
 
   private _callBackLogger: ((rootCategory: Category, runtimeSettings: RuntimeSettings) => CategoryLogger) | null;
 
+  /**
+   * Create a new instance
+   * @param logLevel Log level for all loggers, default is LogLevel.Error
+   * @param loggerType Where to log, default is LoggerType.Console
+   * @param logFormat What logging format to use, use default instance, for default values see CategoryLogFormat.
+   * @param callBackLogger Optional callback, if LoggerType.Custom is used as loggerType. In that case must return a new Logger instance.
+   *            It is recommended to extend AbstractCategoryLogger to make your custom logger.
+   */
   constructor(logLevel: LogLevel = LogLevel.Error, loggerType: LoggerType = LoggerType.Console,
               logFormat: CategoryLogFormat = new CategoryLogFormat(),
               callBackLogger: ((rootCategory: Category, runtimeSettings: RuntimeSettings) => CategoryLogger) | null = null) {
@@ -101,7 +109,7 @@ export class CategoryDefaultConfiguration {
     this._logFormat = logFormat;
     this._callBackLogger = callBackLogger;
 
-    if (this._loggerType === LoggerType.Custom && this.callBackLogger == null) {
+    if (this._loggerType === LoggerType.Custom && this.callBackLogger === null) {
       throw new Error("If you specify loggerType to be Custom, you must provide the callBackLogger argument");
     }
   }
@@ -332,6 +340,7 @@ export class CategoryServiceImpl implements RuntimeSettings {
  * For the standard way of logging like most frameworks do these days, use LFService instead.
  * If you want fine grained control to divide sections of your application in
  * logical units to enable/disable logging for, this is the service you want to use instead.
+ * Also for this type a browser plugin will be available.
  */
 export class CategoryServiceFactory {
 
