@@ -14,6 +14,8 @@ npm install --save typescript-logging
 ~~~
 No additional typings are required, these are included.
 
+Or download the (minified) javascript bundle and documentation from [here](https://github.com/mreuvers/typescript-logging/tree/master/downloads/bundle/latest).
+
 ## Usage
 
 This provides a quick example based on the new way of logging (0.2.0+), please check the documentation section for full documentation for both the latest and previous version.
@@ -102,7 +104,7 @@ If you add/change new functionality and want it merged to master, please open a 
 Some things may not fit the library and could be rejected, so if you are unsure please ask first before wasting your valuable time.
 
 ## History
-* 0.2.0-beta1 New release
+* 0.2.0-beta1 (current release)
   * Categorized logging (new feature)
   * Categorized logging supports chrome developer extension
   * Updated and split documentation (pre 0.2 and latest)
