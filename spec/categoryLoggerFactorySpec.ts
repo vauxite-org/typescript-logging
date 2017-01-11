@@ -1,7 +1,11 @@
 import {Category, CategoryLogger} from "../src/logging/CategoryLogger";
-import {CategoryServiceFactory, CategoryRuntimeSettings, CategoryDefaultConfiguration} from "../src/logging/CategoryService";
+import {
+  CategoryServiceFactory, CategoryRuntimeSettings, CategoryDefaultConfiguration,
+  RuntimeSettings
+} from "../src/logging/CategoryService";
 import {CategoryDelegateLoggerImpl} from "../src/logging/CategoryDelegateLoggerImpl";
 import {LoggerType, DateFormatEnum, LogLevel, CategoryLogFormat, DateFormat} from "../src/logging/LoggerOptions";
+import {AbstractCategoryLogger, CategoryLogMessage} from "../src/logging/AbstractCategoryLogger";
 
 
 describe("Categories", () => {
@@ -145,7 +149,7 @@ describe("CategoryServiceFactory", () => {
       expect(settings.loggerType === LoggerType.MessageBuffer).toBeTruthy();
       expect(settings.logFormat.showCategoryName).toBeFalsy();
       expect(settings.logFormat.showTimeStamp).toBeFalsy();
-      expect(settings.logFormat.dateFormat.dateSeparator).toEqual('/');
+      expect(settings.logFormat.dateFormat.dateSeparator).toEqual("/");
       expect(settings.logFormat.dateFormat.formatEnum === DateFormatEnum.YearDayMonthWithFullTime).toBeTruthy();
       expect(settings.logLevel === LogLevel.Info).toBeTruthy();
       expect(settings.callBackLogger).toBeNull();
@@ -182,4 +186,32 @@ describe("CategoryServiceFactory", () => {
     checkChangedConfig(anotherChild, CategoryServiceFactory.getRuntimeSettings().getCategorySettings(anotherChild));
   });
 
+  class CustomLogger extends AbstractCategoryLogger {
+
+    private messages: string[] = [];
+
+    constructor(rootCategory: Category, runtimeSettings: RuntimeSettings, messages: string[]) {
+      super(rootCategory, runtimeSettings);
+      this.messages = messages;
+    }
+
+    protected doLog(msg: CategoryLogMessage): void {
+      this.messages.push(msg.getMessage());
+    }
+  }
+
+  it("Can use a custom logger", () => {
+    checkDefaultConfig(root1, CategoryServiceFactory.getRuntimeSettings().getCategorySettings(root1));
+
+    const messages: string[] = [];
+    const configChanged = new CategoryDefaultConfiguration(
+       LogLevel.Info, LoggerType.Custom, new CategoryLogFormat(),
+      (rootCategory: Category, runtimeSettings: RuntimeSettings) => new CustomLogger(rootCategory, runtimeSettings, messages)
+    );
+    CategoryServiceFactory.setDefaultConfiguration(configChanged, true);
+    const rootLogger = CategoryServiceFactory.getLogger(root1);
+    rootLogger.info("First Message");
+    rootLogger.info("Second Message");
+    expect(messages).toEqual(["First Message", "Second Message"]);
+  });
 });

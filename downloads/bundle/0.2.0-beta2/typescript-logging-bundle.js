@@ -72,7 +72,6 @@ var TSL =
 	exports.ConsoleLoggerImpl = LoggerImpl_1.ConsoleLoggerImpl;
 	exports.MessageBufferLoggerImpl = LoggerImpl_1.MessageBufferLoggerImpl;
 	var LoggerOptions_1 = __webpack_require__(3);
-	exports.CategoryLogFormat = LoggerOptions_1.CategoryLogFormat;
 	exports.DateFormat = LoggerOptions_1.DateFormat;
 	exports.DateFormatEnum = LoggerOptions_1.DateFormatEnum;
 	exports.LogFormat = LoggerOptions_1.LogFormat;

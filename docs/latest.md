@@ -101,7 +101,63 @@ Output (we assume we called the methods createProduct("Beer") and processMoney()
 2016-12-22 11:14:26,276 INFO [financial] Log to the new category
 ~~~
 
-## Api
+## Custom logger
+
+By default logging will go the console. In some cases you may want to use a custom logger which either logs differently or logs elsewhere.
+The example below shows how to do this.
+
+CustomLogger.ts
+~~~
+import {AbstractCategoryLogger,Category,CategoryLogMessage,RuntimeSettings} from "typescript-logging";
+
+export class CustomLogger extends AbstractCategoryLogger {
+
+  private messages: string[] = [];
+
+  // The first two parameters are required, the 3rd one is an example parameter
+  // where we give this logger an array and log all messages to that array.
+  constructor(rootCategory: Category, runtimeSettings: RuntimeSettings, messages: string[]) {
+    super(rootCategory, runtimeSettings);
+    this.messages = messages;
+  }
+
+  // This is the only thing you really need to implement. In this case
+  // we just write the complete message to the array.
+  protected doLog(msg: CategoryLogMessage): void {
+    // Note: we use createDefaultLogMessage() to spit it out formatted and all
+    // however you're free to print in any way you like, the data is all
+    // present on the message.
+    this.messages.push(this.createDefaultLogMessage(msg));
+  }
+}
+~~~
+The code above shows how to create a CustomLogger, the easiest way is to extend AbstractCategoryLogger. If you really
+want to implement everything yourself you could implement CategoryLogger instead (note this is quite some work).
+
+Config.ts
+~~~
+import {Category,CategoryLogFormat,CategoryServiceFactory,CategoryDefaultConfiguration,LoggerType,LogLevel,RuntimeSettings} from "typescript-logging";
+import {CustomLogger} from "./CustomLogger"
+
+export const catRoot = new Category("service");
+const messages: string[] = [];
+
+// Configure to use our custom logger, note the callback which returns our CustomLogger from above.
+const config = new CategoryDefaultConfiguration(
+   LogLevel.Info, LoggerType.Custom, new CategoryLogFormat(),
+  (rootCategory: Category, runtimeSettings: RuntimeSettings) => new CustomLogger(rootCategory, runtimeSettings, messages)
+);
+CategoryServiceFactory.setDefaultConfiguration(config);
+
+export const log = CategoryServiceFactory.getLogger(catRoot);
+~~~
+The config above modifies the configuration and makes sure that we use our CustomLogger for logging.
+If you'd log using the logger, e.g. log.info("Hello"). The formatted message in this example would end up in the array "messages" from above.
+Obviously you can do whatever you need to do in the CustomLogger.
+
+That's all there is to it to make a custom logger. :)
+
+## Api and documentation
 
 The full typescript API can be found in the downloads part of github as a .zip file. Download and extract the zip and open the relevant index.html,
 it also contains a copy of this file as html.
@@ -111,5 +167,9 @@ You can download both bundles and documentation from here: [Documentation](https
 **Changing default configuration** can be done through CategoryServiceFactory.setDefaultConfiguration(..). Check the documentation for details,
 as each class is documented on how to be used.
 
-**Changing log levels dynamically** when an app runs, you can use the browser plugin, see: [typescript-logging-extension](https://github.com/mreuvers/typescript-logging-extension) for details.
+**Changing log levels dynamically** when an app runs, you can use the developer extension, see: [typescript-logging-extension](https://github.com/mreuvers/typescript-logging-extension) for details.
 In a future release a console api will be provided as well, to support similar options like the plugin does.
+
+## Browser developer extension
+
+Make sure to visit: [typescript-logging-extension](https://github.com/mreuvers/typescript-logging-extension) to get the chrome developer extension, which allows you to dynamically change log levels when the app runs.
