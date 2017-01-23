@@ -197,8 +197,8 @@ export class CategoryServiceImpl implements RuntimeSettings {
    * applied. If you want to reset all current loggers to have this
    * applied as well, pass in reset=true (the default is false). All
    * categories will be reset then as well.
-   * @param config
-   * @param reset
+   * @param config New config
+   * @param reset Defaults to false. Set to true to reset all loggers and current runtimesettings.
    */
   public setDefaultConfiguration(config: CategoryDefaultConfiguration, reset: boolean = false): void {
     this.defaultConfig = config;
@@ -226,8 +226,40 @@ export class CategoryServiceImpl implements RuntimeSettings {
       this.rootLoggers.values().forEach((pair: TuplePair<Category, CategoryLogger>) => {
         // Set the new logger type
         (<CategoryDelegateLoggerImpl> pair.y).delegate = this.createRootLogger(pair.x);
-
       });
+    }
+  }
+
+  /**
+   * Set new configuration settings for a category (and possibly its child categories)
+   * @param config Config
+   * @param category Category
+   * @param applyChildren True to apply to child categories, defaults to false.
+   * @param resetRootLogger Defaults to false. If set to true and if category is a root category it will reset the root logger.
+   */
+  public setConfigurationCategory(config: CategoryDefaultConfiguration, category: Category, applyChildren: boolean = false,
+                                  resetRootLogger: boolean = false): void {
+    const categorySettings = this.getCategorySettings(category);
+    if (categorySettings === null) {
+      throw new Error("Given category is not registered: " + category.name);
+    }
+    categorySettings.logLevel = config.logLevel;
+    categorySettings.loggerType = config.loggerType;
+    categorySettings.logFormat = config.logFormat;
+    categorySettings.callBackLogger = config.callBackLogger;
+
+    // Apply the settings to children recursive if requested
+    if (applyChildren) {
+      category.children.forEach((child) => {
+        this.setConfigurationCategory(config, child, applyChildren, resetRootLogger);
+      });
+    }
+
+    if (resetRootLogger && this.rootCategoryExists(category)) {
+      const tupleLogger = this.rootLoggers.get(category.name);
+      if (tupleLogger !== null) {
+        (<CategoryDelegateLoggerImpl> tupleLogger.y).delegate = this.createRootLogger(tupleLogger.x);
+      }
     }
   }
 
@@ -377,6 +409,18 @@ export class CategoryServiceFactory {
    */
   public static setDefaultConfiguration(config: CategoryDefaultConfiguration, reset: boolean = false): void {
     CategoryServiceImpl.getInstance().setDefaultConfiguration(config, reset);
+  }
+
+  /**
+   * Set new configuration settings for a category (and possibly its child categories)
+   * @param config Config
+   * @param category Category
+   * @param applyChildren True to apply to child categories, defaults to false.
+   * @param resetRootLogger Defaults to false. If set to true and if category is a root category it will reset the root logger.
+   */
+  public static setConfigurationCategory(config: CategoryDefaultConfiguration, category: Category, applyChildren: boolean = false,
+                                         resetRootLogger: boolean = false): void {
+    CategoryServiceImpl.getInstance().setConfigurationCategory(config, category, applyChildren, resetRootLogger);
   }
 
   /**

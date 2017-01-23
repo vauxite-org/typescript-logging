@@ -34,7 +34,7 @@ a different child category. It does that by just declaring another category, and
 
 Config.ts
 ~~~
-import {Category,CategoryServiceFactory,CategoryDefaultConfiguration,LogLevel} from "typescript-logging";
+import {Category,CategoryLogger,CategoryServiceFactory,CategoryDefaultConfiguration,LogLevel} from "typescript-logging";
 
 // Optionally change default settings, in this example set default logging to Info.
 // Without changing configuration, categories will log to Error.
@@ -47,7 +47,7 @@ export const catCust = new Category("customer", catRoot);
 export const catProd = new Category("product", catRoot);
 
 // Get a logger, this can be retrieved for root categories only (in the example above, the "service" category).
-export const log = CategoryServiceFactory.getLogger(catRoot);
+export const log: CategoryLogger = CategoryServiceFactory.getLogger(catRoot);
 ~~~
 
 ProductService.ts
@@ -136,7 +136,7 @@ want to implement everything yourself you could implement CategoryLogger instead
 
 Config.ts
 ~~~
-import {Category,CategoryLogFormat,CategoryServiceFactory,CategoryDefaultConfiguration,LoggerType,LogLevel,RuntimeSettings} from "typescript-logging";
+import {Category,CategoryLogger,CategoryLogFormat,CategoryServiceFactory,CategoryDefaultConfiguration,LoggerType,LogLevel,RuntimeSettings} from "typescript-logging";
 import {CustomLogger} from "./CustomLogger"
 
 export const catRoot = new Category("service");
@@ -149,7 +149,7 @@ const config = new CategoryDefaultConfiguration(
 );
 CategoryServiceFactory.setDefaultConfiguration(config);
 
-export const log = CategoryServiceFactory.getLogger(catRoot);
+export const log: CategoryLogger = CategoryServiceFactory.getLogger(catRoot);
 ~~~
 The config above modifies the configuration and makes sure that we use our CustomLogger for logging.
 If you'd log using the logger, e.g. log.info("Hello"). The formatted message in this example would end up in the array "messages" from above.

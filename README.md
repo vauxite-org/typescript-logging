@@ -24,7 +24,7 @@ This provides a quick example based on the new way of logging (0.2.0+), please c
 
 Config.ts
 ~~~
-import {Category,CategoryServiceFactory,CategoryDefaultConfiguration,LogLevel} from "typescript-logging";
+import {Category,CategoryLogger,CategoryServiceFactory,CategoryDefaultConfiguration,LogLevel} from "typescript-logging";
 
 // Optionally change default settings, in this example set default logging to Info.
 // Without changing configuration, categories will log to Error.
@@ -36,7 +36,7 @@ export const catRoot = new Category("service");
 export const catProd = new Category("product", catRoot);
 
 // Get a logger, this can be retrieved for root categories only (in the example above, the "service" category).
-export const log = CategoryServiceFactory.getLogger(catRoot);
+export const log: CategoryLogger = CategoryServiceFactory.getLogger(catRoot);
 ~~~
 
 ElseWhere.ts
@@ -51,6 +51,8 @@ export class ElseWhere {
 
      // Lambda log to catProd (cheaper)
      log.infoc(() => "Performing magic once more: " + name, catProd);
+
+     log.infoc(() => `With template script: ${name}`, catProd);
   }
 }
 ~~~
@@ -58,7 +60,8 @@ export class ElseWhere {
 With the above example if magic("spell") is executed it will log:
 ~~~
 2016-01-07 11:14:26,273 INFO [product] Performing magic: spell
-2016-01-07 11:14:26,273 INFO [product] Performing magic once more: spell
+2016-01-07 11:14:26,274 INFO [product] Performing magic once more: spell
+2016-01-07 11:14:26,275 INFO [product] With template script: spell
 ~~~
 
 ## Documentation
@@ -73,6 +76,8 @@ Please note that the latest version is backwards compatible with 0.1.3.
 
 Starting with version 0.2.0+ a chrome developer extension has been created to easily allow changing log levels and filtering of logging for an application
 that uses typescript logging.
+
+![Extension screenshot](img/typescript-logging-tab.png)
 
 Please visit: [typescript-logging-extension](https://github.com/mreuvers/typescript-logging-extension) on how to get this.
 
@@ -106,7 +111,11 @@ If you add/change new functionality and want it merged to master, please open a 
 Some things may not fit the library and could be rejected, so if you are unsure please ask first before wasting your valuable time.
 
 ## History
-* 0.2.0-beta3 (current release)
+* 0.2.0-beta4 (current release)
+  * Drop / move types (they can cause issues with es6 ts projects)
+  * Added 'setConfigurationCategory(...)' to CategoryServiceFactory to allow config for specific category (and childs).
+  * Update documentation
+* 0.2.0-beta3
   * Update latest documentation with example for custom logger
   * Expose CategoryLogFormat, was missing.
   * Add source maps to the latest download as well.
