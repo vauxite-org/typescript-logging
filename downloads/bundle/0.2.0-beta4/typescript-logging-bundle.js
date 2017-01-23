@@ -681,7 +681,6 @@ var TSL =
 	/**
 	 * Log level for a logger.
 	 */
-	var LogLevel;
 	(function (LogLevel) {
 	    LogLevel[LogLevel["Trace"] = 0] = "Trace";
 	    LogLevel[LogLevel["Debug"] = 1] = "Debug";
@@ -689,7 +688,8 @@ var TSL =
 	    LogLevel[LogLevel["Warn"] = 3] = "Warn";
 	    LogLevel[LogLevel["Error"] = 4] = "Error";
 	    LogLevel[LogLevel["Fatal"] = 5] = "Fatal";
-	})(LogLevel = exports.LogLevel || (exports.LogLevel = {}));
+	})(exports.LogLevel || (exports.LogLevel = {}));
+	var LogLevel = exports.LogLevel;
 	/* tslint:disable:no-namespace */
 	(function (LogLevel) {
 	    /**
@@ -725,16 +725,15 @@ var TSL =
 	 * Where to log to? Pick one of the constants. Custom requires a callback to be present, see LFService.createLoggerFactory(...)
 	 * where this comes into play.
 	 */
-	var LoggerType;
 	(function (LoggerType) {
 	    LoggerType[LoggerType["Console"] = 0] = "Console";
 	    LoggerType[LoggerType["MessageBuffer"] = 1] = "MessageBuffer";
 	    LoggerType[LoggerType["Custom"] = 2] = "Custom";
-	})(LoggerType = exports.LoggerType || (exports.LoggerType = {}));
+	})(exports.LoggerType || (exports.LoggerType = {}));
+	var LoggerType = exports.LoggerType;
 	/**
 	 * Defines several date enums used for formatting a date.
 	 */
-	var DateFormatEnum;
 	(function (DateFormatEnum) {
 	    /**
 	     * Displays as: year-month-day hour:minute:second,millis -> 1999-02-12 23:59:59,123
@@ -756,7 +755,8 @@ var TSL =
 	     * Note the date separator can be set separately.
 	     */
 	    DateFormatEnum[DateFormatEnum["YearDayMonthTime"] = 3] = "YearDayMonthTime";
-	})(DateFormatEnum = exports.DateFormatEnum || (exports.DateFormatEnum = {}));
+	})(exports.DateFormatEnum || (exports.DateFormatEnum = {}));
+	var DateFormatEnum = exports.DateFormatEnum;
 	/**
 	 * DateFormat class, stores data on how to format a date.
 	 */
@@ -5365,8 +5365,8 @@ var TSL =
 	    };
 	    return Category;
 	}());
-	Category.currentId = 1;
 	exports.Category = Category;
+	Category.currentId = 1;
 	//# sourceMappingURL=CategoryLogger.js.map
 
 /***/ },
@@ -5708,9 +5708,9 @@ var TSL =
 	    };
 	    return CategoryServiceImpl;
 	}());
+	exports.CategoryServiceImpl = CategoryServiceImpl;
 	// Singleton category service, used by CategoryServiceFactory as well as Categories.
 	CategoryServiceImpl.INSTANCE = new CategoryServiceImpl();
-	exports.CategoryServiceImpl = CategoryServiceImpl;
 	/**
 	 * Categorized service for logging, where logging is bound to categories which
 	 * can log horizontally through specific application logic (services, group(s) of components etc).
@@ -6003,8 +6003,8 @@ var TSL =
 	    };
 	    return ExtensionHelper;
 	}());
-	ExtensionHelper.registered = false;
 	exports.ExtensionHelper = ExtensionHelper;
+	ExtensionHelper.registered = false;
 	//# sourceMappingURL=ExtensionHelper.js.map
 
 /***/ },
@@ -6026,7 +6026,7 @@ var TSL =
 	var CategoryMessageBufferLoggerImpl = (function (_super) {
 	    __extends(CategoryMessageBufferLoggerImpl, _super);
 	    function CategoryMessageBufferLoggerImpl() {
-	        var _this = _super !== null && _super.apply(this, arguments) || this;
+	        var _this = _super.apply(this, arguments) || this;
 	        _this.messages = [];
 	        return _this;
 	    }
@@ -6205,8 +6205,8 @@ var TSL =
 	    };
 	    return LFService;
 	}());
-	LFService._loggerFactories = [];
 	exports.LFService = LFService;
+	LFService._loggerFactories = [];
 	//# sourceMappingURL=LoggerFactoryService.js.map
 
 /***/ },

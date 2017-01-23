@@ -14,7 +14,7 @@ npm install --save typescript-logging
 ~~~
 No additional typings are required, these are included.
 
-Requires typescript 2.1.1+ (tested).
+Requires typescript 2.1.5+ (tested).
 
 Or download the (minified) javascript bundle and documentation from [here](https://github.com/mreuvers/typescript-logging/tree/master/downloads/bundle/latest).
 
@@ -111,7 +111,9 @@ If you add/change new functionality and want it merged to master, please open a 
 Some things may not fit the library and could be rejected, so if you are unsure please ask first before wasting your valuable time.
 
 ## History
-* 0.2.0-beta4 (current release)
+* 0.2.0-beta5 (current release)
+  * Use typescript 2.1.5 as minimum, as that gets rid of references in generated .d.ts files to node e.a
+* 0.2.0-beta4
   * Drop / move types (they can cause issues with es6 ts projects)
   * Added 'setConfigurationCategory(...)' to CategoryServiceFactory to allow config for specific category (and childs).
   * Update documentation
