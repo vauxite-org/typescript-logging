@@ -1,7 +1,7 @@
 import * as ST from "stacktrace-js";
-import {CategoryLogMessage} from "./AbstractCategoryLogger";
-import {Category} from "./CategoryLogger";
-import {DateFormat, DateFormatEnum, LogLevel} from "./LoggerOptions";
+import {CategoryLogMessage} from "../AbstractCategoryLogger";
+import {Category} from "../CategoryLogger";
+import {DateFormat, DateFormatEnum, LogLevel} from "../LoggerOptions";
 
 /**
  * Some utilities to format messages.

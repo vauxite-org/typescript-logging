@@ -1,13 +1,15 @@
-import {CategoryLogMessage} from "./AbstractCategoryLogger";
-import {Category} from "./CategoryLogger";
-import {CategoryServiceImpl} from "./CategoryService";
-import {ExtensionMessageContentJSON, ExtensionMessageJSON} from "./json/ExtensionMessageJSON";
+import {CategoryLogMessage} from "../AbstractCategoryLogger";
+import {Category} from "../CategoryLogger";
+import {CategoryServiceImpl} from "../CategoryService";
+import {LogLevel} from "../LoggerOptions";
+import {MessageFormatUtils} from "../utils/MessageUtils";
+import {ExtensionMessageContentJSON, ExtensionMessageJSON} from "./ExtensionMessageJSON";
 import {
-  ExtensionCategoriesUpdateMessageJSON, ExtensionCategoryJSON, ExtensionCategoryLogMessageJSON,
+  ExtensionCategoriesUpdateMessageJSON,
+  ExtensionCategoryJSON,
+  ExtensionCategoryLogMessageJSON,
   ExtensionRequestChangeLogLevelJSON
-} from "./json/ExtensionMessagesJSON";
-import {LogLevel} from "./LoggerOptions";
-import {MessageFormatUtils} from "./MessageUtils";
+} from "./ExtensionMessagesJSON";
 
 export class ExtensionHelper {
 

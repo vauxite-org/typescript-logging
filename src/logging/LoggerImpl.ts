@@ -1,8 +1,8 @@
-import {LinkedList} from "./DataStructures";
 import {Logger} from "./Logger";
 import {LogGroupRule} from "./LoggerFactoryService";
 import {LogLevel} from "./LoggerOptions";
-import {MessageFormatUtils} from "./MessageUtils";
+import {LinkedList} from "./utils/DataStructures";
+import {MessageFormatUtils} from "./utils/MessageUtils";
 
 class Message {
 

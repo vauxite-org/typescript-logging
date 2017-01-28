@@ -1,7 +1,7 @@
 import {AbstractCategoryLogger, CategoryLogMessage} from "./AbstractCategoryLogger";
 import {Category} from "./CategoryLogger";
 import {RuntimeSettings} from "./CategoryService";
-import {ExtensionHelper} from "./ExtensionHelper";
+import {ExtensionHelper} from "./extension/ExtensionHelper";
 
 /**
  * This class should not be used directly, it is used for communication with the extension only.

@@ -12,7 +12,6 @@ export interface ExtensionCategoryJSON {
   parentId: number;
 
   children: ExtensionCategoryJSON[];
-
 }
 
 /**
@@ -33,16 +32,14 @@ export interface ExtensionCategoryLogMessageJSON {
   resolvedErrorMessage: boolean;
 }
 
-
 /**
  * Represents a (new) loglevel for a category, as json.
  */
 export interface ExtensionCategoriesUpdateMessageJSON {
 
-  categories: [{id : number, logLevel: string}];
+  categories: [{id: number, logLevel: string}];
 
 }
-
 
 export interface ExtensionRequestChangeLogLevelJSON {
 

@@ -1,9 +1,9 @@
 /**
  * Module containing bunch of JSON related stuff.
  */
-import {Category} from "./CategoryLogger";
+import {Category} from "../CategoryLogger";
+import {LogLevel} from "../LoggerOptions";
 import {SimpleMap, StringBuilder} from "./DataStructures";
-import {LogLevel} from "./LoggerOptions";
 
 export interface JSONType<T> {
 

@@ -1,4 +1,4 @@
-import {ExtensionHelper} from "./ExtensionHelper";
+import {ExtensionHelper} from "./extension/ExtensionHelper";
 import {LoggerFactory} from "./LoggerFactory";
 import {LoggerFactoryImpl} from "./LoggerFactoryImpl";
 import {AbstractLogger} from "./LoggerImpl";
