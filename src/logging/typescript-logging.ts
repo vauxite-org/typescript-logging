@@ -35,7 +35,26 @@ export {SimpleMap, LinkedList} from "./utils/DataStructures";
 export * from "./utils/JSONHelper";
 export {MessageFormatUtils} from "./utils/MessageUtils";
 
-// Export our control function to be available on TSL
+/*
+ Functions to export on TSL libarary var.
+*/
+
+// Export help function
+export function help(): void {
+  /* tslint:disable:no-console */
+  console.log(
+`help()
+   ** Shows this help
+   
+ getLogControl(): LogControl
+   ** Returns LogControl Object, use to dynamically change loglevels for LogGroups and Categories alike.
+   ** Call .help() on LogControl object for available options.
+`
+  );
+  /* tslint:enable:no-console */
+}
+
+// Export LogControl function
 export function getLogControl(): LogControl {
   return new LogControlImpl();
 }

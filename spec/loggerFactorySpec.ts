@@ -1,7 +1,7 @@
+import {Logger} from "../src/logging/Logger";
 import {LFService, LoggerFactoryOptions, LogGroupRule} from "../src/logging/LoggerFactoryService";
 import {LogLevel} from "../src/logging/LoggerOptions";
-import {Logger} from "../src/logging/Logger";
-
+import {LoggerFactory} from "../src/logging/LoggerFactory";
 
 describe("LoggerFactory configuration", () => {
 
@@ -32,6 +32,12 @@ describe("LoggerFactory configuration", () => {
     expect(myLogger.isFatalEnabled()).toBeTruthy();
 
     expect(() => factory.getLogger("NotSet")).toThrow();
+  });
+
+  it("Testing named logger", () => {
+    let factory: LoggerFactory = LFService.createNamedLoggerFactory("helloworld");
+    expect(factory.getName()).toMatch("helloworld");
+    expect(() => LFService.createNamedLoggerFactory("helloworld")).toThrow(new Error("LoggerFactory with name helloworld already exists."));
   });
 
   it("Testing reconfigure", () => {
@@ -71,4 +77,3 @@ describe("LoggerFactory configuration", () => {
   });
 
 });
-

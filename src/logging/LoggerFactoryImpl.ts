@@ -6,51 +6,57 @@ import {LoggerType} from "./LoggerOptions";
 
 export class LoggerFactoryImpl implements LoggerFactory {
 
-  private options: LoggerFactoryOptions;
-  private loggers: {[name: string]: AbstractLogger} = {};
+  private _name: string;
+  private _options: LoggerFactoryOptions;
+  private _loggers: {[name: string]: AbstractLogger} = {};
 
-  constructor(options: LoggerFactoryOptions) {
+  constructor(name: string, options: LoggerFactoryOptions) {
+    this._name = name;
     this.configure(options);
   }
 
   public configure(options: LoggerFactoryOptions): void {
-    this.options = options;
+    this._options = options;
 
     // Close any current open loggers.
     this.closeLoggers();
   }
 
   public getLogger(named: string): Logger {
-    if (!this.options.enabled) {
+    if (!this._options.enabled) {
       throw new Error("LoggerFactory is not enabled, please check your options passed in");
     }
 
-    let logger = this.loggers[named];
+    let logger = this._loggers[named];
     if (logger !== undefined) {
       return logger;
     }
 
     // Initialize logger with appropriate level
     logger = this.loadLogger(named);
-    this.loggers[named] = logger;
+    this._loggers[named] = logger;
     return logger;
   }
 
   public isEnabled(): boolean {
-    return this.options.enabled;
+    return this._options.enabled;
   }
 
   public closeLoggers(): void {
-    for (let key in this.loggers) {
-      if (this.loggers.hasOwnProperty(key)) {
-        this.loggers[key].close();
+    for (let key in this._loggers) {
+      if (this._loggers.hasOwnProperty(key)) {
+        this._loggers[key].close();
       }
     }
-    this.loggers = {};
+    this._loggers = {};
+  }
+
+  public getName(): string {
+    return this._name;
   }
 
   private loadLogger(named: string): AbstractLogger {
-    const logGroupRules = this.options.logGroupRules;
+    const logGroupRules = this._options.logGroupRules;
 
     for (const logGroupRule of logGroupRules) {
       if (logGroupRule.regExp.test(named)) {

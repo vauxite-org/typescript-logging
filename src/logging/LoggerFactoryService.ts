@@ -3,6 +3,7 @@ import {LoggerFactory} from "./LoggerFactory";
 import {LoggerFactoryImpl} from "./LoggerFactoryImpl";
 import {AbstractLogger} from "./LoggerImpl";
 import {LogFormat, LoggerType, LogLevel} from "./LoggerOptions";
+import {SimpleMap} from "./utils/DataStructures";
 
 /**
  * Defines a LogGroupRule, this allows you to either have everything configured the same way
@@ -96,11 +97,85 @@ export class LoggerFactoryOptions {
 }
 
 /**
- * Create and configure your LoggerFactory from here.
+ * Represents the runtime settings for a LogGroup (LogGroupRule).
  */
-export class LFService {
+export class LogGroupRuntimeSettings {
 
-  private static _loggerFactories: LoggerFactoryImpl[] = [];
+  private _level: LogLevel;
+  private _loggerType: LoggerType;
+  private _logFormat: LogFormat;
+  private _callBackLogger: ((name: string, logGroupRule: LogGroupRule) => AbstractLogger) | null;
+
+  constructor(level: LogLevel, loggerType: LoggerType, logFormat: LogFormat,
+              callBackLogger: ((name: string, logGroupRule: LogGroupRule) => AbstractLogger) | null) {
+    this._level = level;
+    this._loggerType = loggerType;
+    this._logFormat = logFormat;
+    this._callBackLogger = callBackLogger;
+  }
+
+  get level(): LogLevel {
+    return this._level;
+  }
+
+  set level(value: LogLevel) {
+    this._level = value;
+  }
+
+  get loggerType(): LoggerType {
+    return this._loggerType;
+  }
+
+  set loggerType(value: LoggerType) {
+    this._loggerType = value;
+  }
+
+  get logFormat(): LogFormat {
+    return this._logFormat;
+  }
+
+  set logFormat(value: LogFormat) {
+    this._logFormat = value;
+  }
+
+  get callBackLogger(): ((name: string, logGroupRule: LogGroupRule) => AbstractLogger) | null {
+    return this._callBackLogger;
+  }
+
+  set callBackLogger(value: ((name: string, logGroupRule: LogGroupRule) => AbstractLogger) | null) {
+    this._callBackLogger = value;
+  }
+}
+
+/**
+ * Interface for the RuntimeSettings related to LoggerFactories.
+ */
+export interface LFServiceRuntimeSettings {
+
+  /**
+   * Get the runtimesettings for given LogGroup that is part of given LoggerFactory
+   * @param nameLoggerFactory Name of LoggerFactory (can be specified when creating a named loggerfactory, a generated on is set otherwise).
+   * @param idLogGroupRule Number representing the LogGroup (LogGroupRule)
+   * @return {LogGroupRuntimeSettings} LogGroupRuntimeSettings when found, null otherwise.
+   */
+  getLogGroupSettings(nameLoggerFactory: string, idLogGroupRule: number): LogGroupRuntimeSettings | null;
+
+}
+
+class LFServiceImpl implements LFServiceRuntimeSettings {
+
+  private static INSTANCE = new LFServiceImpl();
+
+  private _nameCounter: number = 1;
+  private _mapFactories: SimpleMap<LoggerFactory> = new SimpleMap<LoggerFactory>();
+
+  private constructor() {
+    // Private constructor.
+  }
+
+  public static getInstance(): LFServiceImpl {
+    return LFServiceImpl.INSTANCE;
+  }
 
   /**
    * Create a new LoggerFactory with given options (if any). If no options
@@ -109,16 +184,30 @@ export class LFService {
    * @param options Options, optional.
    * @returns {LoggerFactory}
    */
-  public static createLoggerFactory(options?: LoggerFactoryOptions): LoggerFactory {
+  public createLoggerFactory(options: LoggerFactoryOptions | null = null): LoggerFactory {
+    const name = "LoggerFactory" + this._nameCounter++;
+    return this.createNamedLoggerFactory(name, options);
+  }
+
+  /**
+   * Create a new LoggerFactory using given name (used for console api/extension).
+   * @param name Name Pick something short but distinguishable.
+   * @param options Options, optional
+   * @return {LoggerFactory}
+   */
+  public createNamedLoggerFactory(name: string, options: LoggerFactoryOptions | null = null): LoggerFactory {
     let factory: LoggerFactoryImpl;
 
-    if (options !== undefined) {
-      factory = new LoggerFactoryImpl(options);
+    if (options !== null) {
+      factory = new LoggerFactoryImpl(name, options);
     }
     else {
-      factory = new LoggerFactoryImpl(this.createDefaultOptions());
+      factory = new LoggerFactoryImpl(name, LFServiceImpl.createDefaultOptions());
     }
-    LFService._loggerFactories.push(factory);
+    if (this._mapFactories.exists(name)) {
+      throw new Error("LoggerFactory with name " + name + " already exists.");
+    }
+    this._mapFactories.put(name, factory);
 
     // Allow extensions to talk with us.
     ExtensionHelper.register();
@@ -131,14 +220,57 @@ export class LFService {
    * After this call, all previously fetched Loggers (from their
    * factories) are unusable. The factories remain as they were.
    */
-  public static closeLoggers(): void {
-    for (const loggerFactory of this._loggerFactories) {
-      loggerFactory.closeLoggers();
-    }
-    this._loggerFactories = [];
+  public closeLoggers(): void {
+    this._mapFactories.values().forEach((factory: LoggerFactoryImpl) => {
+      factory.closeLoggers();
+    });
+
+    this._mapFactories.clear();
+  }
+
+  public getLogGroupSettings(nameLoggerFactory: string, idLogGroupRule: number): LogGroupRuntimeSettings|null {
+    return null;
   }
 
   private static createDefaultOptions(): LoggerFactoryOptions {
     return new LoggerFactoryOptions().addLogGroupRule(new LogGroupRule(new RegExp(".+"), LogLevel.Info));
+  }
+}
+
+/**
+ * Create and configure your LoggerFactory from here.
+ */
+export class LFService {
+
+  private static INSTANCE_SERVICE = LFServiceImpl.getInstance();
+
+  /**
+   * Create a new LoggerFactory with given options (if any). If no options
+   * are specified, the LoggerFactory, will accept any named logger and will
+   * log on info level by default for, to the console.
+   * @param options Options, optional.
+   * @returns {LoggerFactory}
+   */
+  public static createLoggerFactory(options: LoggerFactoryOptions | null = null): LoggerFactory {
+    return LFService.INSTANCE_SERVICE.createLoggerFactory(options);
+  }
+
+  /**
+   * Create a new LoggerFactory using given name (used for console api/extension).
+   * @param name Name Pick something short but distinguishable.
+   * @param options Options, optional
+   * @return {LoggerFactory}
+   */
+  public static createNamedLoggerFactory(name: string, options: LoggerFactoryOptions | null = null): LoggerFactory {
+    return LFService.INSTANCE_SERVICE.createNamedLoggerFactory(name, options);
+  }
+
+  /**
+   * Closes all Loggers for LoggerFactories that were created.
+   * After this call, all previously fetched Loggers (from their
+   * factories) are unusable. The factories remain as they were.
+   */
+  public static closeLoggers(): void {
+    return LFService.INSTANCE_SERVICE.closeLoggers();
   }
 }

@@ -49,11 +49,11 @@ export class LogControlImpl implements LogControl {
 
   private static _example: string =
 `
-  // Line already done, or you would not see this help.
+  // First line you already did, or you would not see this example.
   const lc = TSL.getLogControl();
   lc.help(); // Prints help
-  const lgc = lc.getLogGroupControl();
-  lgc.
+  const lgc = lc.getLogGroupControl();  // Retrieve LogGroupControl object
+    
 `;
   /* tslint:enable:no-trailing-whitespace */
 

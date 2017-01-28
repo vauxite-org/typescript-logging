@@ -67,14 +67,14 @@ export class CategoryRuntimeSettings {
 }
 
 /**
- * Interface for RuntimeSettings.
+ * Interface for RuntimeSettings related to Categories.
  */
 export interface RuntimeSettings {
 
   /**
    * Get the runtimesettings for given category
-   * @param category
-   * @return {Category} Category or null
+   * @param category Category
+   * @return {CategoryRuntimeSettings} CategoryRuntimeSettings when found, null otherwise.
    */
   getCategorySettings(category: Category): CategoryRuntimeSettings | null;
 
@@ -83,7 +83,7 @@ export interface RuntimeSettings {
 /**
  * Default configuration, can be used to initially set a different default configuration
  * on the CategoryServiceFactory. This will be applied to all categories already registered (or
- * registered in the future).
+ * registered in the future). Can also be applied to one Category (and childs).
  */
 export class CategoryDefaultConfiguration {
 

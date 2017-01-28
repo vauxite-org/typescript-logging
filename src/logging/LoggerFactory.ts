@@ -28,4 +28,10 @@ export interface LoggerFactory {
    * Return true if enabled, false otherwise. If disabled, logging is not written in any form.
    */
   isEnabled(): boolean;
+
+  /**
+   * Returns the name of this LoggerFactory, this is used for the console api.
+   * If no name was specified they have a name auto-generated.
+   */
+  getName(): string;
 }
