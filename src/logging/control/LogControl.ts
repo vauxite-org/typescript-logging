@@ -1,7 +1,6 @@
-import {LogGroupControl} from "../../../dist/commonjs/control/LogGroupControl";
-import {CategoryControl} from "../../../dist/commonjs/control/CategoryControl";
-import {LogGroupControlImpl} from "./LogGroupControl";
-import {CategoryControlImpl} from "./CategoryControl";
+import {CategoryControl, CategoryControlImpl} from "./CategoryControl";
+import {LogGroupControl, LogGroupControlImpl} from "./LogGroupControl";
+
 /**
  * LogControl interface
  */
