@@ -1,9 +1,9 @@
+import {SimpleMap} from "../../utils/DataStructures";
+import {LoggerType} from "../LoggerOptions";
 import {Logger} from "./Logger";
 import {LoggerFactory} from "./LoggerFactory";
 import {LoggerFactoryOptions, LogGroupRuntimeSettings} from "./LoggerFactoryService";
 import {AbstractLogger, ConsoleLoggerImpl, MessageBufferLoggerImpl} from "./LoggerImpl";
-import {LoggerType} from "./LoggerOptions";
-import {SimpleMap} from "./utils/DataStructures";
 
 export class LoggerFactoryImpl implements LoggerFactory {
 

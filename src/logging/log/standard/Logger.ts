@@ -1,4 +1,4 @@
-import {LogLevel} from "./LoggerOptions";
+import {LogLevel} from "../LoggerOptions";
 
 /**
  * The Logger interface used for logging.

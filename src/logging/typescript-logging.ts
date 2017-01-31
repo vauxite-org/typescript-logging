@@ -1,24 +1,24 @@
 // CategoryService related.
 import {LogControl, LogControlImpl} from "./control/LogControl";
 
-export {AbstractCategoryLogger, CategoryLogMessage} from "./AbstractCategoryLogger";
-export {CategoryConsoleLoggerImpl} from "./CategoryConsoleLoggerImpl";
-export {CategoryDelegateLoggerImpl} from "./CategoryDelegateLoggerImpl";
-export {Category, CategoryLogger} from "./CategoryLogger";
-export {CategoryMessageBufferLoggerImpl} from "./CategoryMessageBufferImpl";
+export {AbstractCategoryLogger, CategoryLogMessage} from "./log/category/AbstractCategoryLogger";
+export {CategoryConsoleLoggerImpl} from "./log/category/CategoryConsoleLoggerImpl";
+export {CategoryDelegateLoggerImpl} from "./log/category/CategoryDelegateLoggerImpl";
+export {Category, CategoryLogger} from "./log/category/CategoryLogger";
+export {CategoryMessageBufferLoggerImpl} from "./log/category/CategoryMessageBufferImpl";
 export {
   CategoryDefaultConfiguration,
   CategoryRuntimeSettings,
   CategoryServiceFactory,
   RuntimeSettings
-} from "./CategoryService";
+} from "./log/category/CategoryService";
 
 // LoggerFactory related.
-export {Logger} from "./Logger";
-export {LoggerFactory} from "./LoggerFactory";
-export {LoggerFactoryOptions, LFService, LogGroupRule} from "./LoggerFactoryService";
-export {AbstractLogger, ConsoleLoggerImpl, MessageBufferLoggerImpl} from "./LoggerImpl";
-export {CategoryLogFormat, DateFormat, DateFormatEnum, LogFormat, LoggerType, LogLevel} from "./LoggerOptions";
+export {Logger} from "./log/standard/Logger";
+export {LoggerFactory} from "./log/standard/LoggerFactory";
+export {LoggerFactoryOptions, LFService, LogGroupRule} from "./log/standard/LoggerFactoryService";
+export {AbstractLogger, ConsoleLoggerImpl, MessageBufferLoggerImpl} from "./log/standard/LoggerImpl";
+export {CategoryLogFormat, DateFormat, DateFormatEnum, LogFormat, LoggerType, LogLevel} from "./log/LoggerOptions";
 
 // Console controller related
 export {CategoryControl} from "./control/CategoryControl";

@@ -1,11 +1,11 @@
-import {Category, CategoryLogger} from "../src/logging/CategoryLogger";
+import {Category, CategoryLogger} from "../src/logging/log/category/CategoryLogger";
 import {
   CategoryServiceFactory, CategoryRuntimeSettings, CategoryDefaultConfiguration,
   RuntimeSettings
-} from "../src/logging/CategoryService";
-import {CategoryDelegateLoggerImpl} from "../src/logging/CategoryDelegateLoggerImpl";
-import {LoggerType, DateFormatEnum, LogLevel, CategoryLogFormat, DateFormat} from "../src/logging/LoggerOptions";
-import {AbstractCategoryLogger, CategoryLogMessage} from "../src/logging/AbstractCategoryLogger";
+} from "../src/logging/log/category/CategoryService";
+import {CategoryDelegateLoggerImpl} from "../src/logging/log/category/CategoryDelegateLoggerImpl";
+import {LoggerType, DateFormatEnum, LogLevel, CategoryLogFormat, DateFormat} from "../src/logging/log/LoggerOptions";
+import {AbstractCategoryLogger, CategoryLogMessage} from "../src/logging/log/category/AbstractCategoryLogger";
 
 
 describe("Categories", () => {

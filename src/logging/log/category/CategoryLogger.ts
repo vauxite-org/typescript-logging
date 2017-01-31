@@ -1,5 +1,5 @@
+import {LogLevel} from "../LoggerOptions";
 import {CategoryServiceImpl} from "./CategoryService";
-import {LogLevel} from "./LoggerOptions";
 
 /**
  * Category for use with categorized logging.

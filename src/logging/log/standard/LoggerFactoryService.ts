@@ -1,9 +1,9 @@
-import {ExtensionHelper} from "./extension/ExtensionHelper";
+import {ExtensionHelper} from "../../extension/ExtensionHelper";
+import {SimpleMap} from "../../utils/DataStructures";
+import {LogFormat, LoggerType, LogLevel} from "../LoggerOptions";
 import {LoggerFactory} from "./LoggerFactory";
 import {LoggerFactoryImpl} from "./LoggerFactoryImpl";
 import {AbstractLogger} from "./LoggerImpl";
-import {LogFormat, LoggerType, LogLevel} from "./LoggerOptions";
-import {SimpleMap} from "./utils/DataStructures";
 
 /**
  * Defines a LogGroupRule, this allows you to either have everything configured the same way

@@ -1,11 +1,11 @@
+import {ExtensionHelper} from "../../extension/ExtensionHelper";
+import {SimpleMap, TuplePair} from "../../utils/DataStructures";
+import {CategoryLogFormat, LoggerType, LogLevel} from "../LoggerOptions";
 import {CategoryConsoleLoggerImpl} from "./CategoryConsoleLoggerImpl";
 import {CategoryDelegateLoggerImpl} from "./CategoryDelegateLoggerImpl";
 import {CategoryExtensionLoggerImpl} from "./CategoryExtensionLoggerImpl";
 import {Category, CategoryLogger} from "./CategoryLogger";
 import {CategoryMessageBufferLoggerImpl} from "./CategoryMessageBufferImpl";
-import {ExtensionHelper} from "./extension/ExtensionHelper";
-import {CategoryLogFormat, LoggerType, LogLevel} from "./LoggerOptions";
-import {SimpleMap, TuplePair} from "./utils/DataStructures";
 
 /**
  * RuntimeSettings for a category, at runtime these are associated to a category.

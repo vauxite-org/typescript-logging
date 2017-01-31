@@ -18,9 +18,8 @@ export interface CategoryControl {
 
 export class CategoryControlImpl implements CategoryControl {
 
-
   public showSettings(): void {
-    //
+    // todo
   }
 
   public help(): void {

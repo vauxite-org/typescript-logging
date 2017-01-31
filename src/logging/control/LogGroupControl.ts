@@ -1,4 +1,4 @@
-import {LFService} from "../LoggerFactoryService";
+import {LFService} from "../log/standard/LoggerFactoryService";
 /**
  *  Interface to control LogGroups (LoggerFactory and related loggers) through
  *  ordinary console (in browsers).
@@ -50,7 +50,7 @@ export class LogGroupControlImpl implements LogGroupControl {
   }
 
   public list(): void {
-
+    // todo
   }
 
 }

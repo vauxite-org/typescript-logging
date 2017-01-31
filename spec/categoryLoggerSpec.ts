@@ -1,8 +1,8 @@
-import {Category, CategoryLogger} from "../src/logging/CategoryLogger";
-import {CategoryServiceFactory, CategoryDefaultConfiguration} from "../src/logging/CategoryService";
-import {LogLevel, LoggerType} from "../src/logging/LoggerOptions";
-import {CategoryDelegateLoggerImpl} from "../src/logging/CategoryDelegateLoggerImpl";
-import {CategoryMessageBufferLoggerImpl} from "../src/logging/CategoryMessageBufferImpl";
+import {Category, CategoryLogger} from "../src/logging/log/category/CategoryLogger";
+import {CategoryServiceFactory, CategoryDefaultConfiguration} from "../src/logging/log/category/CategoryService";
+import {LogLevel, LoggerType} from "../src/logging/log/LoggerOptions";
+import {CategoryDelegateLoggerImpl} from "../src/logging/log/category/CategoryDelegateLoggerImpl";
+import {CategoryMessageBufferLoggerImpl} from "../src/logging/log/category/CategoryMessageBufferImpl";
 
 const getMessagesAsString = (logger: CategoryLogger): string => {
   expect(logger instanceof CategoryDelegateLoggerImpl).toBeTruthy();

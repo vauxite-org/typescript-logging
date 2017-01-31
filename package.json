@@ -5,7 +5,7 @@
   "main": "dist/commonjs/typescript-logging",
   "scripts": {
     "test": "tsc -p tsconfig-test.json && jasmine-node --verbose ./dist-test/spec",
-    "tslint": "tslint -c tslint.json -p tsconfig.json src/logging/**",
+    "tslint": "tslint -c tslint.json -p tsconfig.json 'src/logging/**/*.ts'",
     "build": "tsc && npm run tslint && webpack --config webpack.config.bundle.js && webpack --config webpack.config.bundle-min.js",
     "docs": "typedoc --tsconfig tsconfig-docs.json --excludeNotExported --excludePrivate --mode modules --out dist/bundle/docs/api src/logging/typescript-logging.ts && github-markdown docs/latest.md --flavor gfm --title 'TypeScript logging documentation' > dist/bundle/docs/index.html && node scripts/process-docs.js dist/bundle",
     "release": "npm run build && npm run test && npm run docs"

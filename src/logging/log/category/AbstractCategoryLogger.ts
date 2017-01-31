@@ -1,8 +1,9 @@
+import {LinkedList} from "../../utils/DataStructures";
+import {MessageFormatUtils} from "../../utils/MessageUtils";
+import {CategoryLogFormat, LogLevel} from "../LoggerOptions";
 import {Category, CategoryLogger} from "./CategoryLogger";
 import {RuntimeSettings} from "./CategoryService";
-import {CategoryLogFormat, LogLevel} from "./LoggerOptions";
-import {LinkedList} from "./utils/DataStructures";
-import {MessageFormatUtils} from "./utils/MessageUtils";
+
 /**
  * Contains information about a single log message.
  */

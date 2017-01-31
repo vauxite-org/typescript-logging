@@ -1,7 +1,7 @@
-import {CategoryLogMessage} from "../AbstractCategoryLogger";
-import {Category} from "../CategoryLogger";
-import {CategoryServiceImpl} from "../CategoryService";
-import {LogLevel} from "../LoggerOptions";
+import {CategoryLogMessage} from "../log/category/AbstractCategoryLogger";
+import {Category} from "../log/category/CategoryLogger";
+import {CategoryServiceImpl} from "../log/category/CategoryService";
+import {LogLevel} from "../log/LoggerOptions";
 import {MessageFormatUtils} from "../utils/MessageUtils";
 import {ExtensionMessageContentJSON, ExtensionMessageJSON} from "./ExtensionMessageJSON";
 import {

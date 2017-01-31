@@ -1,5 +1,5 @@
+import {LogLevel} from "../LoggerOptions";
 import {Category, CategoryLogger} from "./CategoryLogger";
-import {LogLevel} from "./LoggerOptions";
 
 /**
  * Delegate logger, delegates logging to given logger (constructor).
