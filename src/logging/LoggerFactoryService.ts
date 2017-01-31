@@ -154,7 +154,7 @@ export interface LFServiceRuntimeSettings {
 
   /**
    * Get the runtimesettings for given LogGroup that is part of given LoggerFactory
-   * @param nameLoggerFactory Name of LoggerFactory (can be specified when creating a named loggerfactory, a generated on is set otherwise).
+   * @param nameLoggerFactory Name of LoggerFactory (can be specified when creating a named loggerfactory, a generated on is used otherwise).
    * @param idLogGroupRule Number representing the LogGroup (LogGroupRule)
    * @return {LogGroupRuntimeSettings} LogGroupRuntimeSettings when found, null otherwise.
    */
@@ -167,7 +167,7 @@ class LFServiceImpl implements LFServiceRuntimeSettings {
   private static INSTANCE = new LFServiceImpl();
 
   private _nameCounter: number = 1;
-  private _mapFactories: SimpleMap<LoggerFactory> = new SimpleMap<LoggerFactory>();
+  private _mapFactories: SimpleMap<LoggerFactoryImpl> = new SimpleMap<LoggerFactoryImpl>();
 
   private constructor() {
     // Private constructor.
@@ -196,6 +196,10 @@ class LFServiceImpl implements LFServiceRuntimeSettings {
    * @return {LoggerFactory}
    */
   public createNamedLoggerFactory(name: string, options: LoggerFactoryOptions | null = null): LoggerFactory {
+    if (this._mapFactories.exists(name)) {
+      throw new Error("LoggerFactory with name " + name + " already exists.");
+    }
+
     let factory: LoggerFactoryImpl;
 
     if (options !== null) {
@@ -203,9 +207,6 @@ class LFServiceImpl implements LFServiceRuntimeSettings {
     }
     else {
       factory = new LoggerFactoryImpl(name, LFServiceImpl.createDefaultOptions());
-    }
-    if (this._mapFactories.exists(name)) {
-      throw new Error("LoggerFactory with name " + name + " already exists.");
     }
     this._mapFactories.put(name, factory);
 
@@ -226,6 +227,7 @@ class LFServiceImpl implements LFServiceRuntimeSettings {
     });
 
     this._mapFactories.clear();
+    this._nameCounter = 1;
   }
 
   public getLogGroupSettings(nameLoggerFactory: string, idLogGroupRule: number): LogGroupRuntimeSettings|null {

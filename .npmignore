@@ -1,9 +1,0 @@
-.idea
-docs
-downloads
-node_modules
-npm-debug.log
-spec
-# Dist is what we publish so won't ignore for npm
-dist-test
-

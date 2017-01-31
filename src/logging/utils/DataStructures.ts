@@ -184,9 +184,9 @@ export class SimpleMap<V> {
   }
 
   public get(key: string): V | null {
-    const value = this.array[key];
-    if (value !== undefined) {
-      return value;
+    const result = this.array[key];
+    if (result !== undefined) {
+      return result;
     }
     return null;
   }
@@ -237,6 +237,16 @@ export class SimpleMap<V> {
 
   public clear(): void {
     this.array = {};
+  }
+
+  public forEach(cbFunction: (value: V | null, index: string, map: SimpleMap<V>) => void): void {
+    for (let key in this.array) {
+      // To prevent random stuff to appear
+      if (this.array.hasOwnProperty(key)) {
+        const value = this.array[key];
+        cbFunction(value, key, this);
+      }
+    }
   }
 }
 

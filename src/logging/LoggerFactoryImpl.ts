@@ -1,14 +1,17 @@
 import {Logger} from "./Logger";
 import {LoggerFactory} from "./LoggerFactory";
-import {LoggerFactoryOptions} from "./LoggerFactoryService";
+import {LoggerFactoryOptions, LogGroupRuntimeSettings} from "./LoggerFactoryService";
 import {AbstractLogger, ConsoleLoggerImpl, MessageBufferLoggerImpl} from "./LoggerImpl";
 import {LoggerType} from "./LoggerOptions";
+import {SimpleMap} from "./utils/DataStructures";
 
 export class LoggerFactoryImpl implements LoggerFactory {
 
   private _name: string;
   private _options: LoggerFactoryOptions;
-  private _loggers: {[name: string]: AbstractLogger} = {};
+  private _loggers: SimpleMap<AbstractLogger> = new SimpleMap<AbstractLogger>();
+
+  private _loggerToLogGroupSettings: SimpleMap<LogGroupRuntimeSettings> = new SimpleMap<LogGroupRuntimeSettings>();
 
   constructor(name: string, options: LoggerFactoryOptions) {
     this._name = name;
@@ -27,14 +30,14 @@ export class LoggerFactoryImpl implements LoggerFactory {
       throw new Error("LoggerFactory is not enabled, please check your options passed in");
     }
 
-    let logger = this._loggers[named];
-    if (logger !== undefined) {
+    let logger = this._loggers.get(named);
+    if (logger !== null) {
       return logger;
     }
 
     // Initialize logger with appropriate level
     logger = this.loadLogger(named);
-    this._loggers[named] = logger;
+    this._loggers.put(named, logger);
     return logger;
   }
 
@@ -43,16 +46,20 @@ export class LoggerFactoryImpl implements LoggerFactory {
   }
 
   public closeLoggers(): void {
-    for (let key in this._loggers) {
-      if (this._loggers.hasOwnProperty(key)) {
-        this._loggers[key].close();
+    this._loggers.forEach((logger) => {
+      if (logger != null) {
+        logger.close();
       }
-    }
-    this._loggers = {};
+    });
+    this._loggers.clear();
   }
 
   public getName(): string {
     return this._name;
+  }
+
+  public getLogGroupRuntimeSettings(nameLogger: string): LogGroupRuntimeSettings | null {
+    return this._loggerToLogGroupSettings.get(nameLogger);
   }
 
   private loadLogger(named: string): AbstractLogger {

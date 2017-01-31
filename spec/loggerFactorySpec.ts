@@ -5,6 +5,10 @@ import {LoggerFactory} from "../src/logging/LoggerFactory";
 
 describe("LoggerFactory configuration", () => {
 
+  beforeEach(() => {
+    LFService.closeLoggers();
+  });
+
   it("Testing default configuration", () => {
     const factory = LFService.createLoggerFactory();
     expect(factory.isEnabled()).toBeTruthy();

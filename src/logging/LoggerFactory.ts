@@ -31,7 +31,7 @@ export interface LoggerFactory {
 
   /**
    * Returns the name of this LoggerFactory, this is used for the console api.
-   * If no name was specified they have a name auto-generated.
+   * If no name was specified the LoggerFactory has an auto-generated name.
    */
   getName(): string;
 }
