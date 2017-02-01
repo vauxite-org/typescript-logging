@@ -52,6 +52,10 @@ export abstract class AbstractLogger implements Logger {
     this._level = rule.level;
   }
 
+  get name(): string {
+    return this._name;
+  }
+
   public trace(msg: string, error: Error | null = null): void {
     this._log(LogLevel.Trace, msg, error);
   }

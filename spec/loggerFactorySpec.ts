@@ -2,6 +2,7 @@ import {Logger} from "../src/logging/log/standard/Logger";
 import {LFService, LoggerFactoryOptions, LogGroupRule} from "../src/logging/log/standard/LoggerFactoryService";
 import {LogLevel} from "../src/logging/log/LoggerOptions";
 import {LoggerFactory} from "../src/logging/log/standard/LoggerFactory";
+import {LoggerFactoryImpl} from "../src/logging/log/standard/LoggerFactoryImpl";
 
 describe("LoggerFactory configuration", () => {
 
@@ -78,6 +79,27 @@ describe("LoggerFactory configuration", () => {
 
     // model. is invalid, it needs to have something after the name
     expect(() => factory.getLogger("model.")).toThrow();
+  });
+
+  it("Testing LogGroupRule related runtime settings", () => {
+    const factory = LFService.createLoggerFactory() as LoggerFactoryImpl;
+    expect(factory.getName()).toEqual("LoggerFactory1");
+    factory.configure(new LoggerFactoryOptions().addLogGroupRule(new LogGroupRule(new RegExp("model\\..+"), LogLevel.Warn)));
+
+    const loggerHello = factory.getLogger("model.Hello");
+    expect(loggerHello).not.toBeNull();
+
+    const rtSettings = factory.getLogGroupRuntimeSettingsByLoggerName(loggerHello.name);
+    expect(rtSettings).not.toBeNull();
+    expect(rtSettings.level).toEqual(LogLevel.Warn);
+
+    const notExists = factory.getLogGroupRuntimeSettingsByLoggerName("nonsense");
+    expect(notExists).toBeNull();
+
+    // Since there is only one loggroup, it has to be 0.
+    const rtSettingsAgain = factory.getLogGroupRuntimeSettingsByLoggerGroupId(0);
+    expect(rtSettingsAgain).not.toBeNull();
+    expect(rtSettingsAgain === rtSettings).toBeTruthy();
   });
 
 });

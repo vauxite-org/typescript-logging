@@ -30,6 +30,11 @@ import {LogLevel} from "../LoggerOptions";
  */
 export interface Logger {
 
+  /**
+   * Name of this logger (the name it was created with).
+   */
+  readonly name: string;
+
   trace(msg: string, error?: Error | null): void;
 
   debug(msg: string, error?: Error | null): void;

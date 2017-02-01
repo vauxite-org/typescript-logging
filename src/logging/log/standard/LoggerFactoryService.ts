@@ -242,8 +242,12 @@ class LFServiceImpl implements LFServiceRuntimeSettings {
     this._nameCounter = 1;
   }
 
-  public getLogGroupSettings(nameLoggerFactory: string, idLogGroupRule: number): LogGroupRuntimeSettings|null {
-    return null;
+  public getLogGroupSettings(nameLoggerFactory: string, idLogGroupRule: number): LogGroupRuntimeSettings | null {
+    const factory = this._mapFactories.get(nameLoggerFactory);
+    if (factory === null) {
+      return null;
+    }
+    return factory.getLogGroupRuntimeSettingsByLoggerGroupId(idLogGroupRule);
   }
 
   private static createDefaultOptions(): LoggerFactoryOptions {

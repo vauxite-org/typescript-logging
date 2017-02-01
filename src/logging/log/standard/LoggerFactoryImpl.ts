@@ -61,8 +61,12 @@ export class LoggerFactoryImpl implements LoggerFactory {
     return this._name;
   }
 
-  public getLogGroupRuntimeSettings(nameLogger: string): LogGroupRuntimeSettings | null {
+  public getLogGroupRuntimeSettingsByLoggerName(nameLogger: string): LogGroupRuntimeSettings | null {
     return this._loggerToLogGroupSettings.get(nameLogger);
+  }
+
+  public getLogGroupRuntimeSettingsByLoggerGroupId(idx: number): LogGroupRuntimeSettings | null {
+    return this._logGroupRuntimeSettingsIndexedByLoggerGroup.get(("" + idx));
   }
 
   private loadLogger(named: string): AbstractLogger {
