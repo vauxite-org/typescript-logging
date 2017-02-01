@@ -2,7 +2,7 @@ import {SimpleMap} from "../../utils/DataStructures";
 import {LoggerType} from "../LoggerOptions";
 import {Logger} from "./Logger";
 import {LoggerFactory} from "./LoggerFactory";
-import {LoggerFactoryOptions, LogGroupRuntimeSettings} from "./LoggerFactoryService";
+import {LoggerFactoryOptions, LogGroupRule, LogGroupRuntimeSettings} from "./LoggerFactoryService";
 import {AbstractLogger, ConsoleLoggerImpl, MessageBufferLoggerImpl} from "./LoggerImpl";
 
 export class LoggerFactoryImpl implements LoggerFactory {
@@ -11,6 +11,7 @@ export class LoggerFactoryImpl implements LoggerFactory {
   private _options: LoggerFactoryOptions;
   private _loggers: SimpleMap<AbstractLogger> = new SimpleMap<AbstractLogger>();
 
+  private _logGroupRuntimeSettingsIndexedByLoggerGroup: SimpleMap<LogGroupRuntimeSettings> = new SimpleMap<LogGroupRuntimeSettings>();
   private _loggerToLogGroupSettings: SimpleMap<LogGroupRuntimeSettings> = new SimpleMap<LogGroupRuntimeSettings>();
 
   constructor(name: string, options: LoggerFactoryOptions) {
@@ -23,6 +24,8 @@ export class LoggerFactoryImpl implements LoggerFactory {
 
     // Close any current open loggers.
     this.closeLoggers();
+    this._loggerToLogGroupSettings.clear();
+    this._logGroupRuntimeSettingsIndexedByLoggerGroup.clear();
   }
 
   public getLogger(named: string): Logger {
@@ -65,25 +68,48 @@ export class LoggerFactoryImpl implements LoggerFactory {
   private loadLogger(named: string): AbstractLogger {
     const logGroupRules = this._options.logGroupRules;
 
-    for (const logGroupRule of logGroupRules) {
+    for (let i = 0; i < logGroupRules.length; i++) {
+      const logGroupRule = logGroupRules[i];
       if (logGroupRule.regExp.test(named)) {
+        const key = "" + i;
+        const logGroupRuntimeSettings = this.getOrCreateLogGroupRuntimeSettings(key, logGroupRule);
+
+        let logger: AbstractLogger;
         switch (logGroupRule.loggerType) {
           case LoggerType.Console:
-            return new ConsoleLoggerImpl(named, logGroupRule);
+            logger = new ConsoleLoggerImpl(named, logGroupRuntimeSettings);
+            break;
           case LoggerType.MessageBuffer:
-            return new MessageBufferLoggerImpl(named, logGroupRule);
+            logger = new MessageBufferLoggerImpl(named, logGroupRuntimeSettings);
+            break;
           case LoggerType.Custom:
             if (logGroupRule.callBackLogger != null) {
-              return logGroupRule.callBackLogger(named, logGroupRule);
+              logger = logGroupRule.callBackLogger(named, logGroupRule);
             }
             else {
               throw new Error("Cannot create a custom logger, custom callback is null");
             }
+            break;
           default:
             throw new Error("Cannot create a Logger for LoggerType: " + logGroupRule.loggerType);
         }
+
+        // For a new logger map it by its name
+        this._loggerToLogGroupSettings.put(named, logGroupRuntimeSettings);
+        return logger;
       }
     }
     throw new Error("Failed to find a match to create a Logger for: " + named);
+  }
+
+  private getOrCreateLogGroupRuntimeSettings(key: string, logGroupRule: LogGroupRule): LogGroupRuntimeSettings {
+    const logGroupRuntimeSettings = this._logGroupRuntimeSettingsIndexedByLoggerGroup.get(key);
+    if (logGroupRuntimeSettings !== null) {
+      return logGroupRuntimeSettings;
+    }
+    // Create and cache.
+    const result = new LogGroupRuntimeSettings(logGroupRule);
+    this._logGroupRuntimeSettingsIndexedByLoggerGroup.put(key, result);
+    return result;
   }
 }

@@ -101,17 +101,29 @@ export class LoggerFactoryOptions {
  */
 export class LogGroupRuntimeSettings {
 
+  // Store the original
+  private _logGroupRule: LogGroupRule;
+
+  // Store current runtime
   private _level: LogLevel;
   private _loggerType: LoggerType;
   private _logFormat: LogFormat;
   private _callBackLogger: ((name: string, logGroupRule: LogGroupRule) => AbstractLogger) | null;
 
-  constructor(level: LogLevel, loggerType: LoggerType, logFormat: LogFormat,
-              callBackLogger: ((name: string, logGroupRule: LogGroupRule) => AbstractLogger) | null) {
-    this._level = level;
-    this._loggerType = loggerType;
-    this._logFormat = logFormat;
-    this._callBackLogger = callBackLogger;
+  constructor(logGroupRule: LogGroupRule) {
+    this._logGroupRule = logGroupRule;
+    this._level = logGroupRule.level;
+    this._loggerType = logGroupRule.loggerType;
+    this._logFormat = logGroupRule.logFormat;
+    this._callBackLogger = logGroupRule.callBackLogger;
+  }
+
+  /**
+   * Returns original LogGroupRule (so not runtime settings!)
+   * @return {LogGroupRule}
+   */
+  get logGroupRule(): LogGroupRule {
+    return this._logGroupRule;
   }
 
   get level(): LogLevel {

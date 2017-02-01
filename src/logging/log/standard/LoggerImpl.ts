@@ -2,9 +2,9 @@ import {LinkedList} from "../../utils/DataStructures";
 import {MessageFormatUtils} from "../../utils/MessageUtils";
 import {LogLevel} from "../LoggerOptions";
 import {Logger} from "./Logger";
-import {LogGroupRule} from "./LoggerFactoryService";
+import {LogGroupRule, LogGroupRuntimeSettings} from "./LoggerFactoryService";
 
-class Message {
+export class Message {
 
   private _ready: boolean;
   private _message: string | null;
@@ -38,17 +38,18 @@ class Message {
  */
 export abstract class AbstractLogger implements Logger {
 
-  private open: boolean = true;
-  private name: string;
-  private rule: LogGroupRule;
-  private level: LogLevel;
+  private _rule: LogGroupRule;
+  private _level: LogLevel;
 
   private _allMessages: LinkedList<Message> = new LinkedList<Message>();
 
+  protected _name: string;
+  protected _open: boolean = true;
+
   constructor(name: string, rule: LogGroupRule) {
-    this.name = name;
-    this.rule = rule;
-    this.level = rule.level;
+    this._name = name;
+    this._rule = rule;
+    this._level = rule.level;
   }
 
   public trace(msg: string, error: Error | null = null): void {
@@ -100,67 +101,84 @@ export abstract class AbstractLogger implements Logger {
   }
 
   public isTraceEnabled(): boolean {
-    return this.level === LogLevel.Trace;
+    return this._level === LogLevel.Trace;
   }
 
   public isDebugEnabled(): boolean {
-    return this.level <= LogLevel.Debug;
+    return this._level <= LogLevel.Debug;
   }
 
   public isInfoEnabled(): boolean {
-    return this.level <= LogLevel.Info;
+    return this._level <= LogLevel.Info;
   }
 
   public isWarnEnabled(): boolean {
-    return this.level <= LogLevel.Warn;
+    return this._level <= LogLevel.Warn;
   }
 
   public isErrorEnabled(): boolean {
-    return this.level <= LogLevel.Error;
+    return this._level <= LogLevel.Error;
   }
 
   public isFatalEnabled(): boolean {
-    return this.level <= LogLevel.Fatal;
+    return this._level <= LogLevel.Fatal;
   }
 
   public getLogLevel(): LogLevel {
-    return this.level;
+    return this._level;
   }
 
   public isOpen(): boolean {
-    return this.open;
+    return this._open;
   }
 
   public close(): void {
-    this.open = false;
+    this._open = false;
     this._allMessages.clear();
   }
 
   protected abstract doLog(msg: string, logLevel?: LogLevel): void;
 
-  private _log(level: LogLevel, msg: string, error: Error | null = null): void {
-    if (this.open && this.level <= level) {
+  /**
+   * Do not override by end user, will be gone in 0.3 release.
+   */
+  protected _addMessage(msg: Message) {
+    // Make sure to make Message internal class again when this one is gone!
+    this._allMessages.addTail(msg);
+  }
+
+  /**
+   * Do not override by end user, will be gone in 0.3 release.
+   */
+  protected _log(level: LogLevel, msg: string, error: Error | null = null): void {
+    if (this._open && this._level <= level) {
       this._allMessages.addTail(this.createMessage(level, msg, new Date(), error));
       this.processMessages();
     }
   }
 
-  private _logc(level: LogLevel, msg: () => string, error?: () => Error | null): void {
-    if (this.open && this.level <= level) {
+  /**
+   * Do not override by end user, will be gone in 0.3 release.
+   */
+  protected _logc(level: LogLevel, msg: () => string, error?: () => Error | null): void {
+    if (this._open && this._level <= level) {
       this._allMessages.addTail(this.createMessage(level, msg(), new Date(), error !== undefined && error != null ? error() : null));
       this.processMessages();
     }
   }
 
-  private createMessage(level: LogLevel, msg: string, date: Date, error: Error | null = null): Message {
+  /**
+   * Do not override by end user, will be gone in 0.3 release.
+   */
+  protected createMessage(level: LogLevel, msg: string, date: Date, error: Error | null = null): Message {
     let result = "";
-    if (this.rule.logFormat.showTimeStamp) {
-      result += MessageFormatUtils.renderDate(date, this.rule.logFormat.dateFormat) + " ";
+    if (this._rule.logFormat.showTimeStamp) {
+      result += MessageFormatUtils.renderDate(date, this._rule.logFormat.dateFormat) + " ";
     }
 
     result += LogLevel[level].toUpperCase() + " ";
-    if (this.rule.logFormat.showLoggerName) {
-      result += "[" + this.name + "]";
+    if (this._rule.logFormat.showLoggerName) {
+      result += "[" + this._name + "]";
     }
 
     result += " " + msg;
@@ -179,7 +197,10 @@ export abstract class AbstractLogger implements Logger {
     return new Message(true, result);
   }
 
-  private processMessages(): void {
+  /**
+   * Do not override by end user, will be gone in 0.3 release.
+   */
+  protected processMessages(): void {
     // Basically we wait until errors are resolved (those messages
     // may not be ready).
     const msgs = this._allMessages;
@@ -203,12 +224,76 @@ export abstract class AbstractLogger implements Logger {
 }
 
 /**
+ * Future base logger, temporal name will replace AbstractLogger in future 0.3 release.
+ */
+export abstract class AbstractBaseLogger extends AbstractLogger {
+
+  private _logGroupRuntimeSettings: LogGroupRuntimeSettings;
+
+  constructor(name: string, logGroupRuntimeSettings: LogGroupRuntimeSettings) {
+    super(name, logGroupRuntimeSettings.logGroupRule);
+
+    this._logGroupRuntimeSettings = logGroupRuntimeSettings;
+  }
+
+  /**
+   * Do not override by end user, will be gone in 0.3 release.
+   */
+  protected _log(level: LogLevel, msg: string, error: Error | null = null): void {
+    if (this._open && this._logGroupRuntimeSettings.level <= level) {
+      this._addMessage(this.createMessage(level, msg, new Date(), error));
+      this.processMessages();
+    }
+  }
+
+  /**
+   * Do not override by end user, will be gone in 0.3 release.
+   */
+  protected _logc(level: LogLevel, msg: () => string, error?: () => Error | null): void {
+    if (this._open && this._logGroupRuntimeSettings.level <= level) {
+      this._addMessage(this.createMessage(level, msg(), new Date(), error !== undefined && error != null ? error() : null));
+      this.processMessages();
+    }
+  }
+
+  /**
+   * Do not override by end user, will be gone in 0.3 release.
+   */
+  protected createMessage(level: LogLevel, msg: string, date: Date, error: Error | null = null): Message {
+    let result = "";
+    if (this._logGroupRuntimeSettings.logFormat.showTimeStamp) {
+      result += MessageFormatUtils.renderDate(date, this._logGroupRuntimeSettings.logFormat.dateFormat) + " ";
+    }
+
+    result += LogLevel[level].toUpperCase() + " ";
+    if (this._logGroupRuntimeSettings.logFormat.showLoggerName) {
+      result += "[" + this._name + "]";
+    }
+
+    result += " " + msg;
+    if (error != null) {
+      const message = new Message(false);
+
+      MessageFormatUtils.renderError(error).then((stackResult: string) => {
+        result += "\n" + stackResult;
+        message.message = result;
+        message.ready = true;
+        this.processMessages();
+      });
+
+      return message;
+    }
+    return new Message(true, result);
+  }
+}
+
+/**
  * Simple logger, that logs to the console. If the console is unavailable will throw exception.
  */
-export class ConsoleLoggerImpl extends AbstractLogger {
+export class ConsoleLoggerImpl extends AbstractBaseLogger {
 
-  constructor(name: string, rule: LogGroupRule) {
-    super(name, rule);
+  constructor(name: string, logGroupRuntimeSettings: LogGroupRuntimeSettings) {
+    super(name, logGroupRuntimeSettings);
   }
 
   protected doLog(msg: string, logLevel: LogLevel): void {
@@ -264,12 +349,12 @@ export class ConsoleLoggerImpl extends AbstractLogger {
  * Can be convenient in some cases. Call toString() for full output, or cast to this class
  * and call getMessages() to do something with it yourself.
  */
-export class MessageBufferLoggerImpl extends AbstractLogger {
+export class MessageBufferLoggerImpl extends AbstractBaseLogger {
 
   private messages: string[] = [];
 
-  constructor(name: string, rule: LogGroupRule) {
-    super(name, rule);
+  constructor(name: string, logGroupRuntimeSettings: LogGroupRuntimeSettings) {
+    super(name, logGroupRuntimeSettings);
   }
 
   public close(): void {
