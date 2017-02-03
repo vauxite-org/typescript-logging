@@ -1,5 +1,5 @@
 import {Logger} from "./Logger";
-import {LoggerFactoryOptions} from "./LoggerFactoryService";
+import {LoggerFactoryOptions, LogGroupRuntimeSettings} from "./LoggerFactoryService";
 
 /**
  * LoggerFactory, which allows you to get a Logger. It also
@@ -34,4 +34,5 @@ export interface LoggerFactory {
    * If no name was specified the LoggerFactory has an auto-generated name.
    */
   getName(): string;
+
 }

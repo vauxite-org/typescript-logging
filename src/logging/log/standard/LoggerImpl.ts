@@ -7,10 +7,12 @@ import {LogGroupRule, LogGroupRuntimeSettings} from "./LoggerFactoryService";
 export class Message {
 
   private _ready: boolean;
+  private _logLevel: LogLevel;
   private _message: string | null;
 
-  constructor(ready: boolean, message: string | null = null) {
+  constructor(ready: boolean, logLevel: LogLevel, message: string | null = null) {
     this._ready = ready;
+    this._logLevel = logLevel;
     this._message = message;
   }
 
@@ -28,6 +30,10 @@ export class Message {
 
   set message(value: string | null) {
     this._message = value;
+  }
+
+  get logLevel(): LogLevel {
+    return this._logLevel;
   }
 }
 
@@ -141,7 +147,7 @@ export abstract class AbstractLogger implements Logger {
     this._allMessages.clear();
   }
 
-  protected abstract doLog(msg: string, logLevel?: LogLevel): void;
+  protected abstract doLog(msg: string, logLevel: LogLevel): void;
 
   /**
    * Do not override by end user, will be gone in 0.3 release.
@@ -187,7 +193,7 @@ export abstract class AbstractLogger implements Logger {
 
     result += " " + msg;
     if (error != null) {
-      const message = new Message(false);
+      const message = new Message(false, level);
 
       MessageFormatUtils.renderError(error).then((stackResult: string) => {
         result += "\n" + stackResult;
@@ -198,7 +204,7 @@ export abstract class AbstractLogger implements Logger {
 
       return message;
     }
-    return new Message(true, result);
+    return new Message(true, level, result);
   }
 
   /**
@@ -218,7 +224,7 @@ export abstract class AbstractLogger implements Logger {
           msgs.removeHead();
           // This can never be null normally, but strict null checking ...
           if (msg.message != null) {
-            this.doLog(msg.message);
+            this.doLog(msg.message, msg.logLevel);
           }
         }
       }
@@ -276,7 +282,7 @@ export abstract class AbstractBaseLogger extends AbstractLogger {
 
     result += " " + msg;
     if (error != null) {
-      const message = new Message(false);
+      const message = new Message(false, level);
 
       MessageFormatUtils.renderError(error).then((stackResult: string) => {
         result += "\n" + stackResult;
@@ -287,7 +293,7 @@ export abstract class AbstractBaseLogger extends AbstractLogger {
 
       return message;
     }
-    return new Message(true, result);
+    return new Message(true, level, result);
   }
 }
 

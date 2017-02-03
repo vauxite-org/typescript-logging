@@ -2,16 +2,17 @@ import {SimpleMap} from "../../utils/DataStructures";
 import {LoggerType} from "../LoggerOptions";
 import {Logger} from "./Logger";
 import {LoggerFactory} from "./LoggerFactory";
-import {LoggerFactoryOptions, LogGroupRule, LogGroupRuntimeSettings} from "./LoggerFactoryService";
+import {LoggerFactoryRuntimeSettings} from "./LoggerFactoryRuntimeSettings";
+import {LoggerFactoryOptions, LogGroupRuntimeSettings} from "./LoggerFactoryService";
 import {AbstractLogger, ConsoleLoggerImpl, MessageBufferLoggerImpl} from "./LoggerImpl";
 
-export class LoggerFactoryImpl implements LoggerFactory {
+export class LoggerFactoryImpl implements LoggerFactory, LoggerFactoryRuntimeSettings {
 
   private _name: string;
   private _options: LoggerFactoryOptions;
   private _loggers: SimpleMap<AbstractLogger> = new SimpleMap<AbstractLogger>();
 
-  private _logGroupRuntimeSettingsIndexedByLoggerGroup: SimpleMap<LogGroupRuntimeSettings> = new SimpleMap<LogGroupRuntimeSettings>();
+  private _logGroupRuntimeSettingsIndexed: LogGroupRuntimeSettings[] = [];
   private _loggerToLogGroupSettings: SimpleMap<LogGroupRuntimeSettings> = new SimpleMap<LogGroupRuntimeSettings>();
 
   constructor(name: string, options: LoggerFactoryOptions) {
@@ -25,7 +26,14 @@ export class LoggerFactoryImpl implements LoggerFactory {
     // Close any current open loggers.
     this.closeLoggers();
     this._loggerToLogGroupSettings.clear();
-    this._logGroupRuntimeSettingsIndexedByLoggerGroup.clear();
+    this._logGroupRuntimeSettingsIndexed = [];
+
+    const logGroupRules = this._options.logGroupRules;
+    /* tslint:disable:prefer-for-of */
+    for (let i = 0; i < logGroupRules.length; i++) {
+      this._logGroupRuntimeSettingsIndexed.push(new LogGroupRuntimeSettings(logGroupRules[i]));
+    }
+    /* tslint:enable:prefer-for-of */
   }
 
   public getLogger(named: string): Logger {
@@ -61,12 +69,19 @@ export class LoggerFactoryImpl implements LoggerFactory {
     return this._name;
   }
 
+  public getLogGroupRuntimeSettingsByIndex(idx: number): LogGroupRuntimeSettings | null {
+    if (idx >= 0 && idx < this._logGroupRuntimeSettingsIndexed.length) {
+      return this._logGroupRuntimeSettingsIndexed[idx];
+    }
+    return null;
+  }
+
   public getLogGroupRuntimeSettingsByLoggerName(nameLogger: string): LogGroupRuntimeSettings | null {
     return this._loggerToLogGroupSettings.get(nameLogger);
   }
 
-  public getLogGroupRuntimeSettingsByLoggerGroupId(idx: number): LogGroupRuntimeSettings | null {
-    return this._logGroupRuntimeSettingsIndexedByLoggerGroup.get(("" + idx));
+  public getLogGroupRuntimeSettings(): LogGroupRuntimeSettings[] {
+    return this._logGroupRuntimeSettingsIndexed.slice(0);
   }
 
   private loadLogger(named: string): AbstractLogger {
@@ -75,8 +90,7 @@ export class LoggerFactoryImpl implements LoggerFactory {
     for (let i = 0; i < logGroupRules.length; i++) {
       const logGroupRule = logGroupRules[i];
       if (logGroupRule.regExp.test(named)) {
-        const key = "" + i;
-        const logGroupRuntimeSettings = this.getOrCreateLogGroupRuntimeSettings(key, logGroupRule);
+        const logGroupRuntimeSettings = this._logGroupRuntimeSettingsIndexed[i];
 
         let logger: AbstractLogger;
         switch (logGroupRule.loggerType) {
@@ -106,14 +120,4 @@ export class LoggerFactoryImpl implements LoggerFactory {
     throw new Error("Failed to find a match to create a Logger for: " + named);
   }
 
-  private getOrCreateLogGroupRuntimeSettings(key: string, logGroupRule: LogGroupRule): LogGroupRuntimeSettings {
-    const logGroupRuntimeSettings = this._logGroupRuntimeSettingsIndexedByLoggerGroup.get(key);
-    if (logGroupRuntimeSettings !== null) {
-      return logGroupRuntimeSettings;
-    }
-    // Create and cache.
-    const result = new LogGroupRuntimeSettings(logGroupRule);
-    this._logGroupRuntimeSettingsIndexedByLoggerGroup.put(key, result);
-    return result;
-  }
 }

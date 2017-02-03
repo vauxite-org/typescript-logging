@@ -1,8 +1,8 @@
-import {Logger} from "../src/logging/log/standard/Logger";
-import {LFService, LoggerFactoryOptions, LogGroupRule} from "../src/logging/log/standard/LoggerFactoryService";
 import {LogLevel} from "../src/logging/log/LoggerOptions";
+import {Logger} from "../src/logging/log/standard/Logger";
 import {LoggerFactory} from "../src/logging/log/standard/LoggerFactory";
 import {LoggerFactoryImpl} from "../src/logging/log/standard/LoggerFactoryImpl";
+import {LFService, LoggerFactoryOptions, LogGroupRule} from "../src/logging/log/standard/LoggerFactoryService";
 
 describe("LoggerFactory configuration", () => {
 
@@ -97,7 +97,7 @@ describe("LoggerFactory configuration", () => {
     expect(notExists).toBeNull();
 
     // Since there is only one loggroup, it has to be 0.
-    const rtSettingsAgain = factory.getLogGroupRuntimeSettingsByLoggerGroupId(0);
+    const rtSettingsAgain = factory.getLogGroupRuntimeSettingsByIndex(0);
     expect(rtSettingsAgain).not.toBeNull();
     expect(rtSettingsAgain === rtSettings).toBeTruthy();
   });

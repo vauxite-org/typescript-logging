@@ -3,6 +3,7 @@ import {SimpleMap} from "../../utils/DataStructures";
 import {LogFormat, LoggerType, LogLevel} from "../LoggerOptions";
 import {LoggerFactory} from "./LoggerFactory";
 import {LoggerFactoryImpl} from "./LoggerFactoryImpl";
+import {LoggerFactoryRuntimeSettings} from "./LoggerFactoryRuntimeSettings";
 import {AbstractLogger} from "./LoggerImpl";
 
 /**
@@ -165,12 +166,25 @@ export class LogGroupRuntimeSettings {
 export interface LFServiceRuntimeSettings {
 
   /**
+   * Returns all LoggerFactoryRuntimeSettings for all registered factories (ordered by index).
+   * @returns {LoggerFactoryRuntimeSettings[]}
+   */
+  getRuntimeSettingsForLoggerFactories(): LoggerFactoryRuntimeSettings[];
+
+  /**
    * Get the runtimesettings for given LogGroup that is part of given LoggerFactory
    * @param nameLoggerFactory Name of LoggerFactory (can be specified when creating a named loggerfactory, a generated on is used otherwise).
    * @param idLogGroupRule Number representing the LogGroup (LogGroupRule)
-   * @return {LogGroupRuntimeSettings} LogGroupRuntimeSettings when found, null otherwise.
+   * @returns {LogGroupRuntimeSettings | null} LogGroupRuntimeSettings when found, null otherwise.
    */
   getLogGroupSettings(nameLoggerFactory: string, idLogGroupRule: number): LogGroupRuntimeSettings | null;
+
+  /**
+   * Get the runtimesettings for given LoggerFactory name
+   * @param nameLoggerFactory Name of LoggerFactory
+   * @returns {LoggerFactoryRuntimeSettings | null}
+   */
+  getLoggerFactoryRuntimeSettingsByName(nameLoggerFactory: string): LoggerFactoryRuntimeSettings | null;
 
 }
 
@@ -222,9 +236,6 @@ class LFServiceImpl implements LFServiceRuntimeSettings {
     }
     this._mapFactories.put(name, factory);
 
-    // Allow extensions to talk with us.
-    ExtensionHelper.register();
-
     return factory;
   }
 
@@ -242,12 +253,27 @@ class LFServiceImpl implements LFServiceRuntimeSettings {
     this._nameCounter = 1;
   }
 
+  public getRuntimeSettingsForLoggerFactories(): LoggerFactoryRuntimeSettings[] {
+    const result: LoggerFactoryRuntimeSettings[] = [];
+    this._mapFactories.forEach((factory) => {
+      // Won't be null, but hey tslint ...
+      if (factory != null) {
+        result.push(factory);
+      }
+    });
+    return result;
+  }
+
   public getLogGroupSettings(nameLoggerFactory: string, idLogGroupRule: number): LogGroupRuntimeSettings | null {
     const factory = this._mapFactories.get(nameLoggerFactory);
     if (factory === null) {
       return null;
     }
-    return factory.getLogGroupRuntimeSettingsByLoggerGroupId(idLogGroupRule);
+    return factory.getLogGroupRuntimeSettingsByIndex(idLogGroupRule);
+  }
+
+  public getLoggerFactoryRuntimeSettingsByName(nameLoggerFactory: string): LoggerFactoryRuntimeSettings | null {
+    return this._mapFactories.get(nameLoggerFactory);
   }
 
   private static createDefaultOptions(): LoggerFactoryOptions {
@@ -290,5 +316,14 @@ export class LFService {
    */
   public static closeLoggers(): void {
     return LFService.INSTANCE_SERVICE.closeLoggers();
+  }
+
+  /**
+   * Return LFServiceRuntimeSettings to retrieve information loggerfactories
+   * and their runtime settings.
+   * @returns {LFServiceRuntimeSettings}
+   */
+  public static getRuntimeSettings(): LFServiceRuntimeSettings {
+    return LFService.INSTANCE_SERVICE;
   }
 }

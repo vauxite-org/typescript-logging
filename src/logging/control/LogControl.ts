@@ -1,5 +1,5 @@
 import {CategoryControl, CategoryControlImpl} from "./CategoryControl";
-import {LogGroupControl, LogGroupControlImpl} from "./LogGroupControl";
+import {LoggerControl, LoggerFactoryControlImpl} from "./LogGroupControl";
 
 /**
  * LogControl interface
@@ -17,9 +17,9 @@ export interface LogControl {
   example(): void;
 
   /**
-   * Return LogGroupControl object.
+   * Return LoggerControl object related to LFService/LoggerFactories.
    */
-  getLogGroupControl(): LogGroupControl;
+  getLFServiceControl(): LoggerControl;
 
   /**
    * Return CategoryControl object.
@@ -69,8 +69,8 @@ export class LogControlImpl implements LogControl {
     /* tslint:enable:no-console */
   }
 
-  public getLogGroupControl(): LogGroupControl {
-    return new LogGroupControlImpl();
+  public getLFServiceControl(): LoggerControl {
+    return new LoggerFactoryControlImpl();
   }
 
   public getCategoryControl(): CategoryControl {

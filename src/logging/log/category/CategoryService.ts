@@ -153,8 +153,7 @@ export class CategoryServiceImpl implements RuntimeSettings {
   private rootLoggers: SimpleMap<TuplePair<Category, CategoryLogger>> = new SimpleMap<TuplePair<Category, CategoryLogger>>();
 
   private constructor() {
-    // Allow extensions to talk with us.
-    ExtensionHelper.register();
+    // Private constructor
   }
 
   public static getInstance(): CategoryServiceImpl {
