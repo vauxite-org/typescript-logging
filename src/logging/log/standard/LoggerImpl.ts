@@ -312,10 +312,7 @@ export class ConsoleLoggerImpl extends AbstractBaseLogger {
       /* tslint:disable:no-console */
       switch (logLevel) {
         case LogLevel.Trace:
-          if (console.trace) {
-            console.trace(msg);
-            logged = true;
-          }
+          // Do not try trace we don't want a stack
           break;
         case LogLevel.Debug:
           if (console.debug) {
@@ -344,6 +341,9 @@ export class ConsoleLoggerImpl extends AbstractBaseLogger {
           break;
         default:
           throw new Error("Log level not supported: " + logLevel);
+      }
+      if (!logged) {
+        console.log(msg);
       }
       /* tslint:enable:no-console */
     }

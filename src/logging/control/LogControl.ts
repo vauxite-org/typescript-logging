@@ -1,5 +1,5 @@
 import {CategoryControl, CategoryControlImpl} from "./CategoryControl";
-import {LoggerControl, LoggerFactoryControlImpl} from "./LogGroupControl";
+import {LoggerControl, LoggerControlImpl} from "./LogGroupControl";
 
 /**
  * LogControl interface
@@ -39,8 +39,8 @@ export class LogControlImpl implements LogControl {
   example()
     ** Shows code example with short explanation on using this.
 
-  getLogGroupControl(): LogGroupControl
-    ** Returns LogGroupControl object.
+  getLFServiceControl(): LoggerControl
+    ** Returns LoggerControl object.
     ** Can be used to control LogGroups
 
   getCategoryControl(): CategoryControl
@@ -52,7 +52,7 @@ export class LogControlImpl implements LogControl {
   // First line you already did, or you would not see this example.
   const lc = TSL.getLogControl();
   lc.help(); // Prints help
-  const lgc = lc.getLogGroupControl();  // Retrieve LogGroupControl object
+  const lgc = lc.getLFServiceControl();  // Retrieve LoggerControl object
     
 `;
   /* tslint:enable:no-trailing-whitespace */
@@ -70,7 +70,7 @@ export class LogControlImpl implements LogControl {
   }
 
   public getLFServiceControl(): LoggerControl {
-    return new LoggerFactoryControlImpl();
+    return new LoggerControlImpl();
   }
 
   public getCategoryControl(): CategoryControl {

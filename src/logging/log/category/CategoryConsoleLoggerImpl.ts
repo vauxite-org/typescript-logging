@@ -20,10 +20,7 @@ export class CategoryConsoleLoggerImpl extends AbstractCategoryLogger {
       /* tslint:disable:no-console */
       switch (msg.getLevel()) {
         case LogLevel.Trace:
-          if (console.trace) {
-            console.trace(fullMsg);
-            logged = true;
-          }
+          // Don't try trace we don't want stacks
           break;
         case LogLevel.Debug:
           if (console.debug) {
