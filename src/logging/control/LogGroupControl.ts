@@ -106,7 +106,7 @@ export class LoggerControlImpl implements LoggerControl {
   }
 
   public listFactories(): void {
-    const rtSettingsFactories = this._getRuntimeSettingsLoggerFactories();
+    const rtSettingsFactories = LoggerControlImpl._getRuntimeSettingsLoggerFactories();
     const result = new StringBuilder();
     result.appendLine("Registered LoggerFactories (index / name)");
     for (let i = 0; i < rtSettingsFactories.length; i++) {
@@ -128,7 +128,7 @@ export class LoggerControlImpl implements LoggerControl {
       });
     }
     else {
-      const settings = this._getRuntimeSettingsLoggerFactories();
+      const settings = LoggerControlImpl._getRuntimeSettingsLoggerFactories();
       if (id >= 0 && id < settings.length) {
         result.push(new TuplePair(id, settings[id]));
       }
@@ -164,7 +164,7 @@ export class LoggerControlImpl implements LoggerControl {
     throw new Error("idFactory is invalid (less than 0) or non existing id.");
   }
 
-  private _getRuntimeSettingsLoggerFactories(): LoggerFactoryRuntimeSettings[] {
+  private static _getRuntimeSettingsLoggerFactories(): LoggerFactoryRuntimeSettings[] {
     return LoggerControlImpl._getSettings().getRuntimeSettingsForLoggerFactories();
   }
 
@@ -201,29 +201,55 @@ class LoggerFactoryControlImpl implements LoggerFactoryControl {
   public setLogLevel(level: string, idGroup: number | null = null): void {
     const newLevel = LogLevel.fromString(level);
 
-    let settings: LogGroupRuntimeSettings[] = [];
-    if (idGroup !== null) {
-      this.checkIndex(idGroup);
-      settings.push(this._settings.getLogGroupRuntimeSettings()[idGroup]);
-    }
-    else {
-      settings = settings.concat(this._settings.getLogGroupRuntimeSettings());
-    }
-
+    const settings: LogGroupRuntimeSettings[] = this._getLogGroupRunTimeSettingsFor(idGroup);
     for (let setting of settings) {
       setting.level = newLevel;
     }
+
+    /* tslint:disable:no-console */
+    console.log("LogLevel set to " + level + " for " + (idGroup != null ? " LogGroup " + idGroup + "." : " all LogGroups."));
+    /* tslint:enable:no-console */
   }
 
   public setLogFormat(format: string, showTimestamp: boolean = true, showLoggerName: boolean = true, idGroup: number | null = null): void {
-    //
+    const formatEnum = DateFormatEnum.fromString(format);
+    const settings: LogGroupRuntimeSettings[] = this._getLogGroupRunTimeSettingsFor(idGroup);
+    for (let setting of settings) {
+      setting.logFormat.dateFormat.formatEnum = formatEnum;
+      setting.logFormat.showTimeStamp = showTimestamp;
+      setting.logFormat.showLoggerName = showLoggerName;
+    }
+    /* tslint:disable:no-console */
+    console.log("LogFormat set to " + format + " for " + (idGroup != null ? " LogGroup " + idGroup + "." : " all LogGroups."));
+    /* tslint:enable:no-console */
   }
 
   public reset(idGroup: number | null = null): void {
-    //
+    const settings: LogGroupRuntimeSettings[] = this._getLogGroupRunTimeSettingsFor(idGroup);
+    for (let setting of settings) {
+      setting.level = setting.logGroupRule.level;
+      setting.logFormat.showTimeStamp = setting.logGroupRule.logFormat.showTimeStamp;
+      setting.logFormat.showLoggerName = setting.logGroupRule.logFormat.showLoggerName;
+      setting.logFormat.dateFormat.formatEnum = setting.logGroupRule.logFormat.dateFormat.formatEnum;
+    }
+    /* tslint:disable:no-console */
+    console.log("Reset all settings for " + (idGroup != null ? " LogGroup " + idGroup + "." : " all LogGroups."));
+    /* tslint:enable:no-console */
   }
 
-  private checkIndex(index: number): void {
+  private _getLogGroupRunTimeSettingsFor(idGroup: number | null): LogGroupRuntimeSettings[] {
+    let settings: LogGroupRuntimeSettings[] = [];
+    if (idGroup !== null) {
+      this._checkIndex(idGroup);
+      settings.push(this._settings.getLogGroupRuntimeSettings()[idGroup]);
+    }
+    else {
+      settings = this._settings.getLogGroupRuntimeSettings();
+    }
+    return settings;
+  }
+
+  private _checkIndex(index: number): void {
     if (index < 0 || index >= this._settings.getLogGroupRuntimeSettings().length) {
       throw new Error("Invalid index, use listLogGroups to find out a valid one.");
     }

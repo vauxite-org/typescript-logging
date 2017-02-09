@@ -86,6 +86,36 @@ export enum DateFormatEnum {
   YearDayMonthTime
 }
 
+/* tslint:disable:no-namespace */
+export namespace DateFormatEnum {
+
+  /**
+   * Returns LogLevel based on string representation
+   * @param val Value
+   * @returns {LogLevel}, Error is thrown if invalid.
+   */
+  export function fromString(val: string): DateFormatEnum {
+    if (val == null) {
+      throw new Error("Argument must be set");
+    }
+
+    switch (val.toLowerCase()) {
+      case "default":
+        return DateFormatEnum.Default;
+      case "yearmonthdayTime":
+        return DateFormatEnum.YearMonthDayTime;
+      case "yeardaymonthwithfulltime":
+        return DateFormatEnum.YearDayMonthWithFullTime;
+      case "yeardaymonthtime":
+        return DateFormatEnum.YearDayMonthTime;
+      default:
+        throw new Error("Unsupported value for conversion: " + val);
+    }
+  }
+
+}
+/* tslint:disable:enable-namespace */
+
 /**
  * DateFormat class, stores data on how to format a date.
  */
@@ -110,6 +140,14 @@ export class DateFormat {
 
   get dateSeparator(): string {
     return this._dateSeparator;
+  }
+
+  set formatEnum(value: DateFormatEnum) {
+    this._formatEnum = value;
+  }
+
+  set dateSeparator(value: string) {
+    this._dateSeparator = value;
   }
 }
 
@@ -144,6 +182,14 @@ export class LogFormat {
 
   get showLoggerName(): boolean {
     return this._showLoggerName;
+  }
+
+  set showTimeStamp(value: boolean) {
+    this._showTimeStamp = value;
+  }
+
+  set showLoggerName(value: boolean) {
+    this._showLoggerName = value;
   }
 }
 

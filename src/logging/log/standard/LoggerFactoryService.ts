@@ -1,6 +1,5 @@
-import {ExtensionHelper} from "../../extension/ExtensionHelper";
 import {SimpleMap} from "../../utils/DataStructures";
-import {LogFormat, LoggerType, LogLevel} from "../LoggerOptions";
+import {DateFormat, LogFormat, LoggerType, LogLevel} from "../LoggerOptions";
 import {LoggerFactory} from "./LoggerFactory";
 import {LoggerFactoryImpl} from "./LoggerFactoryImpl";
 import {LoggerFactoryRuntimeSettings} from "./LoggerFactoryRuntimeSettings";
@@ -115,7 +114,8 @@ export class LogGroupRuntimeSettings {
     this._logGroupRule = logGroupRule;
     this._level = logGroupRule.level;
     this._loggerType = logGroupRule.loggerType;
-    this._logFormat = logGroupRule.logFormat;
+    this._logFormat = new LogFormat(new DateFormat(logGroupRule.logFormat.dateFormat.formatEnum, logGroupRule.logFormat.dateFormat.dateSeparator),
+      logGroupRule.logFormat.showTimeStamp, logGroupRule.logFormat.showLoggerName);
     this._callBackLogger = logGroupRule.callBackLogger;
   }
 
