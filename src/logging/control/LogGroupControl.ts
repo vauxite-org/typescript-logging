@@ -40,6 +40,11 @@ export interface LoggerControl {
 export interface LoggerFactoryControl {
 
   /**
+   * Shows help.
+   */
+  help(): void;
+
+  /**
    * List all log groups registered to this factory.
    */
   listLogGroups(): void;
@@ -175,10 +180,34 @@ export class LoggerControlImpl implements LoggerControl {
 
 class LoggerFactoryControlImpl implements LoggerFactoryControl {
 
+  private static _help: string =
+    `
+  help():
+    ** Shows this help.
+    
+  listLogGroups()
+    ** Lists all registered LogGroups for this factory and their current settings.
+    
+  setLogLevel(level: string, idGroup: number | null = null)
+    ** Sets the log level for given LogGroup id, or if null for all LogGroups.
+     
+  setLogFormat(format: string, showTimestamp: boolean = true, showLoggerName: boolean = true, idGroup: number | null = null)
+    ** Sets the log format, whether to show a timestamp and whether to show a logger name for given group or all groups if null.
+  
+  reset(idGroup: number | null = null)
+    ** Reset everything back to original defaults for given LogGroup id, or all if null.
+`;
+
   private _settings: LoggerFactoryRuntimeSettings;
 
   public constructor(settings: LoggerFactoryRuntimeSettings) {
     this._settings = settings;
+  }
+
+  public help(): void {
+    /* tslint:disable:no-console */
+    console.log(LoggerFactoryControlImpl._help);
+    /* tslint:enable:no-console */
   }
 
   public listLogGroups(): void {
