@@ -27,7 +27,8 @@ export {LogControl} from "./control/LogControl";
 export {LoggerControl} from "./control/LogGroupControl";
 
 // Public stuff we export for extension
-export * from "./extension/ExtensionMessagesJSON";
+export * from "./extension/MessagesToExtensionJSON";
+export * from "./extension/MessagesFromExtensionJSON";
 export * from "./extension/ExtensionMessageJSON";
 export {ExtensionHelper} from "./extension/ExtensionHelper";
 

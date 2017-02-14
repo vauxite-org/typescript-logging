@@ -4,12 +4,12 @@ import {CategoryServiceImpl} from "../log/category/CategoryService";
 import {LogLevel} from "../log/LoggerOptions";
 import {MessageFormatUtils} from "../utils/MessageUtils";
 import {ExtensionMessageContentJSON, ExtensionMessageJSON} from "./ExtensionMessageJSON";
+import {ExtensionRequestChangeLogLevelJSON} from "./MessagesFromExtensionJSON";
 import {
   ExtensionCategoriesUpdateMessageJSON,
   ExtensionCategoryJSON,
   ExtensionCategoryLogMessageJSON,
-  ExtensionRequestChangeLogLevelJSON
-} from "./ExtensionMessagesJSON";
+} from "./MessagesToExtensionJSON";
 
 export class ExtensionHelper {
 
@@ -26,27 +26,21 @@ export class ExtensionHelper {
   public static register(): void {
     if (!ExtensionHelper.registered) {
       ExtensionHelper.registered = true;
+
+      const listener = (evt: MessageEvent) => {
+        /* tslint:disable:no-console */
+        console.log("Got event: " + JSON.stringify(evt.data));
+        /* tslint:enable:no-console */
+
+        const msg = evt.data as ExtensionMessageJSON<any>;
+        if (msg !== null) {
+          ExtensionHelper.processMessageFromExtension(msg);
+        }
+      };
+
+      window.removeEventListener("message", listener);
+      window.addEventListener("message", listener);
     }
-  }
-
-  /**
-   *  Extension framework will call this to enable the integration between two,
-   *  after this call the framework will respond with postMessage() messages.
-   */
-  public static enableExtensionIntegration(): void {
-    if (!ExtensionHelper.registered) {
-      return;
-    }
-
-    const instance = CategoryServiceImpl.getInstance();
-    instance.enableExtensionIntegration();
-
-    // Send over all categories
-    ExtensionHelper.sendRootCategoriesToExtension();
-
-    // Send over the current runtime levels
-    const cats = ExtensionHelper.getAllCategories();
-    ExtensionHelper.sendCategoriesRuntimeUpdateMessage(cats);
   }
 
   public static processMessageFromExtension(msg: ExtensionMessageJSON<any>): void {
@@ -57,6 +51,9 @@ export class ExtensionHelper {
     if (msg.from === "tsl-extension") {
       const data = msg.data;
       switch (data.type) {
+        case "register":
+          ExtensionHelper.enableExtensionIntegration();
+          break;
         case "request-change-loglevel":
           const valueRequest = data.value as ExtensionRequestChangeLogLevelJSON;
           const catsApplied = ExtensionHelper.applyLogLevel(valueRequest.categoryId, valueRequest.logLevel, valueRequest.recursive);
@@ -70,8 +67,11 @@ export class ExtensionHelper {
           break;
       }
     }
+    else if (msg.from === "tsl-logging") {
+      console.log("Dropping tsl-logging message: " + JSON.stringify(msg));
+    }
     else {
-      console.log("Dropping message (not from tsl-extension): " + msg.from);
+      console.log("Dropping unknown message: " + JSON.stringify(msg));
     }
     /* tslint:enable:no-console */
   }
@@ -110,7 +110,8 @@ export class ExtensionHelper {
       return;
     }
     const service = CategoryServiceImpl.getInstance();
-    const catLevels: {categories: [{id: number, logLevel: string}]} = {categories: [{}]} as ExtensionCategoriesUpdateMessageJSON;
+    const catLevels = {categories: Array<{id: number, logLevel: string}>()} as ExtensionCategoriesUpdateMessageJSON;
+
     categories.forEach((cat: Category) => {
       const catSettings = service.getCategorySettings(cat);
       if (catSettings != null) {
@@ -231,5 +232,25 @@ export class ExtensionHelper {
       /* tslint:enable:no-console */
       window.postMessage(msg, "*");
     }
+  }
+
+  /**
+   *  Extension framework will call this to enable the integration between two,
+   *  after this call the framework will respond with postMessage() messages.
+   */
+  private static enableExtensionIntegration(): void {
+    if (!ExtensionHelper.registered) {
+      return;
+    }
+
+    const instance = CategoryServiceImpl.getInstance();
+    instance.enableExtensionIntegration();
+
+    // Send over all categories
+    ExtensionHelper.sendRootCategoriesToExtension();
+
+    // Send over the current runtime levels
+    const cats = ExtensionHelper.getAllCategories();
+    ExtensionHelper.sendCategoriesRuntimeUpdateMessage(cats);
   }
 }
