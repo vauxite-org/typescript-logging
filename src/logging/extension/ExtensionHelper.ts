@@ -28,10 +28,6 @@ export class ExtensionHelper {
       ExtensionHelper.registered = true;
 
       const listener = (evt: MessageEvent) => {
-        /* tslint:disable:no-console */
-        console.log("Got event: " + JSON.stringify(evt.data));
-        /* tslint:enable:no-console */
-
         const msg = evt.data as ExtensionMessageJSON<any>;
         if (msg !== null) {
           ExtensionHelper.processMessageFromExtension(msg);
@@ -67,10 +63,7 @@ export class ExtensionHelper {
           break;
       }
     }
-    else if (msg.from === "tsl-logging") {
-      console.log("Dropping tsl-logging message: " + JSON.stringify(msg));
-    }
-    else {
+    else if (msg.from !== "tsl-logging") {
       console.log("Dropping unknown message: " + JSON.stringify(msg));
     }
     /* tslint:enable:no-console */
