@@ -223,7 +223,9 @@ If you add/change new functionality and want it merged to master, please open a 
 Some things may not fit the library and could be rejected, so if you are unsure please ask first before wasting your valuable time!
 
 ## History
-* 0.2.0-beta6 (current release)
+* 0.2.0-beta7 (current release)
+  * Include source in distribution (makes source map warnings go away)
+* 0.2.0-beta6
   * Updated documentation
   * Enhanced the extension support (to actually help fix issues on the extension with packed webpack modules)
   * Added option for creating named LoggerFactories

@@ -1,6 +1,6 @@
 {
   "name": "typescript-logging",
-  "version": "0.2.0-beta6",
+  "version": "0.2.0-beta7",
   "description": "Library for logging, written in typescript, can be used by normal es5+ javascript as well.",
   "main": "dist/commonjs/typescript-logging",
   "scripts": {
@@ -14,6 +14,7 @@
     "dist/",
     "docs/",
     "img/",
+    "src/",
     "LICENSE",
     "README.md"
   ],
