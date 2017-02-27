@@ -225,7 +225,7 @@ Some things may not fit the library and could be rejected, so if you are unsure 
 ## History
 * 0.2.0 (Current release)
   * No changes, bump to official release.
-* 0.2.0-beta7 (current release)
+* 0.2.0-beta7
   * Include source in distribution (makes source map warnings go away)
 * 0.2.0-beta6
   * Updated documentation
