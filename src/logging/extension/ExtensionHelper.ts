@@ -34,8 +34,10 @@ export class ExtensionHelper {
         }
       };
 
-      window.removeEventListener("message", listener);
-      window.addEventListener("message", listener);
+      if (typeof window !== "undefined") {
+        window.removeEventListener("message", listener);
+        window.addEventListener("message", listener);
+      }
     }
   }
 

@@ -11,6 +11,7 @@
                               }
                        ],
     "one-line": [true, "check-open-brace", "check-whitespace"],
+    "ordered-imports": "false",
     "trailing-comma": false,
     "variable-name": [true, "ban-keywords", "check-format", "allow-leading-underscore"]
   }

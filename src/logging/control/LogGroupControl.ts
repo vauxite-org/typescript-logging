@@ -89,21 +89,6 @@ export class LoggerControlImpl implements LoggerControl {
     ** Return LoggerFactoryControl when found for given idFactory or throws Error if invalid or null, get the id by using listFactories()
 `;
 
-/*
- setLogLevel(level: string, idGroup: number | null = null)
- ** Set new log level for id of LogGroup, applied to both new and existing loggers. If id is null applies to all groups.
- ** level must be one of: Trace,Debug,Info,Warn,Error,Fatal.
-
- setLogFormat(format: string, showTimestamp: boolean = true, showLoggerName: boolean = true, idGroup: number | null = null)
- ** Set format for logging, format must be one of: "Default, YearMonthDayTime, YearDayMonthWithFullTime, YearDayMonthTime".
- ** Applied to both new and existing loggers.
- ** If id is null applies to all groups.
-
- reset(id: number | null = null)
- ** Reset LogGroup back to original settings, applied to both new and existing loggers.
- ** If id is null applies to all groups.
-   */
-
   public help(): void {
     /* tslint:disable:no-console */
     console.log(LoggerControlImpl._help);

@@ -626,216 +626,6 @@ exports.StringBuilder = StringBuilder;
 
 /***/ }),
 /* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var CategoryService_1 = __webpack_require__(5);
-var LoggerOptions_1 = __webpack_require__(0);
-var MessageUtils_1 = __webpack_require__(6);
-var ExtensionHelper = (function () {
-    function ExtensionHelper() {
-        // Private constructor
-    }
-    /**
-     * Enables the window event listener to listen to messages (from extensions).
-     * Can be registered/enabled only once.
-     */
-    ExtensionHelper.register = function () {
-        if (!ExtensionHelper.registered) {
-            ExtensionHelper.registered = true;
-            var listener = function (evt) {
-                var msg = evt.data;
-                if (msg !== null) {
-                    ExtensionHelper.processMessageFromExtension(msg);
-                }
-            };
-            if (typeof window !== "undefined") {
-                window.removeEventListener("message", listener);
-                window.addEventListener("message", listener);
-            }
-        }
-    };
-    ExtensionHelper.processMessageFromExtension = function (msg) {
-        if (!ExtensionHelper.registered) {
-            return;
-        }
-        /* tslint:disable:no-console */
-        if (msg.from === "tsl-extension") {
-            var data = msg.data;
-            switch (data.type) {
-                case "register":
-                    ExtensionHelper.enableExtensionIntegration();
-                    break;
-                case "request-change-loglevel":
-                    var valueRequest = data.value;
-                    var catsApplied = ExtensionHelper.applyLogLevel(valueRequest.categoryId, valueRequest.logLevel, valueRequest.recursive);
-                    if (catsApplied.length > 0) {
-                        // Send changes back
-                        ExtensionHelper.sendCategoriesRuntimeUpdateMessage(catsApplied);
-                    }
-                    break;
-                default:
-                    console.log("Unknown command to process message from extension, command was: " + data.type);
-                    break;
-            }
-        }
-        else if (msg.from !== "tsl-logging") {
-            console.log("Dropping unknown message: " + JSON.stringify(msg));
-        }
-        /* tslint:enable:no-console */
-    };
-    ExtensionHelper.sendCategoryLogMessage = function (msg) {
-        if (!ExtensionHelper.registered) {
-            return;
-        }
-        var categoryIds = msg.getCategories().map(function (cat) {
-            return cat.id;
-        });
-        var content = {
-            type: "log-message",
-            value: {
-                categories: categoryIds,
-                errorAsStack: msg.getErrorAsStack(),
-                formattedMessage: MessageUtils_1.MessageFormatUtils.renderDefaultMessage(msg, false),
-                logLevel: LoggerOptions_1.LogLevel[msg.getLevel()].toString(),
-                message: msg.getMessage(),
-                resolvedErrorMessage: msg.isResolvedErrorMessage()
-            }
-        };
-        var message = {
-            data: content,
-            from: "tsl-logging",
-        };
-        ExtensionHelper.sendMessage(message);
-    };
-    ExtensionHelper.sendCategoriesRuntimeUpdateMessage = function (categories) {
-        if (!ExtensionHelper.registered) {
-            return;
-        }
-        var service = CategoryService_1.CategoryServiceImpl.getInstance();
-        var catLevels = { categories: Array() };
-        categories.forEach(function (cat) {
-            var catSettings = service.getCategorySettings(cat);
-            if (catSettings != null) {
-                catLevels.categories.push({ id: cat.id, logLevel: LoggerOptions_1.LogLevel[catSettings.logLevel].toString() });
-            }
-        });
-        var content = {
-            type: "categories-rt-update",
-            value: catLevels,
-        };
-        var message = {
-            data: content,
-            from: "tsl-logging"
-        };
-        ExtensionHelper.sendMessage(message);
-    };
-    ExtensionHelper.sendRootCategoriesToExtension = function () {
-        if (!ExtensionHelper.registered) {
-            return;
-        }
-        var categories = CategoryService_1.CategoryServiceImpl.getInstance().getRootCategories().map(function (cat) {
-            return ExtensionHelper.getCategoryAsJSON(cat);
-        });
-        var content = {
-            type: "root-categories-tree",
-            value: categories
-        };
-        var message = {
-            data: content,
-            from: "tsl-logging"
-        };
-        ExtensionHelper.sendMessage(message);
-    };
-    /**
-     * If extension integration is enabled, will send the root categories over to the extension.
-     * Otherwise does nothing.
-     */
-    ExtensionHelper.getCategoryAsJSON = function (cat) {
-        var childCategories = cat.children.map(function (child) {
-            return ExtensionHelper.getCategoryAsJSON(child);
-        });
-        return {
-            children: childCategories,
-            id: cat.id,
-            logLevel: LoggerOptions_1.LogLevel[cat.logLevel].toString(),
-            name: cat.name,
-            parentId: (cat.parent != null ? cat.parent.id : null),
-        };
-    };
-    ExtensionHelper.applyLogLevel = function (categoryId, logLevel, recursive) {
-        var cats = [];
-        var category = CategoryService_1.CategoryServiceImpl.getInstance().getCategoryById(categoryId);
-        if (category != null) {
-            ExtensionHelper._applyLogLevelRecursive(category, LoggerOptions_1.LogLevel.fromString(logLevel), recursive, cats);
-        }
-        else {
-            /* tslint:disable:no-console */
-            console.log("Could not change log level, failed to find category with id: " + categoryId);
-        }
-        return cats;
-    };
-    ExtensionHelper._applyLogLevelRecursive = function (category, logLevel, recursive, cats) {
-        var categorySettings = CategoryService_1.CategoryServiceImpl.getInstance().getCategorySettings(category);
-        if (categorySettings != null) {
-            categorySettings.logLevel = logLevel;
-            cats.push(category);
-            if (recursive) {
-                category.children.forEach(function (child) {
-                    ExtensionHelper._applyLogLevelRecursive(child, logLevel, recursive, cats);
-                });
-            }
-        }
-    };
-    ExtensionHelper.getAllCategories = function () {
-        var cats = [];
-        var addCats = function (cat, allCats) {
-            allCats.push(cat);
-            cat.children.forEach(function (catChild) {
-                addCats(catChild, allCats);
-            });
-        };
-        CategoryService_1.CategoryServiceImpl.getInstance().getRootCategories().forEach(function (cat) {
-            addCats(cat, cats);
-        });
-        return cats;
-    };
-    ExtensionHelper.sendMessage = function (msg) {
-        if (!ExtensionHelper.registered) {
-            return;
-        }
-        if (typeof window !== "undefined") {
-            /* tslint:disable:no-console */
-            console.log("Sending message to extension, message type: " + msg.data.type);
-            /* tslint:enable:no-console */
-            window.postMessage(msg, "*");
-        }
-    };
-    /**
-     *  Extension framework will call this to enable the integration between two,
-     *  after this call the framework will respond with postMessage() messages.
-     */
-    ExtensionHelper.enableExtensionIntegration = function () {
-        if (!ExtensionHelper.registered) {
-            return;
-        }
-        var instance = CategoryService_1.CategoryServiceImpl.getInstance();
-        instance.enableExtensionIntegration();
-        // Send over all categories
-        ExtensionHelper.sendRootCategoriesToExtension();
-        // Send over the current runtime levels
-        var cats = ExtensionHelper.getAllCategories();
-        ExtensionHelper.sendCategoriesRuntimeUpdateMessage(cats);
-    };
-    return ExtensionHelper;
-}());
-ExtensionHelper.registered = false;
-exports.ExtensionHelper = ExtensionHelper;
-//# sourceMappingURL=ExtensionHelper.js.map
-
-/***/ }),
-/* 3 */
 /***/ (function(module, exports) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -1258,13 +1048,13 @@ exports.compareByGeneratedPositionsInflated = compareByGeneratedPositionsInflate
 
 
 /***/ }),
-/* 4 */
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 var DataStructures_1 = __webpack_require__(1);
-var MessageUtils_1 = __webpack_require__(6);
+var MessageUtils_1 = __webpack_require__(4);
 var LoggerOptions_1 = __webpack_require__(0);
 var CategoryLogMessageImpl = (function () {
     function CategoryLogMessageImpl(message, error, categories, date, level, logFormat, ready) {
@@ -1550,12 +1340,355 @@ exports.AbstractCategoryLogger = AbstractCategoryLogger;
 //# sourceMappingURL=AbstractCategoryLogger.js.map
 
 /***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var ST = __webpack_require__(34);
+var LoggerOptions_1 = __webpack_require__(0);
+/**
+ * Some utilities to format messages.
+ */
+var MessageFormatUtils = (function () {
+    function MessageFormatUtils() {
+    }
+    /**
+     * Render given date in given DateFormat and return as String.
+     * @param date Date
+     * @param dateFormat Format
+     * @returns {string} Formatted date
+     */
+    MessageFormatUtils.renderDate = function (date, dateFormat) {
+        var lpad = function (value, chars, padWith) {
+            var howMany = chars - value.length;
+            if (howMany > 0) {
+                var res = "";
+                for (var i = 0; i < howMany; i++) {
+                    res += padWith;
+                }
+                res += value;
+                return res;
+            }
+            return value;
+        };
+        var fullYear = function (d) {
+            return lpad(d.getFullYear().toString(), 4, "0");
+        };
+        var month = function (d) {
+            return lpad((d.getMonth() + 1).toString(), 2, "0");
+        };
+        var day = function (d) {
+            return lpad(d.getDate().toString(), 2, "0");
+        };
+        var hours = function (d) {
+            return lpad(d.getHours().toString(), 2, "0");
+        };
+        var minutes = function (d) {
+            return lpad(d.getMinutes().toString(), 2, "0");
+        };
+        var seconds = function (d) {
+            return lpad(d.getSeconds().toString(), 2, "0");
+        };
+        var millis = function (d) {
+            return lpad(d.getMilliseconds().toString(), 3, "0");
+        };
+        var dateSeparator = dateFormat.dateSeparator;
+        var ds = "";
+        switch (dateFormat.formatEnum) {
+            case LoggerOptions_1.DateFormatEnum.Default:
+                // yyyy-mm-dd hh:mm:ss,m
+                ds = fullYear(date) + dateSeparator + month(date) + dateSeparator + day(date) + " " +
+                    hours(date) + ":" + minutes(date) + ":" + seconds(date) + "," + millis(date);
+                break;
+            case LoggerOptions_1.DateFormatEnum.YearMonthDayTime:
+                ds = fullYear(date) + dateSeparator + month(date) + dateSeparator + day(date) + " " +
+                    hours(date) + ":" + minutes(date) + ":" + seconds(date);
+                break;
+            case LoggerOptions_1.DateFormatEnum.YearDayMonthWithFullTime:
+                ds = fullYear(date) + dateSeparator + day(date) + dateSeparator + month(date) + " " +
+                    hours(date) + ":" + minutes(date) + ":" + seconds(date) + "," + millis(date);
+                break;
+            case LoggerOptions_1.DateFormatEnum.YearDayMonthTime:
+                ds = fullYear(date) + dateSeparator + day(date) + dateSeparator + month(date) + " " +
+                    hours(date) + ":" + minutes(date) + ":" + seconds(date);
+                break;
+            default:
+                throw new Error("Unsupported date format enum: " + dateFormat.formatEnum);
+        }
+        return ds;
+    };
+    /**
+     * Renders given category log message
+     * @param msg Message to format
+     * @param addStack If true adds the stack to the output, otherwise skips it
+     * @returns {string} Formatted message
+     */
+    MessageFormatUtils.renderDefaultMessage = function (msg, addStack) {
+        var result = "";
+        var logFormat = msg.getLogFormat();
+        if (logFormat.showTimeStamp) {
+            result += MessageFormatUtils.renderDate(msg.getDate(), logFormat.dateFormat) + " ";
+        }
+        result += LoggerOptions_1.LogLevel[msg.getLevel()].toUpperCase();
+        if (msg.isResolvedErrorMessage()) {
+            result += " (resolved)";
+        }
+        result += " ";
+        if (logFormat.showCategoryName) {
+            result += "[";
+            msg.getCategories().forEach(function (value, idx) {
+                if (idx > 0) {
+                    result += ", ";
+                }
+                result += value.name;
+            });
+            result += "]";
+        }
+        result += " " + msg.getMessage();
+        if (addStack && msg.getErrorAsStack() != null) {
+            result += "\n" + msg.getErrorAsStack();
+        }
+        return result;
+    };
+    /**
+     * Render error as stack
+     * @param error Return error as Promise
+     * @returns {Promise<string>|Promise} Promise for stack
+     */
+    MessageFormatUtils.renderError = function (error) {
+        var result = error.name + ": " + error.message + "\n@";
+        return new Promise(function (resolve) {
+            // This one has a promise too
+            ST.fromError(error, { offline: true }).then(function (frames) {
+                var stackStr = (frames.map(function (frame) {
+                    return frame.toString();
+                })).join("\n  ");
+                result += "\n" + stackStr;
+                // This resolves our returned promise
+                resolve(result);
+            });
+        });
+    };
+    return MessageFormatUtils;
+}());
+exports.MessageFormatUtils = MessageFormatUtils;
+//# sourceMappingURL=MessageUtils.js.map
+
+/***/ }),
 /* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var ExtensionHelper_1 = __webpack_require__(2);
+var CategoryService_1 = __webpack_require__(6);
+var LoggerOptions_1 = __webpack_require__(0);
+var MessageUtils_1 = __webpack_require__(4);
+var ExtensionHelper = (function () {
+    function ExtensionHelper() {
+        // Private constructor
+    }
+    /**
+     * Enables the window event listener to listen to messages (from extensions).
+     * Can be registered/enabled only once.
+     */
+    ExtensionHelper.register = function () {
+        if (!ExtensionHelper.registered) {
+            ExtensionHelper.registered = true;
+            var listener = function (evt) {
+                var msg = evt.data;
+                if (msg !== null) {
+                    ExtensionHelper.processMessageFromExtension(msg);
+                }
+            };
+            window.removeEventListener("message", listener);
+            window.addEventListener("message", listener);
+        }
+    };
+    ExtensionHelper.processMessageFromExtension = function (msg) {
+        if (!ExtensionHelper.registered) {
+            return;
+        }
+        /* tslint:disable:no-console */
+        if (msg.from === "tsl-extension") {
+            var data = msg.data;
+            switch (data.type) {
+                case "register":
+                    ExtensionHelper.enableExtensionIntegration();
+                    break;
+                case "request-change-loglevel":
+                    var valueRequest = data.value;
+                    var catsApplied = ExtensionHelper.applyLogLevel(valueRequest.categoryId, valueRequest.logLevel, valueRequest.recursive);
+                    if (catsApplied.length > 0) {
+                        // Send changes back
+                        ExtensionHelper.sendCategoriesRuntimeUpdateMessage(catsApplied);
+                    }
+                    break;
+                default:
+                    console.log("Unknown command to process message from extension, command was: " + data.type);
+                    break;
+            }
+        }
+        else if (msg.from !== "tsl-logging") {
+            console.log("Dropping unknown message: " + JSON.stringify(msg));
+        }
+        /* tslint:enable:no-console */
+    };
+    ExtensionHelper.sendCategoryLogMessage = function (msg) {
+        if (!ExtensionHelper.registered) {
+            return;
+        }
+        var categoryIds = msg.getCategories().map(function (cat) {
+            return cat.id;
+        });
+        var content = {
+            type: "log-message",
+            value: {
+                categories: categoryIds,
+                errorAsStack: msg.getErrorAsStack(),
+                formattedMessage: MessageUtils_1.MessageFormatUtils.renderDefaultMessage(msg, false),
+                logLevel: LoggerOptions_1.LogLevel[msg.getLevel()].toString(),
+                message: msg.getMessage(),
+                resolvedErrorMessage: msg.isResolvedErrorMessage()
+            }
+        };
+        var message = {
+            data: content,
+            from: "tsl-logging",
+        };
+        ExtensionHelper.sendMessage(message);
+    };
+    ExtensionHelper.sendCategoriesRuntimeUpdateMessage = function (categories) {
+        if (!ExtensionHelper.registered) {
+            return;
+        }
+        var service = CategoryService_1.CategoryServiceImpl.getInstance();
+        var catLevels = { categories: Array() };
+        categories.forEach(function (cat) {
+            var catSettings = service.getCategorySettings(cat);
+            if (catSettings != null) {
+                catLevels.categories.push({ id: cat.id, logLevel: LoggerOptions_1.LogLevel[catSettings.logLevel].toString() });
+            }
+        });
+        var content = {
+            type: "categories-rt-update",
+            value: catLevels,
+        };
+        var message = {
+            data: content,
+            from: "tsl-logging"
+        };
+        ExtensionHelper.sendMessage(message);
+    };
+    ExtensionHelper.sendRootCategoriesToExtension = function () {
+        if (!ExtensionHelper.registered) {
+            return;
+        }
+        var categories = CategoryService_1.CategoryServiceImpl.getInstance().getRootCategories().map(function (cat) {
+            return ExtensionHelper.getCategoryAsJSON(cat);
+        });
+        var content = {
+            type: "root-categories-tree",
+            value: categories
+        };
+        var message = {
+            data: content,
+            from: "tsl-logging"
+        };
+        ExtensionHelper.sendMessage(message);
+    };
+    /**
+     * If extension integration is enabled, will send the root categories over to the extension.
+     * Otherwise does nothing.
+     */
+    ExtensionHelper.getCategoryAsJSON = function (cat) {
+        var childCategories = cat.children.map(function (child) {
+            return ExtensionHelper.getCategoryAsJSON(child);
+        });
+        return {
+            children: childCategories,
+            id: cat.id,
+            logLevel: LoggerOptions_1.LogLevel[cat.logLevel].toString(),
+            name: cat.name,
+            parentId: (cat.parent != null ? cat.parent.id : null),
+        };
+    };
+    ExtensionHelper.applyLogLevel = function (categoryId, logLevel, recursive) {
+        var cats = [];
+        var category = CategoryService_1.CategoryServiceImpl.getInstance().getCategoryById(categoryId);
+        if (category != null) {
+            ExtensionHelper._applyLogLevelRecursive(category, LoggerOptions_1.LogLevel.fromString(logLevel), recursive, cats);
+        }
+        else {
+            /* tslint:disable:no-console */
+            console.log("Could not change log level, failed to find category with id: " + categoryId);
+        }
+        return cats;
+    };
+    ExtensionHelper._applyLogLevelRecursive = function (category, logLevel, recursive, cats) {
+        var categorySettings = CategoryService_1.CategoryServiceImpl.getInstance().getCategorySettings(category);
+        if (categorySettings != null) {
+            categorySettings.logLevel = logLevel;
+            cats.push(category);
+            if (recursive) {
+                category.children.forEach(function (child) {
+                    ExtensionHelper._applyLogLevelRecursive(child, logLevel, recursive, cats);
+                });
+            }
+        }
+    };
+    ExtensionHelper.getAllCategories = function () {
+        var cats = [];
+        var addCats = function (cat, allCats) {
+            allCats.push(cat);
+            cat.children.forEach(function (catChild) {
+                addCats(catChild, allCats);
+            });
+        };
+        CategoryService_1.CategoryServiceImpl.getInstance().getRootCategories().forEach(function (cat) {
+            addCats(cat, cats);
+        });
+        return cats;
+    };
+    ExtensionHelper.sendMessage = function (msg) {
+        if (!ExtensionHelper.registered) {
+            return;
+        }
+        if (typeof window !== "undefined") {
+            /* tslint:disable:no-console */
+            console.log("Sending message to extension, message type: " + msg.data.type);
+            /* tslint:enable:no-console */
+            window.postMessage(msg, "*");
+        }
+    };
+    /**
+     *  Extension framework will call this to enable the integration between two,
+     *  after this call the framework will respond with postMessage() messages.
+     */
+    ExtensionHelper.enableExtensionIntegration = function () {
+        if (!ExtensionHelper.registered) {
+            return;
+        }
+        var instance = CategoryService_1.CategoryServiceImpl.getInstance();
+        instance.enableExtensionIntegration();
+        // Send over all categories
+        ExtensionHelper.sendRootCategoriesToExtension();
+        // Send over the current runtime levels
+        var cats = ExtensionHelper.getAllCategories();
+        ExtensionHelper.sendCategoriesRuntimeUpdateMessage(cats);
+    };
+    return ExtensionHelper;
+}());
+ExtensionHelper.registered = false;
+exports.ExtensionHelper = ExtensionHelper;
+//# sourceMappingURL=ExtensionHelper.js.map
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 var DataStructures_1 = __webpack_require__(1);
 var LoggerOptions_1 = __webpack_require__(0);
 var CategoryConsoleLoggerImpl_1 = __webpack_require__(8);
@@ -1700,7 +1833,6 @@ var CategoryServiceImpl = (function () {
         // Key is name of root logger.
         this.rootLoggers = new DataStructures_1.SimpleMap();
         // Private constructor
-        ExtensionHelper_1.ExtensionHelper.register();
     }
     CategoryServiceImpl.getInstance = function () {
         return CategoryServiceImpl.INSTANCE;
@@ -1959,142 +2091,6 @@ exports.CategoryServiceFactory = CategoryServiceFactory;
 //# sourceMappingURL=CategoryService.js.map
 
 /***/ }),
-/* 6 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var ST = __webpack_require__(34);
-var LoggerOptions_1 = __webpack_require__(0);
-/**
- * Some utilities to format messages.
- */
-var MessageFormatUtils = (function () {
-    function MessageFormatUtils() {
-    }
-    /**
-     * Render given date in given DateFormat and return as String.
-     * @param date Date
-     * @param dateFormat Format
-     * @returns {string} Formatted date
-     */
-    MessageFormatUtils.renderDate = function (date, dateFormat) {
-        var lpad = function (value, chars, padWith) {
-            var howMany = chars - value.length;
-            if (howMany > 0) {
-                var res = "";
-                for (var i = 0; i < howMany; i++) {
-                    res += padWith;
-                }
-                res += value;
-                return res;
-            }
-            return value;
-        };
-        var fullYear = function (d) {
-            return lpad(d.getFullYear().toString(), 4, "0");
-        };
-        var month = function (d) {
-            return lpad((d.getMonth() + 1).toString(), 2, "0");
-        };
-        var day = function (d) {
-            return lpad(d.getDate().toString(), 2, "0");
-        };
-        var hours = function (d) {
-            return lpad(d.getHours().toString(), 2, "0");
-        };
-        var minutes = function (d) {
-            return lpad(d.getMinutes().toString(), 2, "0");
-        };
-        var seconds = function (d) {
-            return lpad(d.getSeconds().toString(), 2, "0");
-        };
-        var millis = function (d) {
-            return lpad(d.getMilliseconds().toString(), 3, "0");
-        };
-        var dateSeparator = dateFormat.dateSeparator;
-        var ds = "";
-        switch (dateFormat.formatEnum) {
-            case LoggerOptions_1.DateFormatEnum.Default:
-                // yyyy-mm-dd hh:mm:ss,m
-                ds = fullYear(date) + dateSeparator + month(date) + dateSeparator + day(date) + " " +
-                    hours(date) + ":" + minutes(date) + ":" + seconds(date) + "," + millis(date);
-                break;
-            case LoggerOptions_1.DateFormatEnum.YearMonthDayTime:
-                ds = fullYear(date) + dateSeparator + month(date) + dateSeparator + day(date) + " " +
-                    hours(date) + ":" + minutes(date) + ":" + seconds(date);
-                break;
-            case LoggerOptions_1.DateFormatEnum.YearDayMonthWithFullTime:
-                ds = fullYear(date) + dateSeparator + day(date) + dateSeparator + month(date) + " " +
-                    hours(date) + ":" + minutes(date) + ":" + seconds(date) + "," + millis(date);
-                break;
-            case LoggerOptions_1.DateFormatEnum.YearDayMonthTime:
-                ds = fullYear(date) + dateSeparator + day(date) + dateSeparator + month(date) + " " +
-                    hours(date) + ":" + minutes(date) + ":" + seconds(date);
-                break;
-            default:
-                throw new Error("Unsupported date format enum: " + dateFormat.formatEnum);
-        }
-        return ds;
-    };
-    /**
-     * Renders given category log message
-     * @param msg Message to format
-     * @param addStack If true adds the stack to the output, otherwise skips it
-     * @returns {string} Formatted message
-     */
-    MessageFormatUtils.renderDefaultMessage = function (msg, addStack) {
-        var result = "";
-        var logFormat = msg.getLogFormat();
-        if (logFormat.showTimeStamp) {
-            result += MessageFormatUtils.renderDate(msg.getDate(), logFormat.dateFormat) + " ";
-        }
-        result += LoggerOptions_1.LogLevel[msg.getLevel()].toUpperCase();
-        if (msg.isResolvedErrorMessage()) {
-            result += " (resolved)";
-        }
-        result += " ";
-        if (logFormat.showCategoryName) {
-            result += "[";
-            msg.getCategories().forEach(function (value, idx) {
-                if (idx > 0) {
-                    result += ", ";
-                }
-                result += value.name;
-            });
-            result += "]";
-        }
-        result += " " + msg.getMessage();
-        if (addStack && msg.getErrorAsStack() != null) {
-            result += "\n" + msg.getErrorAsStack();
-        }
-        return result;
-    };
-    /**
-     * Render error as stack
-     * @param error Return error as Promise
-     * @returns {Promise<string>|Promise} Promise for stack
-     */
-    MessageFormatUtils.renderError = function (error) {
-        var result = error.name + ": " + error.message + "\n@";
-        return new Promise(function (resolve) {
-            // This one has a promise too
-            ST.fromError(error, { offline: true }).then(function (frames) {
-                var stackStr = (frames.map(function (frame) {
-                    return frame.toString();
-                })).join("\n  ");
-                result += "\n" + stackStr;
-                // This resolves our returned promise
-                resolve(result);
-            });
-        });
-    };
-    return MessageFormatUtils;
-}());
-exports.MessageFormatUtils = MessageFormatUtils;
-//# sourceMappingURL=MessageUtils.js.map
-
-/***/ }),
 /* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -2103,7 +2099,6 @@ exports.MessageFormatUtils = MessageFormatUtils;
 var DataStructures_1 = __webpack_require__(1);
 var LoggerOptions_1 = __webpack_require__(0);
 var LoggerFactoryImpl_1 = __webpack_require__(22);
-var ExtensionHelper_1 = __webpack_require__(2);
 /**
  * Defines a LogGroupRule, this allows you to either have everything configured the same way
  * or for example loggers that start with name model. It allows you to group loggers together
@@ -2281,7 +2276,6 @@ var LFServiceImpl = (function () {
         this._nameCounter = 1;
         this._mapFactories = new DataStructures_1.SimpleMap();
         // Private constructor.
-        ExtensionHelper_1.ExtensionHelper.register();
     }
     LFServiceImpl.getInstance = function () {
         return LFServiceImpl.INSTANCE;
@@ -2418,7 +2412,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var LoggerOptions_1 = __webpack_require__(0);
-var AbstractCategoryLogger_1 = __webpack_require__(4);
+var AbstractCategoryLogger_1 = __webpack_require__(3);
 /**
  * Simple logger, that logs to the console. If the console is unavailable will throw an exception.
  */
@@ -2644,7 +2638,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var AbstractCategoryLogger_1 = __webpack_require__(4);
+var AbstractCategoryLogger_1 = __webpack_require__(3);
 /**
  * Logger which buffers all messages, use with care due to possible high memory footprint.
  * Can be convenient in some cases. Call toString() for full output, or cast to this class
@@ -2686,7 +2680,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var DataStructures_1 = __webpack_require__(1);
-var MessageUtils_1 = __webpack_require__(6);
+var MessageUtils_1 = __webpack_require__(4);
 var LoggerOptions_1 = __webpack_require__(0);
 var Message = (function () {
     function Message(ready, logLevel, message) {
@@ -3051,7 +3045,7 @@ exports.MessageBufferLoggerImpl = MessageBufferLoggerImpl;
  * http://opensource.org/licenses/BSD-3-Clause
  */
 
-var util = __webpack_require__(3);
+var util = __webpack_require__(2);
 var has = Object.prototype.hasOwnProperty;
 
 /**
@@ -3308,7 +3302,7 @@ exports.decode = function base64VLQ_decode(aStr, aIndex, aOutParam) {
  */
 
 var base64VLQ = __webpack_require__(13);
-var util = __webpack_require__(3);
+var util = __webpack_require__(2);
 var ArraySet = __webpack_require__(12).ArraySet;
 var MappingList = __webpack_require__(26).MappingList;
 
@@ -3865,7 +3859,7 @@ exports.LogControlImpl = LogControlImpl;
 "use strict";
 
 var LoggerOptions_1 = __webpack_require__(0);
-var CategoryService_1 = __webpack_require__(5);
+var CategoryService_1 = __webpack_require__(6);
 /**
  * Category for use with categorized logging.
  * At minimum you need one category, which will serve as the root category.
@@ -4223,49 +4217,16 @@ exports.JSONHelper = JSONHelper;
 
 "use strict";
 
-var DataStructures_1 = __webpack_require__(1);
-var CategoryService_1 = __webpack_require__(5);
-var LoggerOptions_1 = __webpack_require__(0);
 var CategoryControlImpl = (function () {
     function CategoryControlImpl() {
     }
+    CategoryControlImpl.prototype.showSettings = function () {
+        // todo
+    };
     CategoryControlImpl.prototype.help = function () {
         /* tslint:disable:no-console */
         console.log("help");
         /* tslint:enable:no-console */
-    };
-    CategoryControlImpl.prototype.example = function () {
-        //
-    };
-    CategoryControlImpl.prototype.showSettings = function () {
-        var result = new DataStructures_1.StringBuilder();
-        var service = CategoryService_1.CategoryServiceFactory.getRuntimeSettings();
-        var count = 1;
-        service.getRootCategories().forEach(function (category) {
-            count = CategoryControlImpl._processCategory(service, category, result, count, 0);
-        });
-        /* tslint:disable:no-console */
-        console.log(result.toString());
-        /* tslint:enable:no-console */
-    };
-    CategoryControlImpl._processCategory = function (service, category, result, count, indent) {
-        var settings = service.getCategorySettings(category);
-        if (settings !== null) {
-            result.append("  " + count + ": ");
-            if (indent > 0) {
-                for (var i = 0; i < indent; i++) {
-                    result.append("  ");
-                }
-            }
-            result.append(category.name + " (" + LoggerOptions_1.LogLevel[settings.logLevel].toString() + "@" + LoggerOptions_1.LoggerType[settings.loggerType].toString() + ")\n");
-            count++;
-            if (category.children.length > 0) {
-                category.children.forEach(function (child) {
-                    count = CategoryControlImpl._processCategory(service, child, result, count, indent + 1);
-                });
-            }
-        }
-        return count;
     };
     return CategoryControlImpl;
 }());
@@ -4284,6 +4245,20 @@ var DataStructures_1 = __webpack_require__(1);
 var LoggerControlImpl = (function () {
     function LoggerControlImpl() {
     }
+    /*
+     setLogLevel(level: string, idGroup: number | null = null)
+     ** Set new log level for id of LogGroup, applied to both new and existing loggers. If id is null applies to all groups.
+     ** level must be one of: Trace,Debug,Info,Warn,Error,Fatal.
+    
+     setLogFormat(format: string, showTimestamp: boolean = true, showLoggerName: boolean = true, idGroup: number | null = null)
+     ** Set format for logging, format must be one of: "Default, YearMonthDayTime, YearDayMonthWithFullTime, YearDayMonthTime".
+     ** Applied to both new and existing loggers.
+     ** If id is null applies to all groups.
+    
+     reset(id: number | null = null)
+     ** Reset LogGroup back to original settings, applied to both new and existing loggers.
+     ** If id is null applies to all groups.
+       */
     LoggerControlImpl.prototype.help = function () {
         /* tslint:disable:no-console */
         console.log(LoggerControlImpl._help);
@@ -4451,8 +4426,8 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var ExtensionHelper_1 = __webpack_require__(2);
-var AbstractCategoryLogger_1 = __webpack_require__(4);
+var ExtensionHelper_1 = __webpack_require__(5);
+var AbstractCategoryLogger_1 = __webpack_require__(3);
 /**
  * This class should not be used directly, it is used for communication with the extension only.
  */
@@ -5009,7 +4984,7 @@ exports.search = function search(aNeedle, aHaystack, aCompare, aBias) {
  * http://opensource.org/licenses/BSD-3-Clause
  */
 
-var util = __webpack_require__(3);
+var util = __webpack_require__(2);
 
 /**
  * Determine whether mappingB is after mappingA with respect to generated
@@ -5214,7 +5189,7 @@ exports.quickSort = function (ary, comparator) {
  * http://opensource.org/licenses/BSD-3-Clause
  */
 
-var util = __webpack_require__(3);
+var util = __webpack_require__(2);
 var binarySearch = __webpack_require__(25);
 var ArraySet = __webpack_require__(12).ArraySet;
 var base64VLQ = __webpack_require__(13);
@@ -6303,7 +6278,7 @@ exports.IndexedSourceMapConsumer = IndexedSourceMapConsumer;
  */
 
 var SourceMapGenerator = __webpack_require__(14).SourceMapGenerator;
-var util = __webpack_require__(3);
+var util = __webpack_require__(2);
 
 // Matches a Windows-style `\r\n` newline or a `\n` newline used by all other
 // operating systems these days (capturing the result).
@@ -7439,8 +7414,8 @@ function __export(m) {
 }
 // CategoryService related.
 var LogControl_1 = __webpack_require__(16);
-var ExtensionHelper_1 = __webpack_require__(2);
-var AbstractCategoryLogger_1 = __webpack_require__(4);
+var ExtensionHelper_1 = __webpack_require__(5);
+var AbstractCategoryLogger_1 = __webpack_require__(3);
 exports.AbstractCategoryLogger = AbstractCategoryLogger_1.AbstractCategoryLogger;
 var CategoryConsoleLoggerImpl_1 = __webpack_require__(8);
 exports.CategoryConsoleLoggerImpl = CategoryConsoleLoggerImpl_1.CategoryConsoleLoggerImpl;
@@ -7450,7 +7425,7 @@ var CategoryLogger_1 = __webpack_require__(17);
 exports.Category = CategoryLogger_1.Category;
 var CategoryMessageBufferImpl_1 = __webpack_require__(10);
 exports.CategoryMessageBufferLoggerImpl = CategoryMessageBufferImpl_1.CategoryMessageBufferLoggerImpl;
-var CategoryService_1 = __webpack_require__(5);
+var CategoryService_1 = __webpack_require__(6);
 exports.CategoryDefaultConfiguration = CategoryService_1.CategoryDefaultConfiguration;
 exports.CategoryRuntimeSettings = CategoryService_1.CategoryRuntimeSettings;
 exports.CategoryServiceFactory = CategoryService_1.CategoryServiceFactory;
@@ -7469,14 +7444,14 @@ exports.DateFormatEnum = LoggerOptions_1.DateFormatEnum;
 exports.LogFormat = LoggerOptions_1.LogFormat;
 exports.LoggerType = LoggerOptions_1.LoggerType;
 exports.LogLevel = LoggerOptions_1.LogLevel;
-var ExtensionHelper_2 = __webpack_require__(2);
+var ExtensionHelper_2 = __webpack_require__(5);
 exports.ExtensionHelper = ExtensionHelper_2.ExtensionHelper;
 // Utilities
 var DataStructures_1 = __webpack_require__(1);
 exports.SimpleMap = DataStructures_1.SimpleMap;
 exports.LinkedList = DataStructures_1.LinkedList;
 __export(__webpack_require__(18));
-var MessageUtils_1 = __webpack_require__(6);
+var MessageUtils_1 = __webpack_require__(4);
 exports.MessageFormatUtils = MessageUtils_1.MessageFormatUtils;
 // Allow extensions to talk with us.
 ExtensionHelper_1.ExtensionHelper.register();

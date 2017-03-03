@@ -223,7 +223,9 @@ If you add/change new functionality and want it merged to master, please open a 
 Some things may not fit the library and could be rejected, so if you are unsure please ask first before wasting your valuable time!
 
 ## History
-* 0.2.0 (Current release)
+* 0.2.1 (Current release)
+  * Fixed: [Make sure to access window object only for browsers, not for node](https://github.com/mreuvers/typescript-logging/issues/3)
+* 0.2.0
   * No changes, bump to official release.
 * 0.2.0-beta7
   * Include source in distribution (makes source map warnings go away)

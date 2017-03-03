@@ -154,6 +154,7 @@ export class CategoryServiceImpl implements RuntimeSettings {
 
   private constructor() {
     // Private constructor
+    ExtensionHelper.register();
   }
 
   public static getInstance(): CategoryServiceImpl {

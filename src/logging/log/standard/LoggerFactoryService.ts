@@ -4,6 +4,7 @@ import {LoggerFactory} from "./LoggerFactory";
 import {LoggerFactoryImpl} from "./LoggerFactoryImpl";
 import {LoggerFactoryRuntimeSettings} from "./LoggerFactoryRuntimeSettings";
 import {AbstractLogger} from "./LoggerImpl";
+import {ExtensionHelper} from "../../extension/ExtensionHelper";
 
 /**
  * Defines a LogGroupRule, this allows you to either have everything configured the same way
@@ -197,6 +198,7 @@ class LFServiceImpl implements LFServiceRuntimeSettings {
 
   private constructor() {
     // Private constructor.
+    ExtensionHelper.register();
   }
 
   public static getInstance(): LFServiceImpl {
