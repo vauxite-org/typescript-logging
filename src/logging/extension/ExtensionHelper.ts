@@ -222,9 +222,6 @@ export class ExtensionHelper {
     }
 
     if (typeof window !== "undefined") {
-      /* tslint:disable:no-console */
-      console.log("Sending message to extension, message type: " + msg.data.type);
-      /* tslint:enable:no-console */
       window.postMessage(msg, "*");
     }
   }

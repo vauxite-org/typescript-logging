@@ -1,4 +1,4 @@
-import {CategoryControl, CategoryControlImpl} from "./CategoryControl";
+import {CategoryServiceControl, CategoryServiceControlImpl} from "./CategoryServiceControl";
 import {LoggerControl, LoggerControlImpl} from "./LogGroupControl";
 
 /**
@@ -24,7 +24,7 @@ export interface LogControl {
   /**
    * Return CategoryControl object.
    */
-  getCategoryControl(): CategoryControl;
+  getCategoryControl(): CategoryServiceControl;
 
 }
 
@@ -73,7 +73,7 @@ export class LogControlImpl implements LogControl {
     return new LoggerControlImpl();
   }
 
-  public getCategoryControl(): CategoryControl {
-    return new CategoryControlImpl();
+  public getCategoryControl(): CategoryServiceControl {
+    return new CategoryServiceControlImpl();
   }
 }

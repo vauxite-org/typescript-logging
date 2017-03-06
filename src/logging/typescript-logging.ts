@@ -22,6 +22,7 @@ export {AbstractLogger, ConsoleLoggerImpl, MessageBufferLoggerImpl} from "./log/
 export {CategoryLogFormat, DateFormat, DateFormatEnum, LogFormat, LoggerType, LogLevel} from "./log/LoggerOptions";
 
 // Console controller related
+export {CategoryServiceControl} from "./control/CategoryServiceControl";
 export {CategoryControl} from "./control/CategoryControl";
 export {LogControl} from "./control/LogControl";
 export {LoggerControl} from "./control/LogGroupControl";
