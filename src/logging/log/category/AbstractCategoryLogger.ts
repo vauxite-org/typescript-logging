@@ -213,21 +213,21 @@ export abstract class AbstractCategoryLogger implements CategoryLogger {
   }
 
   private _logInternal(level: LogLevel, msg: () => string, error: () => Error | null, resolved: boolean, ...categories: Category[]): void {
-    let logCateries: Category[];
+    let logCategories: Category[];
 
     // Log root category by default if none present
     if (categories !== undefined && categories.length > 0) {
-      logCateries = categories;
+      logCategories = categories;
     }
     else {
-      logCateries = [];
-      logCateries.push(this.rootCategory);
+      logCategories = [];
+      logCategories.push(this.rootCategory);
     }
 
     // Get the runtime levels for given categories. If their level is lower than given level, we log.
     // In addition we pass along which category/categories we log this statement for.
-    for (let i = 0; i < logCateries.length; i++) {
-      const category = logCateries[i];
+    for (let i = 0; i < logCategories.length; i++) {
+      const category = logCategories[i];
       if (category == null) {
         throw new Error("Cannot have a null element within categories, at index=" + i);
       }
@@ -240,13 +240,13 @@ export abstract class AbstractCategoryLogger implements CategoryLogger {
       if (settings.logLevel <= level) {
         const actualError = error != null ? error() : null;
         if (actualError == null) {
-          const logMessage = new CategoryLogMessageImpl(msg(), actualError, logCateries, new Date(), level, settings.logFormat, true);
+          const logMessage = new CategoryLogMessageImpl(msg(), actualError, logCategories, new Date(), level, settings.logFormat, true);
           logMessage.resolvedErrorMessage = resolved;
           this.allMessages.addTail(logMessage);
           this.processMessages();
         }
         else {
-          const logMessage = new CategoryLogMessageImpl(msg(), actualError, logCateries, new Date(), level, settings.logFormat, false);
+          const logMessage = new CategoryLogMessageImpl(msg(), actualError, logCategories, new Date(), level, settings.logFormat, false);
           logMessage.resolvedErrorMessage = resolved;
           this.allMessages.addTail(logMessage);
           MessageFormatUtils.renderError(actualError).then((stack: string) => {
