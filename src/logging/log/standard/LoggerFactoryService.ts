@@ -191,7 +191,8 @@ export interface LFServiceRuntimeSettings {
 
 class LFServiceImpl implements LFServiceRuntimeSettings {
 
-  private static INSTANCE = new LFServiceImpl();
+  // Loaded on demand. Do NOT change as webpack may pack things in wrong order otherwise.
+  private static _INSTANCE: LFServiceImpl | null = null;
 
   private _nameCounter: number = 1;
   private _mapFactories: SimpleMap<LoggerFactoryImpl> = new SimpleMap<LoggerFactoryImpl>();
@@ -202,7 +203,11 @@ class LFServiceImpl implements LFServiceRuntimeSettings {
   }
 
   public static getInstance(): LFServiceImpl {
-    return LFServiceImpl.INSTANCE;
+    // Loaded on demand. Do NOT change as webpack may pack things in wrong order otherwise.
+    if (LFServiceImpl._INSTANCE === null) {
+      LFServiceImpl._INSTANCE = new LFServiceImpl();
+    }
+    return LFServiceImpl._INSTANCE;
   }
 
   /**

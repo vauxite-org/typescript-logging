@@ -1,8 +1,14 @@
-// CategoryService related.
 import {ExtensionHelper} from "./extension/ExtensionHelper";
 import {LoggerControl, LoggerControlImpl} from "./control/LogGroupControl";
 import {CategoryServiceControl, CategoryServiceControlImpl} from "./control/CategoryServiceControl";
 
+// Public stuff we export for extension
+export * from "./extension/MessagesToExtensionJSON";
+export * from "./extension/MessagesFromExtensionJSON";
+export * from "./extension/ExtensionMessageJSON";
+export {ExtensionHelper} from "./extension/ExtensionHelper";
+
+// Category related
 export {AbstractCategoryLogger, CategoryLogMessage} from "./log/category/AbstractCategoryLogger";
 export {CategoryConsoleLoggerImpl} from "./log/category/CategoryConsoleLoggerImpl";
 export {CategoryDelegateLoggerImpl} from "./log/category/CategoryDelegateLoggerImpl";
@@ -26,19 +32,10 @@ export {CategoryLogFormat, DateFormat, DateFormatEnum, LogFormat, LoggerType, Lo
 export {CategoryServiceControl} from "./control/CategoryServiceControl";
 export {LoggerControl} from "./control/LogGroupControl";
 
-// Public stuff we export for extension
-export * from "./extension/MessagesToExtensionJSON";
-export * from "./extension/MessagesFromExtensionJSON";
-export * from "./extension/ExtensionMessageJSON";
-export {ExtensionHelper} from "./extension/ExtensionHelper";
-
 // Utilities
 export {SimpleMap, LinkedList} from "./utils/DataStructures";
 export * from "./utils/JSONHelper";
 export {MessageFormatUtils} from "./utils/MessageUtils";
-
-// Allow extensions to talk with us.
-ExtensionHelper.register();
 
 /*
  Functions to export on TSL libarary var.
@@ -63,11 +60,12 @@ export function help(): void {
   /* tslint:enable:no-console */
 }
 
-// Export LogControl function
+// Export LogControl function (log4j)
 export function getLogControl(): LoggerControl {
   return new LoggerControlImpl();
 }
 
+// Export CategoryControl function
 export function getCategoryControl(): CategoryServiceControl {
   return new CategoryServiceControlImpl();
 }

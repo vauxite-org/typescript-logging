@@ -149,6 +149,10 @@ export class DateFormat {
   set dateSeparator(value: string) {
     this._dateSeparator = value;
   }
+
+  public copy(): DateFormat {
+    return new DateFormat(this._formatEnum, this._dateSeparator);
+  }
 }
 
 /**
@@ -236,5 +240,9 @@ export class CategoryLogFormat {
 
   set showCategoryName(value: boolean) {
     this._showCategoryName = value;
+  }
+
+  public copy(): CategoryLogFormat {
+    return new CategoryLogFormat(this._dateFormat.copy(), this._showTimeStamp, this._showCategoryName);
   }
 }
