@@ -1,6 +1,7 @@
 // CategoryService related.
-import {LogControl, LogControlImpl} from "./control/LogControl";
 import {ExtensionHelper} from "./extension/ExtensionHelper";
+import {LoggerControl, LoggerControlImpl} from "./control/LogGroupControl";
+import {CategoryServiceControl, CategoryServiceControlImpl} from "./control/CategoryServiceControl";
 
 export {AbstractCategoryLogger, CategoryLogMessage} from "./log/category/AbstractCategoryLogger";
 export {CategoryConsoleLoggerImpl} from "./log/category/CategoryConsoleLoggerImpl";
@@ -23,7 +24,6 @@ export {CategoryLogFormat, DateFormat, DateFormatEnum, LogFormat, LoggerType, Lo
 
 // Console controller related
 export {CategoryServiceControl} from "./control/CategoryServiceControl";
-export {LogControl} from "./control/LogControl";
 export {LoggerControl} from "./control/LogGroupControl";
 
 // Public stuff we export for extension
@@ -51,15 +51,23 @@ export function help(): void {
 `help()
    ** Shows this help
    
- getLogControl(): LogControl
-   ** Returns LogControl Object, use to dynamically change loglevels for LogGroups and Categories alike.
-   ** Call .help() on LogControl object for available options.
+ getLogControl(): LoggerControl
+   ** Returns LoggerControl Object, use to dynamically change loglevels for log4j logging.
+   ** Call .help() on LoggerControl object for available options.
+   
+ getCategoryControl(): CategoryServiceControl
+   ** Returns CategoryServiceControl Object, use to dynamically change loglevels for category logging.
+   ** Call .help() on CategoryServiceControl object for available options.   
 `
   );
   /* tslint:enable:no-console */
 }
 
 // Export LogControl function
-export function getLogControl(): LogControl {
-  return new LogControlImpl();
+export function getLogControl(): LoggerControl {
+  return new LoggerControlImpl();
+}
+
+export function getCategoryControl(): CategoryServiceControl {
+  return new CategoryServiceControlImpl();
 }
