@@ -2,6 +2,41 @@ import {DateFormatEnum, LoggerType, LogLevel} from "../log/LoggerOptions";
 import {LoggerFactoryRuntimeSettings} from "../log/standard/LoggerFactoryRuntimeSettings";
 import {LFService, LFServiceRuntimeSettings, LogGroupRuntimeSettings} from "../log/standard/LoggerFactoryService";
 import {StringBuilder, TuplePair} from "../utils/DataStructures";
+import logger = Handlebars.logger;
+
+/**
+ * Allows to change the settings for one or all LogGroups.
+ * Options will be applied only if set, undefined options are ignored.
+ *
+ * The only property really required is group.
+ */
+export interface LogGroupControlSettings {
+
+  /**
+   * Apply to specific group, or "all".
+   */
+  group: number | "all";
+
+  /**
+   * Set log level, undefined will not change the setting.
+   */
+  logLevel: "Fatal" | "Error" | "Warn" | "Info" | "Debug" | "Trace" | undefined;
+
+  /**
+   * Set the log format, undefined will not change the setting.
+   */
+  logFormat: "Default" | "YearMonthDayTime" | "YearDayMonthWithFullTime" | "YearDayMonthTime" | undefined;
+
+  /**
+   * Whether to show timestamp, undefined will not change the setting.
+   */
+  showTimestamp: boolean | undefined;
+
+  /**
+   * Whether to show the logger name, undefined will not change the setting.
+   */
+  showLoggerName: boolean | undefined;
+}
 
 /**
  *  Interface to control LoggerFactories (LoggerFactory and related loggers) through
@@ -20,10 +55,16 @@ export interface LoggerControl {
   listFactories(): void;
 
   /**
-   * Show settings for LoggerFactory id (see list() to get it) or null, for all.
-   * @param idFactory LoggerFactory id
+   * Show settings for LoggerFactory id (see listFactories() to get it) or null, for all.
+   * @param idFactory LoggerFactory id or all
    */
-  showSettings(idFactory: number | null): void;
+  showSettings(idFactory: number | "all"): void;
+
+  /**
+   * Reset one or all factories back to original values.
+   * @param idFactory Id factory or "all" for all.
+   */
+  reset(idFactory: number | "all"): void;
 
   /**
    * Return LoggerFactoryControl object. Throws error when number is invalid.
@@ -40,53 +81,50 @@ export interface LoggerControl {
 export interface LoggerFactoryControl {
 
   /**
-   * Shows help.
+   * Shows help
    */
   help(): void;
 
   /**
-   * List all log groups registered to this factory.
+   * Shows an example of usage.
    */
-  listLogGroups(): void;
+  example(): void;
 
   /**
-   * Set new log level for id of LogGroup, applied to both new and existing loggers. If id is null applies to all groups.
-   * @param level Level must be one of: Trace, Debug, Info, Warn, Error or Fatal.
-   * @param idGroup Group id, see listGroups() to find them or null for all groups.
+   * Prints settings for given group id, "all" for all group.
    */
-  setLogLevel(level: string, idGroup: number | null): void;
+  showSettings(id: number | "all"): void;
 
   /**
-   * Set format for logging, format must be one of: "Default, YearMonthDayTime, YearDayMonthWithFullTime, YearDayMonthTime".
-   * @param format One of Default, YearMonthDayTime, YearDayMonthWithFullTime, YearDayMonthTime.
-   * @param idGroup Group id, see listGroups() or null to apply to all groups
-   * @param showTimestamp True to show timestamp in log line
-   * @param showLoggerName True to show logger name in log line
+   * Apply new settings, see LogGroupControlSettings for details.
+   * @param settings Settings to set
    */
-  setLogFormat(format: string, showTimestamp: boolean, showLoggerName: boolean, idGroup: number | null): void;
+  change(settings: LogGroupControlSettings): void;
 
   /**
-   * Reset LogGroup back to original settings, applied to both new and existing loggers.
-   * @param idGroup Group to reset, null for all groups.
+   * Resets everything to original values, for one specific or for all groups.
    */
-  reset(idGroup: number | null): void;
+  reset(id: number | "all"): void;
 }
 
 export class LoggerControlImpl implements LoggerControl {
 
   private static _help: string =
 `
-  help():
+  help(): void
     ** Shows this help.
     
-  listFactories()
+  listFactories(): void
     ** List all registered LoggerFactories with associated log groups with respective ids (ids can be used to target a factory and/or group).
     
-  showSettings(idFactory: number | null)
-    ** Show log group settings for idFactory (use list() to find id for a LoggerFactory). If idFactory is null applies to all factories. 
+  showSettings(idFactory: number | "all"): void
+    ** Show log group settings for idFactory (use listFactories to find id for a LoggerFactory). If idFactory is "all" shows all factories. 
   
   getLoggerFactoryControl(idFactory: number): LoggerFactoryControl
     ** Return LoggerFactoryControl when found for given idFactory or throws Error if invalid or null, get the id by using listFactories()
+    
+  reset(idFactory: number | "all"): void
+    ** Resets given factory or all factories back to original values. 
 `;
 
   public help(): void {
@@ -108,12 +146,12 @@ export class LoggerControlImpl implements LoggerControl {
     /* tslint:enable:no-console */
   }
 
-  public showSettings(id: number | null = null): void {
+  public showSettings(id: number | "all" = "all"): void {
     const result: Array<TuplePair<number, LoggerFactoryRuntimeSettings>> = [];
 
-    if (id == null) {
+    if (id === "all") {
       let idx = 0;
-      LoggerControlImpl._getSettings().getRuntimeSettingsForLoggerFactories().forEach((item) => {
+      LoggerControlImpl._getRuntimeSettingsLoggerFactories().forEach((item) => {
         result.push(new TuplePair(idx++, item));
       });
     }
@@ -142,12 +180,29 @@ export class LoggerControlImpl implements LoggerControl {
     }
   }
 
-  public getLoggerFactoryControl(idFactory: number): LoggerFactoryControl {
-    if (idFactory === null) {
-      throw new Error("idFactory argument is required");
+  public reset(idFactory: number | "all" = "all"): void {
+    const loggerFactoriesSettings = LoggerControlImpl._getRuntimeSettingsLoggerFactories();
+    let result: LoggerFactoryRuntimeSettings[] = [];
+    if (idFactory === "all") {
+      result = loggerFactoriesSettings;
+    }
+    else {
+      if (idFactory >= 0 && idFactory < loggerFactoriesSettings.length) {
+        result.push(loggerFactoriesSettings[idFactory]);
+      }
     }
 
-    const loggerFactoriesSettings = LoggerControlImpl._getSettings().getRuntimeSettingsForLoggerFactories();
+    result.forEach((setting) => {
+      /* tslint:disable:no-console */
+      console.log("Reset all settings for factory " + idFactory);
+      /* tslint:enable:no-console */
+      const control = new LoggerFactoryControlImpl(setting);
+      control.reset();
+    });
+  }
+
+  public getLoggerFactoryControl(idFactory: number): LoggerFactoryControl {
+    const loggerFactoriesSettings = LoggerControlImpl._getRuntimeSettingsLoggerFactories();
     if (idFactory >= 0 &&  idFactory < loggerFactoriesSettings.length) {
       return new LoggerFactoryControlImpl(loggerFactoriesSettings[idFactory]);
     }
@@ -167,20 +222,57 @@ class LoggerFactoryControlImpl implements LoggerFactoryControl {
 
   private static _help: string =
     `
-  help():
+  help(): void
     ** Shows this help.
     
-  listLogGroups()
-    ** Lists all registered LogGroups for this factory and their current settings.
+  example(): void
+    ** Shows an example of usage.
+
+  showSettings(id: number | "all"): void
+    ** Prints settings for given group id, "all" for all group.
+
+  change(settings: LogGroupControlSettings): void
+    ** Changes the current settings for one or all log groups. 
+    ** 
+       LogGroupControlSettings, properties of object:
+         group: number | "all"
+           ** Apply to specific group, or "all".
+           ** Required        
+           
+         logLevel: "Fatal" | "Error" | "Warn" | "Info" | "Debug" | "Trace" | undefined
+           ** Set log level, undefined will not change the setting.
+           ** Optional
+         
+         logFormat: "Default" | "YearMonthDayTime" | "YearDayMonthWithFullTime" | "YearDayMonthTime" | undefined
+           ** Set the log format, undefined will not change the setting.
+           ** Optional
+         
+         showTimestamp: boolean | undefined  
+           ** Whether to show timestamp, undefined will not change the setting.
+           ** Optional
+         
+         showLoggerName: boolean | undefined
+           ** Whether to show the logger name, undefined will not change the setting.
+           ** Optional  
+           
+  reset(id: number | "all"): void
+    ** Resets everything to original values, for one specific or for all groups.
     
-  setLogLevel(level: string, idGroup: number | null = null)
-    ** Sets the log level for given LogGroup id, or if null for all LogGroups.
+  help():
+    ** Shows this help.
+`;
+
+  private static _example: string =
+    `
+  Examples:
+    change({group: "all", logLevel: "Info"}) 
+      ** Change loglevel to Info for all groups.
      
-  setLogFormat(format: string, showTimestamp: boolean = true, showLoggerName: boolean = true, idGroup: number | null = null)
-    ** Sets the log format, whether to show a timestamp and whether to show a logger name for given group or all groups if null.
-  
-  reset(idGroup: number | null = null)
-    ** Reset everything back to original defaults for given LogGroup id, or all if null.
+    change({group: 1, recursive:false, logLevel: "Warn"})
+      ** Change logLevel for group 1 to Warn.
+      
+    change({group: "all", logLevel: "Debug", logFormat: "YearDayMonthTime", showTimestamp:false, showLoggerName:false})    
+      ** Change loglevel to Debug for all groups, apply format, do not show timestamp and logger names.      
 `;
 
   private _settings: LoggerFactoryRuntimeSettings;
@@ -195,7 +287,13 @@ class LoggerFactoryControlImpl implements LoggerFactoryControl {
     /* tslint:enable:no-console */
   }
 
-  public listLogGroups(): void {
+  public example(): void {
+    /* tslint:disable:no-console */
+    console.log(LoggerFactoryControlImpl._example);
+    /* tslint:enable:no-console */
+  }
+
+  public showSettings(id: number | "all" = "all"): void {
     const result = new StringBuilder();
     const logGroupRuntimeSettings = this._settings.getLogGroupRuntimeSettings();
 
@@ -212,34 +310,68 @@ class LoggerFactoryControlImpl implements LoggerFactoryControl {
     /* tslint:enable:no-console */
   }
 
-  public setLogLevel(level: string, idGroup: number | null = null): void {
-    const newLevel = LogLevel.fromString(level);
+  public change(settings: LogGroupControlSettings): void {
 
-    const settings: LogGroupRuntimeSettings[] = this._getLogGroupRunTimeSettingsFor(idGroup);
-    for (let setting of settings) {
-      setting.level = newLevel;
+    const logGroupRuntimeSettings = this._getLogGroupRunTimeSettingsFor(settings.group);
+
+    let logLevel: LogLevel | null = null;
+    let formatEnum: DateFormatEnum | null = null;
+    let showLoggerName: boolean | null = null;
+    let showTimestamp: boolean | null = null;
+
+    let result: string | null = null;
+
+    const addResult = (value: string) => {
+      if (result !== null) {
+        result += ", ";
+      }
+      if (result === null) {
+        result = value;
+      }
+      else {
+        result += value;
+      }
+    };
+
+    if (typeof settings.logLevel === "string") {
+      logLevel = LogLevel.fromString(settings.logLevel);
+      addResult("logLevel=" + settings.logLevel);
+    }
+    if (typeof settings.logFormat === "string") {
+      formatEnum = DateFormatEnum.fromString(settings.logFormat);
+      addResult("logFormat=" + settings.logFormat);
+    }
+    if (typeof settings.showLoggerName === "boolean") {
+      showLoggerName = settings.showLoggerName;
+      addResult("showLoggerName=" + settings.showLoggerName);
+    }
+    if (typeof settings.showTimestamp === "boolean") {
+      showTimestamp = settings.showTimestamp;
+      addResult("showTimestamp=" + settings.showTimestamp);
     }
 
+    logGroupRuntimeSettings.forEach((s) => {
+      if (logLevel !== null) {
+        s.level = logLevel;
+      }
+      if (formatEnum !== null) {
+        s.logFormat.dateFormat.formatEnum = formatEnum;
+      }
+      if (showTimestamp !== null) {
+        s.logFormat.showTimeStamp = showTimestamp;
+      }
+      if (showLoggerName !== null) {
+        s.logFormat.showLoggerName = showLoggerName;
+      }
+    });
+
     /* tslint:disable:no-console */
-    console.log("LogLevel set to " + level + " for " + (idGroup != null ? " LogGroup " + idGroup + "." : " all LogGroups."));
+    console.log("Applied changes: " + result + " to log groups '" + settings.group + "'.");
     /* tslint:enable:no-console */
   }
 
-  public setLogFormat(format: string, showTimestamp: boolean = true, showLoggerName: boolean = true, idGroup: number | null = null): void {
-    const formatEnum = DateFormatEnum.fromString(format);
-    const settings: LogGroupRuntimeSettings[] = this._getLogGroupRunTimeSettingsFor(idGroup);
-    for (let setting of settings) {
-      setting.logFormat.dateFormat.formatEnum = formatEnum;
-      setting.logFormat.showTimeStamp = showTimestamp;
-      setting.logFormat.showLoggerName = showLoggerName;
-    }
-    /* tslint:disable:no-console */
-    console.log("LogFormat set to " + format + " for " + (idGroup != null ? " LogGroup " + idGroup + "." : " all LogGroups."));
-    /* tslint:enable:no-console */
-  }
-
-  public reset(idGroup: number | null = null): void {
-    const settings: LogGroupRuntimeSettings[] = this._getLogGroupRunTimeSettingsFor(idGroup);
+  public reset(idGroup: number | "all" = "all"): void {
+    const settings = this._getLogGroupRunTimeSettingsFor(idGroup);
     for (let setting of settings) {
       setting.level = setting.logGroupRule.level;
       setting.logFormat.showTimeStamp = setting.logGroupRule.logFormat.showTimeStamp;
@@ -247,18 +379,18 @@ class LoggerFactoryControlImpl implements LoggerFactoryControl {
       setting.logFormat.dateFormat.formatEnum = setting.logGroupRule.logFormat.dateFormat.formatEnum;
     }
     /* tslint:disable:no-console */
-    console.log("Reset all settings for " + (idGroup != null ? " LogGroup " + idGroup + "." : " all LogGroups."));
+    console.log("Reset all settings for group " + idGroup);
     /* tslint:enable:no-console */
   }
 
-  private _getLogGroupRunTimeSettingsFor(idGroup: number | null): LogGroupRuntimeSettings[] {
+  private _getLogGroupRunTimeSettingsFor(idGroup: number | "all"): LogGroupRuntimeSettings[] {
     let settings: LogGroupRuntimeSettings[] = [];
-    if (idGroup !== null) {
-      this._checkIndex(idGroup);
-      settings.push(this._settings.getLogGroupRuntimeSettings()[idGroup]);
+    if (idGroup === "all") {
+      settings = this._settings.getLogGroupRuntimeSettings();
     }
     else {
-      settings = this._settings.getLogGroupRuntimeSettings();
+      this._checkIndex(idGroup);
+      settings.push(this._settings.getLogGroupRuntimeSettings()[idGroup]);
     }
     return settings;
   }

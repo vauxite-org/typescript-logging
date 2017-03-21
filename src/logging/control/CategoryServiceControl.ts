@@ -59,7 +59,7 @@ export interface CategoryServiceControl {
   example(): void;
 
   /**
-   * Prints settings for given category id, when null prints for all.
+   * Prints settings for given category id, when "all" for all categories.
    */
   showSettings(id: number | "all"): void;
 
@@ -82,13 +82,13 @@ export class CategoryServiceControlImpl implements CategoryServiceControl {
 
   private static _help: string =
     `
-  help():
+  help(): void
     ** Shows this help.
     
-  example()
+  example(): void
     ** Shows an example on how to use this.
     
-  showSettings(id: number | "all" = "all")
+  showSettings(id: number | "all" = "all"): void
     ** Shows settings for a specific category, or for all. The id of categories can be found by calling this method without parameter.
     
   change(settings: CategoryServiceControlSettings): void
@@ -127,13 +127,13 @@ export class CategoryServiceControlImpl implements CategoryServiceControl {
 `
   Examples:
     change({category: "all", recursive:true, logLevel: "Info"}) 
-      ** Change loglevel to Warn for 1 category, do not apply to child categories.
+      ** Change loglevel to Info for all categories, apply to child categories as well.
      
     change({category: 1, recursive:false, logLevel: "Warn"})
-      ** Change logLevel, and all format options to all categories recursively.
+      ** Change logLevel for category 1, do not recurse.
       
     change({category: "all", recursive:true, logLevel: "Debug", logFormat: "YearDayMonthTime", showTimestamp:false, showCategoryName:false})    
-      ** Change loglevel to Info for all categories, apply recursively to child categories.    
+      ** Change loglevel to Debug for all categories, apply format, do not show timestamp and category names - recursively to child categories.    
       
 `;
 
