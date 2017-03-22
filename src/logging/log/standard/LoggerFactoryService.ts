@@ -3,7 +3,7 @@ import {DateFormat, LogFormat, LoggerType, LogLevel} from "../LoggerOptions";
 import {LoggerFactory} from "./LoggerFactory";
 import {LoggerFactoryImpl} from "./LoggerFactoryImpl";
 import {LoggerFactoryRuntimeSettings} from "./LoggerFactoryRuntimeSettings";
-import {AbstractLogger} from "./LoggerImpl";
+import {AbstractLogger} from "./AbstractLogger";
 import {ExtensionHelper} from "../../extension/ExtensionHelper";
 
 /**

@@ -4,7 +4,9 @@ import {Logger} from "./Logger";
 import {LoggerFactory} from "./LoggerFactory";
 import {LoggerFactoryRuntimeSettings} from "./LoggerFactoryRuntimeSettings";
 import {LoggerFactoryOptions, LogGroupRuntimeSettings} from "./LoggerFactoryService";
-import {AbstractLogger, ConsoleLoggerImpl, MessageBufferLoggerImpl} from "./LoggerImpl";
+import {AbstractLogger} from "./AbstractLogger";
+import {ConsoleLoggerImpl} from "./ConsoleLoggerImpl";
+import {MessageBufferLoggerImpl} from "./MessageBufferLoggerImpl";
 
 export class LoggerFactoryImpl implements LoggerFactory, LoggerFactoryRuntimeSettings {
 

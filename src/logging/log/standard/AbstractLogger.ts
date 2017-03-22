@@ -1,8 +1,8 @@
+import {LogLevel} from "../LoggerOptions";
+import {LogGroupRuntimeSettings} from "./LoggerFactoryService";
+import {Logger} from "./Logger";
 import {LinkedList} from "../../utils/DataStructures";
 import {MessageFormatUtils} from "../../utils/MessageUtils";
-import {LogLevel} from "../LoggerOptions";
-import {Logger} from "./Logger";
-import {LogGroupRuntimeSettings} from "./LoggerFactoryService";
 
 export class Message {
 
@@ -146,37 +146,20 @@ export abstract class AbstractLogger implements Logger {
 
   protected abstract doLog(msg: string, logLevel: LogLevel): void;
 
-  /**
-   * Do not override by end user, will be gone in 0.3 release.
-   */
-  protected _addMessage(msg: Message) {
-    // Make sure to make Message internal class again when this one is gone!
-    this._allMessages.addTail(msg);
-  }
-
-  /**
-   * Do not override by end user, will be gone in 0.3 release.
-   */
-  protected _log(level: LogLevel, msg: string, error: Error | null = null): void {
+  private _log(level: LogLevel, msg: string, error: Error | null = null): void {
     if (this._open && this._logGroupRuntimeSettings.level <= level) {
       this._allMessages.addTail(this.createMessage(level, msg, new Date(), error));
       this.processMessages();
     }
   }
 
-  /**
-   * Do not override by end user, will be gone in 0.3 release.
-   */
-  protected _logc(level: LogLevel, msg: () => string, error?: () => Error | null): void {
+  private _logc(level: LogLevel, msg: () => string, error?: () => Error | null): void {
     if (this._open && this._logGroupRuntimeSettings.level <= level) {
       this._allMessages.addTail(this.createMessage(level, msg(), new Date(), error !== undefined && error != null ? error() : null));
       this.processMessages();
     }
   }
 
-  /**
-   * Do not override by end user, will be gone in 0.3 release.
-   */
   private createMessage(level: LogLevel, msg: string, date: Date, error: Error | null = null): Message {
     const format = this._logGroupRuntimeSettings.logGroupRule.logFormat;
     let result = "";
@@ -205,9 +188,6 @@ export abstract class AbstractLogger implements Logger {
     return new Message(true, level, result);
   }
 
-  /**
-   * Do not override by end user, will be gone in 0.3 release.
-   */
   private processMessages(): void {
     // Basically we wait until errors are resolved (those messages
     // may not be ready).
@@ -229,95 +209,4 @@ export abstract class AbstractLogger implements Logger {
       while (msgs.getSize() > 0);
     }
   }
-}
-
-/**
- * Simple logger, that logs to the console. If the console is unavailable will throw exception.
- */
-export class ConsoleLoggerImpl extends AbstractLogger {
-
-  constructor(name: string, logGroupRuntimeSettings: LogGroupRuntimeSettings) {
-    super(name, logGroupRuntimeSettings);
-  }
-
-  protected doLog(msg: string, logLevel: LogLevel): void {
-    if (console !== undefined) {
-      let logged = false;
-      /* tslint:disable:no-console */
-      switch (logLevel) {
-        case LogLevel.Trace:
-          // Do not try trace we don't want a stack
-          break;
-        case LogLevel.Debug:
-          if (console.debug) {
-            console.debug(msg);
-            logged = true;
-          }
-          break;
-        case LogLevel.Info:
-          if (console.info) {
-            console.info(msg);
-            logged = true;
-          }
-          break;
-        case LogLevel.Warn:
-          if (console.warn) {
-            console.warn(msg);
-            logged = true;
-          }
-          break;
-        case LogLevel.Error:
-        case LogLevel.Fatal:
-          if (console.error) {
-            console.error(msg);
-            logged = true;
-          }
-          break;
-        default:
-          throw new Error("Log level not supported: " + logLevel);
-      }
-      if (!logged) {
-        console.log(msg);
-      }
-      /* tslint:enable:no-console */
-    }
-    else {
-      throw new Error("Console is not defined, cannot log msg: " + msg);
-    }
-  }
-
-}
-
-/**
- * Logger which buffers all messages, use with care due to possible high memory footprint.
- * Can be convenient in some cases. Call toString() for full output, or cast to this class
- * and call getMessages() to do something with it yourself.
- */
-export class MessageBufferLoggerImpl extends AbstractLogger {
-
-  private messages: string[] = [];
-
-  constructor(name: string, logGroupRuntimeSettings: LogGroupRuntimeSettings) {
-    super(name, logGroupRuntimeSettings);
-  }
-
-  public close(): void {
-    this.messages = [];
-    super.close();
-  }
-
-  public getMessages(): string[] {
-    return this.messages;
-  }
-
-  public toString(): string {
-    return this.messages.map((msg) => {
-      return msg;
-    }).join("\n");
-  }
-
-  protected doLog(msg: string, logLevel: LogLevel): void {
-    this.messages.push(msg);
-  }
-
 }
