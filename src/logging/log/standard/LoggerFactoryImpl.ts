@@ -102,7 +102,7 @@ export class LoggerFactoryImpl implements LoggerFactory, LoggerFactoryRuntimeSet
             break;
           case LoggerType.Custom:
             if (logGroupRule.callBackLogger != null) {
-              logger = logGroupRule.callBackLogger(named, logGroupRule);
+              logger = logGroupRule.callBackLogger(named, logGroupRuntimeSettings);
             }
             else {
               throw new Error("Cannot create a custom logger, custom callback is null");

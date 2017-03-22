@@ -18,7 +18,7 @@ export class LogGroupRule {
   private _level: LogLevel;
   private _loggerType: LoggerType;
   private _logFormat: LogFormat;
-  private _callBackLogger: ((name: string, logGroupRule: LogGroupRule) => AbstractLogger) | null;
+  private _callBackLogger: ((name: string, settings: LogGroupRuntimeSettings) => AbstractLogger) | null;
 
   /**
    * Create a LogGroupRule. Basically you define what logger name(s) match for this group, what level should be used what logger type (where to log)
@@ -31,7 +31,7 @@ export class LogGroupRule {
    */
   constructor(regExp: RegExp, level: LogLevel, logFormat: LogFormat = new LogFormat(),
               loggerType: LoggerType = LoggerType.Console,
-              callBackLogger: ((name: string, logGroupRule: LogGroupRule) => AbstractLogger) | null = null) {
+              callBackLogger: ((name: string, settings: LogGroupRuntimeSettings) => AbstractLogger) | null = null) {
     this._regExp = regExp;
     this._level = level;
     this._logFormat = logFormat;
@@ -55,7 +55,7 @@ export class LogGroupRule {
     return this._logFormat;
   }
 
-  get callBackLogger(): ((name: string, logGroupRule: LogGroupRule) => AbstractLogger) | null {
+  get callBackLogger(): ((name: string, settings: LogGroupRuntimeSettings) => AbstractLogger) | null {
     return this._callBackLogger;
   }
 }
@@ -109,7 +109,7 @@ export class LogGroupRuntimeSettings {
   private _level: LogLevel;
   private _loggerType: LoggerType;
   private _logFormat: LogFormat;
-  private _callBackLogger: ((name: string, logGroupRule: LogGroupRule) => AbstractLogger) | null;
+  private _callBackLogger: ((name: string, settings: LogGroupRuntimeSettings) => AbstractLogger) | null;
 
   constructor(logGroupRule: LogGroupRule) {
     this._logGroupRule = logGroupRule;
@@ -152,11 +152,11 @@ export class LogGroupRuntimeSettings {
     this._logFormat = value;
   }
 
-  get callBackLogger(): ((name: string, logGroupRule: LogGroupRule) => AbstractLogger) | null {
+  get callBackLogger(): ((name: string, settings: LogGroupRuntimeSettings) => AbstractLogger) | null {
     return this._callBackLogger;
   }
 
-  set callBackLogger(value: ((name: string, logGroupRule: LogGroupRule) => AbstractLogger) | null) {
+  set callBackLogger(value: ((name: string, settings: LogGroupRuntimeSettings) => AbstractLogger) | null) {
     this._callBackLogger = value;
   }
 }

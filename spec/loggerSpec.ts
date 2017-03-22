@@ -1,4 +1,7 @@
-import {LFService, LoggerFactoryOptions, LogGroupRule} from "../src/logging/log/standard/LoggerFactoryService";
+import {
+  LFService, LoggerFactoryOptions, LogGroupRule,
+  LogGroupRuntimeSettings
+} from "../src/logging/log/standard/LoggerFactoryService";
 import {MessageBufferLoggerImpl, AbstractLogger} from "../src/logging/log/standard/LoggerImpl";
 import {LogLevel, LogFormat, LoggerType} from "../src/logging/log/LoggerOptions";
 
@@ -9,8 +12,8 @@ class CustomLoggerImpl extends AbstractLogger {
 
   private _message: string;
 
-  constructor(name: string, rule: LogGroupRule) {
-    super(name, rule);
+  constructor(name: string, settings: LogGroupRuntimeSettings) {
+    super(name, settings);
   }
 
   protected doLog(msg: string, logLevel: LogLevel): void {
@@ -61,7 +64,7 @@ describe("Loggers", () => {
 
   it("Can use custom logger", () => {
     const loggerOptions = new LoggerFactoryOptions().addLogGroupRule(new LogGroupRule(new RegExp("Hello.+"), LogLevel.Info, new LogFormat(), LoggerType.Custom,
-      (name: string, logGroupRule: LogGroupRule) => new CustomLoggerImpl(name, logGroupRule)
+      (name: string, settings: LogGroupRuntimeSettings) => new CustomLoggerImpl(name, settings)
     ));
 
     const loggerFactory = LFService.createLoggerFactory(loggerOptions);
