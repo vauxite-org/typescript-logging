@@ -21,7 +21,6 @@ class CustomLoggerImpl extends AbstractLogger {
     this._message = msg;
   }
 
-
   get message(): string {
     return this._message;
   }

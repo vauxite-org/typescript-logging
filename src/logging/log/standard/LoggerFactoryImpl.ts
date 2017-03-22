@@ -4,15 +4,15 @@ import {Logger} from "./Logger";
 import {LoggerFactory} from "./LoggerFactory";
 import {LoggerFactoryRuntimeSettings} from "./LoggerFactoryRuntimeSettings";
 import {LoggerFactoryOptions, LogGroupRuntimeSettings} from "./LoggerFactoryService";
-import {AbstractLogger} from "./AbstractLogger";
 import {ConsoleLoggerImpl} from "./ConsoleLoggerImpl";
 import {MessageBufferLoggerImpl} from "./MessageBufferLoggerImpl";
+import {AbstractLogger} from "./AbstractLogger";
 
 export class LoggerFactoryImpl implements LoggerFactory, LoggerFactoryRuntimeSettings {
 
   private _name: string;
   private _options: LoggerFactoryOptions;
-  private _loggers: SimpleMap<AbstractLogger> = new SimpleMap<AbstractLogger>();
+  private _loggers: SimpleMap<Logger> = new SimpleMap<Logger>();
 
   private _logGroupRuntimeSettingsIndexed: LogGroupRuntimeSettings[] = [];
   private _loggerToLogGroupSettings: SimpleMap<LogGroupRuntimeSettings> = new SimpleMap<LogGroupRuntimeSettings>();
@@ -60,7 +60,8 @@ export class LoggerFactoryImpl implements LoggerFactory, LoggerFactoryRuntimeSet
 
   public closeLoggers(): void {
     this._loggers.forEach((logger) => {
-      if (logger != null) {
+      // We can only close if AbstractLogger is used (our loggers, but user loggers may not extend it, even though unlikely).
+      if (logger != null && logger instanceof AbstractLogger) {
         logger.close();
       }
     });
@@ -86,7 +87,7 @@ export class LoggerFactoryImpl implements LoggerFactory, LoggerFactoryRuntimeSet
     return this._logGroupRuntimeSettingsIndexed.slice(0);
   }
 
-  private loadLogger(named: string): AbstractLogger {
+  private loadLogger(named: string): Logger {
     const logGroupRules = this._options.logGroupRules;
 
     for (let i = 0; i < logGroupRules.length; i++) {
@@ -94,7 +95,7 @@ export class LoggerFactoryImpl implements LoggerFactory, LoggerFactoryRuntimeSet
       if (logGroupRule.regExp.test(named)) {
         const logGroupRuntimeSettings = this._logGroupRuntimeSettingsIndexed[i];
 
-        let logger: AbstractLogger;
+        let logger: Logger;
         switch (logGroupRule.loggerType) {
           case LoggerType.Console:
             logger = new ConsoleLoggerImpl(named, logGroupRuntimeSettings);
