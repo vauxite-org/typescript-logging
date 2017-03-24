@@ -1,19 +1,133 @@
 import {LogLevel} from "../LoggerOptions";
-import {LogGroupRuntimeSettings} from "./LoggerFactoryService";
+import {LogGroupRule, LogGroupRuntimeSettings} from "./LoggerFactoryService";
 import {Logger} from "./Logger";
 import {LinkedList} from "../../utils/DataStructures";
 import {MessageFormatUtils} from "../../utils/MessageUtils";
 
-export class Message {
+/**
+ * Log message, providing all data for a single message.
+ */
+export interface LogMessage {
 
+  /**
+   * Name of the logger.
+   */
+  readonly loggerName: string;
+
+  /**
+   * Original, unformatted message.
+   */
+  readonly message: string;
+
+  /**
+   * Returns the resolved stack (based on error).
+   * Available only when error is present.
+   */
+  readonly errorAsStack: string | null;
+
+  /**
+   * Error when present, or null.
+   */
+  readonly error: Error | null;
+
+  /**
+   * Which LogGroupRule matched for this message.
+   */
+  readonly logGroupRule: LogGroupRule;
+
+  /**
+   * Time for message.
+   */
+  readonly date: Date;
+
+  /**
+   * LogLevel used
+   */
+  readonly level: LogLevel;
+
+}
+
+interface LogMessageInternal extends LogMessage {
+
+  /**
+   * True if the message is done (ready), if false
+   * we wait for a promise.
+   */
+  ready: boolean;
+}
+
+class LogMessageInternalImpl implements LogMessageInternal {
+
+  private _loggerName: string;
+  private _message: string;
+  private _errorAsStack: string | null = null;
+  private _error: Error | null = null;
+  private _logGroupRule: LogGroupRule;
+  private _date: Date;
+  private _level: LogLevel;
   private _ready: boolean;
-  private _logLevel: LogLevel;
-  private _message: string | null;
 
-  constructor(ready: boolean, logLevel: LogLevel, message: string | null = null) {
-    this._ready = ready;
-    this._logLevel = logLevel;
+  constructor(loggerName: string, message: string, errorAsStack: string | null, error: Error | null, logGroupRule: LogGroupRule, date: Date, level: LogLevel, ready: boolean) {
+    this._loggerName = loggerName;
     this._message = message;
+    this._errorAsStack = errorAsStack;
+    this._error = error;
+    this._logGroupRule = logGroupRule;
+    this._date = date;
+    this._level = level;
+    this._ready = ready;
+  }
+
+  get loggerName(): string {
+    return this._loggerName;
+  }
+
+  get message(): string {
+    return this._message;
+  }
+
+  set message(value: string) {
+    this._message = value;
+  }
+
+  get errorAsStack(): string | any {
+    return this._errorAsStack;
+  }
+
+  set errorAsStack(value: string | any) {
+    this._errorAsStack = value;
+  }
+
+  get error(): Error | any {
+    return this._error;
+  }
+
+  set error(value: Error | any) {
+    this._error = value;
+  }
+
+  get logGroupRule(): LogGroupRule {
+    return this._logGroupRule;
+  }
+
+  set logGroupRule(value: LogGroupRule) {
+    this._logGroupRule = value;
+  }
+
+  get date(): Date {
+    return this._date;
+  }
+
+  set date(value: Date) {
+    this._date = value;
+  }
+
+  get level(): LogLevel {
+    return this._level;
+  }
+
+  set level(value: LogLevel) {
+    this._level = value;
   }
 
   get ready(): boolean {
@@ -23,29 +137,17 @@ export class Message {
   set ready(value: boolean) {
     this._ready = value;
   }
-
-  get message(): string | null {
-    return this._message;
-  }
-
-  set message(value: string | null) {
-    this._message = value;
-  }
-
-  get logLevel(): LogLevel {
-    return this._logLevel;
-  }
 }
 
 /**
  * Abstract base logger, extend to easily implement a custom logger that
- * logs wherever you want. You only need to implement doLog(msg: string) and
+ * logs wherever you want. You only need to implement doLog(msg: LogMessage) and
  * log that somewhere (it will contain format and everything else).
  */
 export abstract class AbstractLogger implements Logger {
 
   private _logGroupRuntimeSettings: LogGroupRuntimeSettings;
-  private _allMessages: LinkedList<Message> = new LinkedList<Message>();
+  private _allMessages: LinkedList<LogMessageInternal> = new LinkedList<LogMessageInternal>();
 
   protected _name: string;
   protected _open: boolean = true;
@@ -144,7 +246,11 @@ export abstract class AbstractLogger implements Logger {
     this._allMessages.clear();
   }
 
-  protected abstract doLog(msg: string, logLevel: LogLevel): void;
+  protected createDefaultLogMessage(msg: LogMessage): string {
+    return MessageFormatUtils.renderDefaultLog4jMessage(msg, true);
+  }
+
+  protected abstract doLog(msg: LogMessage): void;
 
   private _log(level: LogLevel, msg: string, error: Error | null = null): void {
     if (this._open && this._logGroupRuntimeSettings.level <= level) {
@@ -155,37 +261,23 @@ export abstract class AbstractLogger implements Logger {
 
   private _logc(level: LogLevel, msg: () => string, error?: () => Error | null): void {
     if (this._open && this._logGroupRuntimeSettings.level <= level) {
-      this._allMessages.addTail(this.createMessage(level, msg(), new Date(), error !== undefined && error != null ? error() : null));
+      this._allMessages.addTail(this.createMessage(level, msg(), new Date(), error !== undefined && error !== null ? error() : null));
       this.processMessages();
     }
   }
 
-  private createMessage(level: LogLevel, msg: string, date: Date, error: Error | null = null): Message {
-    const format = this._logGroupRuntimeSettings.logGroupRule.logFormat;
-    let result = "";
-    if (format.showTimeStamp) {
-      result += MessageFormatUtils.renderDate(date, format.dateFormat) + " ";
-    }
-
-    result += LogLevel[level].toUpperCase() + " ";
-    if (format.showLoggerName) {
-      result += "[" + this._name + "]";
-    }
-
-    result += " " + msg;
-    if (error != null) {
-      const message = new Message(false, level);
-
-      MessageFormatUtils.renderError(error).then((stackResult: string) => {
-        result += "\n" + stackResult;
-        message.message = result;
+  private createMessage(level: LogLevel, msg: string, date: Date, error: Error | null = null): LogMessageInternal {
+    if (error !== null) {
+      const message = new LogMessageInternalImpl(this._name, msg, null, error, this._logGroupRuntimeSettings.logGroupRule, date, level, false);
+      MessageFormatUtils.renderError(error).then((stack: string) => {
+        message.errorAsStack = stack;
         message.ready = true;
         this.processMessages();
       });
-
       return message;
     }
-    return new Message(true, level, result);
+
+    return new LogMessageInternalImpl(this._name, msg, null, error, this._logGroupRuntimeSettings.logGroupRule, date, level, true);
   }
 
   private processMessages(): void {
@@ -201,8 +293,8 @@ export abstract class AbstractLogger implements Logger {
           }
           msgs.removeHead();
           // This can never be null normally, but strict null checking ...
-          if (msg.message != null) {
-            this.doLog(msg.message, msg.logLevel);
+          if (msg.message !== null) {
+            this.doLog(msg);
           }
         }
       }

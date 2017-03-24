@@ -1,6 +1,7 @@
-import {AbstractLogger} from "./AbstractLogger";
+import {AbstractLogger, LogMessage} from "./AbstractLogger";
 import {LogGroupRuntimeSettings} from "./LoggerFactoryService";
 import {LogLevel} from "../LoggerOptions";
+
 /**
  * Simple logger, that logs to the console. If the console is unavailable will throw exception.
  */
@@ -10,9 +11,11 @@ export class ConsoleLoggerImpl extends AbstractLogger {
     super(name, logGroupRuntimeSettings);
   }
 
-  protected doLog(msg: string, logLevel: LogLevel): void {
+  protected doLog(message: LogMessage): void {
     if (console !== undefined) {
       let logged = false;
+      const logLevel = message.level;
+      const msg = this.createDefaultLogMessage(message);
       /* tslint:disable:no-console */
       switch (logLevel) {
         case LogLevel.Trace:
@@ -52,7 +55,7 @@ export class ConsoleLoggerImpl extends AbstractLogger {
       /* tslint:enable:no-console */
     }
     else {
-      throw new Error("Console is not defined, cannot log msg: " + msg);
+      throw new Error("Console is not defined, cannot log msg: " + message.message);
     }
   }
 }

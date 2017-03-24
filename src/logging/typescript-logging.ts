@@ -25,7 +25,7 @@ export {
 export {Logger} from "./log/standard/Logger";
 export {LoggerFactory} from "./log/standard/LoggerFactory";
 export {LoggerFactoryOptions, LFService, LogGroupRule} from "./log/standard/LoggerFactoryService";
-export {AbstractLogger} from "./log/standard/AbstractLogger";
+export {AbstractLogger, LogMessage} from "./log/standard/AbstractLogger";
 export {ConsoleLoggerImpl} from "./log/standard/ConsoleLoggerImpl";
 export {MessageBufferLoggerImpl} from "./log/standard/MessageBufferLoggerImpl";
 export {CategoryLogFormat, DateFormat, DateFormatEnum, LogFormat, LoggerType, LogLevel} from "./log/LoggerOptions";

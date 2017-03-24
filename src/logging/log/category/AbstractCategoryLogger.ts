@@ -32,65 +32,65 @@ export interface CategoryLogMessage {
 
 class CategoryLogMessageImpl implements CategoryLogMessage {
 
-  private message: string;
-  private error: Error | null;
-  private categories: Category[];
-  private date: Date;
-  private level: LogLevel;
-  private logFormat: CategoryLogFormat;
-  private ready: boolean;
+  private _message: string;
+  private _error: Error | null;
+  private _categories: Category[];
+  private _date: Date;
+  private _level: LogLevel;
+  private _logFormat: CategoryLogFormat;
+  private _ready: boolean;
 
   private _resolvedErrorMessage: boolean = false;
-  private errorAsStack: string | null = null;
+  private _errorAsStack: string | null = null;
 
   constructor(message: string, error: Error | null, categories: Category[], date: Date, level: LogLevel, logFormat: CategoryLogFormat, ready: boolean) {
-    this.message = message;
-    this.error = error;
-    this.categories = categories;
-    this.date = date;
-    this.level = level;
-    this.logFormat = logFormat;
-    this.ready = ready;
+    this._message = message;
+    this._error = error;
+    this._categories = categories;
+    this._date = date;
+    this._level = level;
+    this._logFormat = logFormat;
+    this._ready = ready;
   }
 
   public getMessage(): string {
-    return this.message;
+    return this._message;
   }
 
   public getErrorAsStack(): string | null {
-    return this.errorAsStack;
+    return this._errorAsStack;
   }
 
   public setErrorAsStack(stack: string): void {
-    this.errorAsStack = stack;
+    this._errorAsStack = stack;
   }
 
   public getError(): Error | null {
-    return this.error;
+    return this._error;
   }
 
   public getCategories(): Category[] {
-    return this.categories;
+    return this._categories;
   }
 
   public getDate(): Date {
-    return this.date;
+    return this._date;
   }
 
   public getLevel(): LogLevel {
-    return this.level;
+    return this._level;
   }
 
   public getLogFormat(): CategoryLogFormat {
-    return this.logFormat;
+    return this._logFormat;
   }
 
   public isReady(): boolean {
-    return this.ready;
+    return this._ready;
   }
 
   public setReady(value: boolean): void {
-    this.ready = value;
+    this._ready = value;
   }
 
   get resolvedErrorMessage(): boolean {

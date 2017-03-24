@@ -1,6 +1,6 @@
 import {LogLevel} from "../LoggerOptions";
 import {LogGroupRuntimeSettings} from "./LoggerFactoryService";
-import {AbstractLogger} from "./AbstractLogger";
+import {AbstractLogger, LogMessage} from "./AbstractLogger";
 
 /**
  * Logger which buffers all messages, use with care due to possible high memory footprint.
@@ -30,7 +30,7 @@ export class MessageBufferLoggerImpl extends AbstractLogger {
     }).join("\n");
   }
 
-  protected doLog(msg: string, logLevel: LogLevel): void {
-    this.messages.push(msg);
+  protected doLog(message: LogMessage): void {
+    this.messages.push(this.createDefaultLogMessage(message));
   }
 }

@@ -4,7 +4,7 @@ import {
 } from "../src/logging/log/standard/LoggerFactoryService";
 import {MessageBufferLoggerImpl} from "../src/logging/log/standard/MessageBufferLoggerImpl";
 import {LogLevel, LogFormat, LoggerType} from "../src/logging/log/LoggerOptions";
-import {AbstractLogger} from "../src/logging/log/standard/AbstractLogger";
+import {AbstractLogger, LogMessage} from "../src/logging/log/standard/AbstractLogger";
 
 /**
  * Custom logger for testing, only logs the last message.
@@ -17,8 +17,8 @@ class CustomLoggerImpl extends AbstractLogger {
     super(name, settings);
   }
 
-  protected doLog(msg: string, logLevel: LogLevel): void {
-    this._message = msg;
+  protected doLog(message: LogMessage): void {
+    this._message = this.createDefaultLogMessage(message);
   }
 
   get message(): string {

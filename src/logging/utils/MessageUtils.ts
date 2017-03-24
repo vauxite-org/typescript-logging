@@ -2,6 +2,7 @@ import * as ST from "stacktrace-js";
 import {CategoryLogMessage} from "../log/category/AbstractCategoryLogger";
 import {Category} from "../log/category/CategoryLogger";
 import {DateFormat, DateFormatEnum, LogLevel} from "../log/LoggerOptions";
+import {LogMessage} from "../log/standard/AbstractLogger";
 
 /**
  * Some utilities to format messages.
@@ -83,7 +84,7 @@ export class MessageFormatUtils {
   }
 
   /**
-   * Renders given category log message
+   * Renders given category log message in default format.
    * @param msg Message to format
    * @param addStack If true adds the stack to the output, otherwise skips it
    * @returns {string} Formatted message
@@ -115,10 +116,35 @@ export class MessageFormatUtils {
 
     result += " " + msg.getMessage();
 
-    if (addStack && msg.getErrorAsStack() != null) {
+    if (addStack && msg.getErrorAsStack() !== null) {
       result += "\n" + msg.getErrorAsStack();
     }
 
+    return result;
+  }
+
+  /**
+   * Renders given log4j log message in default format.
+   * @param msg Message to format
+   * @param addStack If true adds the stack to the output, otherwise skips it
+   * @returns {string} Formatted message
+   */
+  public static renderDefaultLog4jMessage(msg: LogMessage, addStack: boolean): string {
+    const format = msg.logGroupRule.logFormat;
+    let result = "";
+    if (format.showTimeStamp) {
+      result += MessageFormatUtils.renderDate(msg.date, format.dateFormat) + " ";
+    }
+
+    result += LogLevel[msg.level].toUpperCase() + " ";
+    if (format.showLoggerName) {
+      result += "[" + msg.loggerName + "]";
+    }
+
+    result += " " + msg.message;
+    if (addStack && msg.errorAsStack !== null) {
+      result += "\n" + msg.errorAsStack;
+    }
     return result;
   }
 
