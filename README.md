@@ -1,12 +1,12 @@
 # typescript-logging
 
 Typescript library for logging. Simple and flexible in usage.
-The library is written in typescript, so it will easily integrate with other Typescript projects.
 
-The library comes with a separate chrome browser developer extension, which allows you to control logging at runtime.
-For detail see: [Typescript Logging Developer Extension](#typescript-logging-developer-extension)
+* The library is written in typescript, so it will easily integrate with other Typescript projects.
+* Api to control (console) logging at runtime through a browser's developer console.
+* Supports a separate chrome browser developer extension, which allows you to control logging at runtime through the chrome developer extension. For details please see: [Typescript Logging Developer Extension](#typescript-logging-developer-extension)
 
-The bundle can be used for normal javascript projects if needed (es5 compatible).
+The javascript bundle can be used for normal javascript projects if needed (es5 compatible).
 
 ## Installation
 
@@ -36,7 +36,7 @@ and a new more experimental way of logging.
 
 Which one to use, is a matter of preference, both have advantages and disadvantages.
 
-Note: Currently the chrome developer extension supports "Categorized logging" only, in the future it will support both (planned for 0.3 release).
+Note: Currently the chrome developer extension supports "Categorized logging" only, in the future it will support both (planned for a future 0.x release).
 
 
 ### Log4j way of logging
@@ -141,6 +141,16 @@ With the above example if magic("spell") is executed it will log:
 2016-01-07 11:14:26,275 INFO [product] With template script: spell
 ~~~
 
+## Console control API
+
+TODO
+
+### Exposing console control API when using webpack
+
+When using webpack to bundle typescript-logging along, you need to expose it yourself as webpack bundles the module inside making 'TSL' unavailable.
+Please read the documentation on page: [Console controle documentation](docs/latest_console_control.md) for all details how to do this.
+
+
 ## Documentation
 
 Since version 0.2.0 the documentation has been split off in several sections.
@@ -148,13 +158,13 @@ Since version 0.2.0 the documentation has been split off in several sections.
 ### Api and related
 * Latest log4j like logging: [Log4j documentation](docs/latest_log4j.md)
 * Latest categorized like logging: [Categorized documentation](docs/latest_categorized.md)
-* Stable older version 0.1.3: [Stable version 0.1.3](docs/stable_0.1.3.md)
-
-The latest version is backwards compatible with 0.1.3 (except for categorized, since that is new since 0.2).
+* Console control api: [Console control documentation](docs/latest_console_control.md)
 
 ### Webpack with more than one project module (important)
 
 Note: This section is only relevant if you have multiple projects depending on each other and all need to use typescript-logging.
+
+#### Dependencies
 
 Whenever you use multiple projects, that are packed separately by webpack (thus each results in a separate bundle).
 You need to make sure to only have typescript-logging packed once in the final module. Not doing so will result
@@ -166,7 +176,7 @@ Example:
 Project A is a core project (and thus used by other projects as a dependency), this project must make sure
 to *not* pack typescript-logging within it's module by using the external option:
 
-~~~
+```
 var webpack = require("webpack");
 
 module.exports = {
@@ -177,7 +187,7 @@ module.exports = {
     }
 
 };
-~~~
+```
 
 Then project B, that depends on project A should pack typescript-logging along normally
 (which is what webpack normally does if it's a dependency in package.json).
@@ -192,7 +202,7 @@ that uses typescript logging.
 
 Please visit: [typescript-logging-extension](https://github.com/mreuvers/typescript-logging-extension) on how to get this.
 
-Note: The extension currently only integrates with the categorized way of logging. Current plan is to add support for log4j like logging as well in 0.3.
+Note: The extension currently only integrates with the categorized way of logging. Current plan is to add support for log4j like logging as well in a future 0.x release.
 
 ## Build
 
@@ -223,39 +233,5 @@ If you add/change new functionality and want it merged to master, please open a 
 Some things may not fit the library and could be rejected, so if you are unsure please ask first before wasting your valuable time!
 
 ## History
-* 0.2.1 (Current release)
-  * Fixed: [Make sure to access window object only for browsers, not for node](https://github.com/mreuvers/typescript-logging/issues/3)
-* 0.2.0
-  * No changes, bump to official release.
-* 0.2.0-beta7
-  * Include source in distribution (makes source map warnings go away)
-* 0.2.0-beta6
-  * Updated documentation
-  * Enhanced the extension support (to actually help fix issues on the extension with packed webpack modules)
-  * Added option for creating named LoggerFactories
-  * Some internal changes to better structure the project
-  * Fix log.trace internally to not call log.trace (which was just wrong).
-* 0.2.0-beta5
-  * Use typescript 2.1.5 as minimum, as that gets rid of references in generated .d.ts files to node e.a
-* 0.2.0-beta4
-  * Drop / move types (they can cause issues with es6 ts projects)
-  * Added 'setConfigurationCategory(...)' to CategoryServiceFactory to allow config for specific category (and childs).
-  * Update documentation
-* 0.2.0-beta3
-  * Update latest documentation with example for custom logger
-  * Expose CategoryLogFormat, was missing.
-  * Add source maps to the latest download as well.
-* 0.2.0-beta2
-  * Fix missing optionals in Logger interface
-  * Hopefully fix @node reference declaration issues by adding typings (compile would fail, feels like a TS bug but not sure).
-* 0.2.0-beta1
-  * Categorized logging (new feature)
-  * Categorized logging supports chrome developer extension
-  * Updated and split documentation (pre 0.2 and latest)
-  * Standard logging (0.1.3) remains compatible (does not integrate with chrome extension)
-* 0.1.3 No api changes, release ok.
-  * Updated documentation (slightly changed examples, added example how to import, added additional logger api)
-  * Fix that messages get logged in proper order always (due to using a promise for error resolving, they could get out of order)
-* 0.1.2 No changes (npm related), release ok.
-* 0.1.1 No changes (npm related), do not use.
-* 0.1.0 Initial release, do not use.
+
+For history please check the [changelog](docs/change_log.md)
