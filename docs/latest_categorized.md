@@ -1,4 +1,4 @@
-# Typescript logging documentation
+# Documentation category style
 
 This page describes how the latest, new logging mechanism of this library works and can be used.
 
@@ -6,22 +6,20 @@ This page describes how the latest, new logging mechanism of this library works 
 
 Most logging libraries are (loosely) based on (older) existing logging implementations
 in the way they used to work and are setup. There's nothing wrong with that, and in fact
-the 'old' way of logging was implemented by this library in a same way initially,
-and works just fine and will remain working as is (for docs on that see: [Stable version 0.1.3](stable_0.1.3.md)).
+the 'old' way of logging is implemented in a similar fashion by the log4j style logging as well.
 
 However in our projects we felt we needed a different approach to logging, specially
-now that logging for typescript is often for single page applications, built in frameworks
+now that logging for TypeScript is often for single page applications, built in frameworks
 like angular, react, ember and so on.
 
 We wanted an easy to use logging mechanism that would build up itself dynamically if needed,
-and required minimum configuration from a developers perspective.
+and required minimum configuration from a developers perspective by default.
 
 In addition, what we also needed is to be able to easily enable/change logging when the application is already deployed.
-Next to logging during development, it's also important to be able to trace problems
-customers encounter in production.
-The above tackled by a different project [typescript-logging-extension](https://github.com/mreuvers/typescript-logging-extension) which
-currently can be used in Chrome, as a developer extension, that is if the logging library
-is used by the application.
+Next to logging during development, it was also important to be able to trace problems customers encounter in production.
+
+The above is tackled by a different project [typescript-logging-extension](https://github.com/mreuvers/typescript-logging-extension) which
+currently can be used in Chrome, as a developer extension, if the category style of logging is used by the application.
 
 ## How
 
@@ -164,11 +162,13 @@ it also contains a copy of this file as html.
 
 You can download both bundles and documentation from here: [Documentation](https://github.com/mreuvers/typescript-logging/tree/master/downloads/bundle/latest)
 
-**Changing default configuration** can be done through CategoryServiceFactory.setDefaultConfiguration(..). Check the documentation for details,
-as each class is documented on how to be used.
+### Changing default configuration
+Can be done through CategoryServiceFactory.setDefaultConfiguration(..). Check the documentation for details, as each class is documented on how to be used.
 
-**Changing log levels dynamically** when an app runs, you can use the developer extension, see: [typescript-logging-extension](https://github.com/mreuvers/typescript-logging-extension) for details.
-In a future release a console api will be provided as well, to support similar options like the plugin does.
+### Changing log levels dynamically
+When an app runs, you can use the developer extension , see: [typescript-logging-extension](https://github.com/mreuvers/typescript-logging-extension) for details.
+
+You can also use the console control API for this since 0.3. For details see [here](latest_console_control.md).
 
 ## Browser developer extension
 

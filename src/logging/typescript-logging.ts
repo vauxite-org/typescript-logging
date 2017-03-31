@@ -31,8 +31,8 @@ export {MessageBufferLoggerImpl} from "./log/standard/MessageBufferLoggerImpl";
 export {CategoryLogFormat, DateFormat, DateFormatEnum, LogFormat, LoggerType, LogLevel} from "./log/LoggerOptions";
 
 // Console controller related
-export {CategoryServiceControl} from "./control/CategoryServiceControl";
-export {LoggerControl} from "./control/LogGroupControl";
+export {CategoryServiceControl, CategoryServiceControlSettings} from "./control/CategoryServiceControl";
+export {LoggerControl, LoggerFactoryControl, LogGroupControlSettings} from "./control/LogGroupControl";
 
 // Utilities
 export {SimpleMap, LinkedList} from "./utils/DataStructures";

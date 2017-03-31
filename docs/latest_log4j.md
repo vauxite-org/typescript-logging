@@ -1,4 +1,4 @@
-# Documentation log4j
+# Documentation log4j style
 
 This page provides an overview of the log4j way of logging and its api. Please note that full API documentation can be found
 in the docs bundle.
@@ -62,12 +62,13 @@ All classes can be imported from "typescript-logging".
   // Custom logger, extend AbstractLogger which makes your life easy.
   class CustomLoggerImpl extends AbstractLogger {
 
-    constructor(name: string, rule: LogGroupRule) {
-      super(name, rule);
+    constructor(name: string, settings: LogGroupRuntimeSettings) {
+      super(name, settings);
     }
 
-    protected doLog(msg: string): void {
+    protected doLog(msg: LogMessage): void {
       // Do what you need to do with this log message!
+      // You can use this.createDefaultLogMessage(msg) to get a fully default formatted message if you want.
     }
   }
 

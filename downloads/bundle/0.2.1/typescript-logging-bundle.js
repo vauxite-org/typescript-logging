@@ -64,7 +64,7 @@ var TSL =
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 36);
+/******/ 	return __webpack_require__(__webpack_require__.s = 35);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -214,9 +214,6 @@ var DateFormat = (function () {
         enumerable: true,
         configurable: true
     });
-    DateFormat.prototype.copy = function () {
-        return new DateFormat(this._formatEnum, this._dateSeparator);
-    };
     return DateFormat;
 }());
 exports.DateFormat = DateFormat;
@@ -318,9 +315,6 @@ var CategoryLogFormat = (function () {
         enumerable: true,
         configurable: true
     });
-    CategoryLogFormat.prototype.copy = function () {
-        return new CategoryLogFormat(this._dateFormat.copy(), this._showTimeStamp, this._showCategoryName);
-    };
     return CategoryLogFormat;
 }());
 exports.CategoryLogFormat = CategoryLogFormat;
@@ -632,6 +626,216 @@ exports.StringBuilder = StringBuilder;
 
 /***/ }),
 /* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var CategoryService_1 = __webpack_require__(5);
+var LoggerOptions_1 = __webpack_require__(0);
+var MessageUtils_1 = __webpack_require__(6);
+var ExtensionHelper = (function () {
+    function ExtensionHelper() {
+        // Private constructor
+    }
+    /**
+     * Enables the window event listener to listen to messages (from extensions).
+     * Can be registered/enabled only once.
+     */
+    ExtensionHelper.register = function () {
+        if (!ExtensionHelper.registered) {
+            ExtensionHelper.registered = true;
+            var listener = function (evt) {
+                var msg = evt.data;
+                if (msg !== null) {
+                    ExtensionHelper.processMessageFromExtension(msg);
+                }
+            };
+            if (typeof window !== "undefined") {
+                window.removeEventListener("message", listener);
+                window.addEventListener("message", listener);
+            }
+        }
+    };
+    ExtensionHelper.processMessageFromExtension = function (msg) {
+        if (!ExtensionHelper.registered) {
+            return;
+        }
+        /* tslint:disable:no-console */
+        if (msg.from === "tsl-extension") {
+            var data = msg.data;
+            switch (data.type) {
+                case "register":
+                    ExtensionHelper.enableExtensionIntegration();
+                    break;
+                case "request-change-loglevel":
+                    var valueRequest = data.value;
+                    var catsApplied = ExtensionHelper.applyLogLevel(valueRequest.categoryId, valueRequest.logLevel, valueRequest.recursive);
+                    if (catsApplied.length > 0) {
+                        // Send changes back
+                        ExtensionHelper.sendCategoriesRuntimeUpdateMessage(catsApplied);
+                    }
+                    break;
+                default:
+                    console.log("Unknown command to process message from extension, command was: " + data.type);
+                    break;
+            }
+        }
+        else if (msg.from !== "tsl-logging") {
+            console.log("Dropping unknown message: " + JSON.stringify(msg));
+        }
+        /* tslint:enable:no-console */
+    };
+    ExtensionHelper.sendCategoryLogMessage = function (msg) {
+        if (!ExtensionHelper.registered) {
+            return;
+        }
+        var categoryIds = msg.getCategories().map(function (cat) {
+            return cat.id;
+        });
+        var content = {
+            type: "log-message",
+            value: {
+                categories: categoryIds,
+                errorAsStack: msg.getErrorAsStack(),
+                formattedMessage: MessageUtils_1.MessageFormatUtils.renderDefaultMessage(msg, false),
+                logLevel: LoggerOptions_1.LogLevel[msg.getLevel()].toString(),
+                message: msg.getMessage(),
+                resolvedErrorMessage: msg.isResolvedErrorMessage()
+            }
+        };
+        var message = {
+            data: content,
+            from: "tsl-logging",
+        };
+        ExtensionHelper.sendMessage(message);
+    };
+    ExtensionHelper.sendCategoriesRuntimeUpdateMessage = function (categories) {
+        if (!ExtensionHelper.registered) {
+            return;
+        }
+        var service = CategoryService_1.CategoryServiceImpl.getInstance();
+        var catLevels = { categories: Array() };
+        categories.forEach(function (cat) {
+            var catSettings = service.getCategorySettings(cat);
+            if (catSettings != null) {
+                catLevels.categories.push({ id: cat.id, logLevel: LoggerOptions_1.LogLevel[catSettings.logLevel].toString() });
+            }
+        });
+        var content = {
+            type: "categories-rt-update",
+            value: catLevels,
+        };
+        var message = {
+            data: content,
+            from: "tsl-logging"
+        };
+        ExtensionHelper.sendMessage(message);
+    };
+    ExtensionHelper.sendRootCategoriesToExtension = function () {
+        if (!ExtensionHelper.registered) {
+            return;
+        }
+        var categories = CategoryService_1.CategoryServiceImpl.getInstance().getRootCategories().map(function (cat) {
+            return ExtensionHelper.getCategoryAsJSON(cat);
+        });
+        var content = {
+            type: "root-categories-tree",
+            value: categories
+        };
+        var message = {
+            data: content,
+            from: "tsl-logging"
+        };
+        ExtensionHelper.sendMessage(message);
+    };
+    /**
+     * If extension integration is enabled, will send the root categories over to the extension.
+     * Otherwise does nothing.
+     */
+    ExtensionHelper.getCategoryAsJSON = function (cat) {
+        var childCategories = cat.children.map(function (child) {
+            return ExtensionHelper.getCategoryAsJSON(child);
+        });
+        return {
+            children: childCategories,
+            id: cat.id,
+            logLevel: LoggerOptions_1.LogLevel[cat.logLevel].toString(),
+            name: cat.name,
+            parentId: (cat.parent != null ? cat.parent.id : null),
+        };
+    };
+    ExtensionHelper.applyLogLevel = function (categoryId, logLevel, recursive) {
+        var cats = [];
+        var category = CategoryService_1.CategoryServiceImpl.getInstance().getCategoryById(categoryId);
+        if (category != null) {
+            ExtensionHelper._applyLogLevelRecursive(category, LoggerOptions_1.LogLevel.fromString(logLevel), recursive, cats);
+        }
+        else {
+            /* tslint:disable:no-console */
+            console.log("Could not change log level, failed to find category with id: " + categoryId);
+        }
+        return cats;
+    };
+    ExtensionHelper._applyLogLevelRecursive = function (category, logLevel, recursive, cats) {
+        var categorySettings = CategoryService_1.CategoryServiceImpl.getInstance().getCategorySettings(category);
+        if (categorySettings != null) {
+            categorySettings.logLevel = logLevel;
+            cats.push(category);
+            if (recursive) {
+                category.children.forEach(function (child) {
+                    ExtensionHelper._applyLogLevelRecursive(child, logLevel, recursive, cats);
+                });
+            }
+        }
+    };
+    ExtensionHelper.getAllCategories = function () {
+        var cats = [];
+        var addCats = function (cat, allCats) {
+            allCats.push(cat);
+            cat.children.forEach(function (catChild) {
+                addCats(catChild, allCats);
+            });
+        };
+        CategoryService_1.CategoryServiceImpl.getInstance().getRootCategories().forEach(function (cat) {
+            addCats(cat, cats);
+        });
+        return cats;
+    };
+    ExtensionHelper.sendMessage = function (msg) {
+        if (!ExtensionHelper.registered) {
+            return;
+        }
+        if (typeof window !== "undefined") {
+            /* tslint:disable:no-console */
+            console.log("Sending message to extension, message type: " + msg.data.type);
+            /* tslint:enable:no-console */
+            window.postMessage(msg, "*");
+        }
+    };
+    /**
+     *  Extension framework will call this to enable the integration between two,
+     *  after this call the framework will respond with postMessage() messages.
+     */
+    ExtensionHelper.enableExtensionIntegration = function () {
+        if (!ExtensionHelper.registered) {
+            return;
+        }
+        var instance = CategoryService_1.CategoryServiceImpl.getInstance();
+        instance.enableExtensionIntegration();
+        // Send over all categories
+        ExtensionHelper.sendRootCategoriesToExtension();
+        // Send over the current runtime levels
+        var cats = ExtensionHelper.getAllCategories();
+        ExtensionHelper.sendCategoriesRuntimeUpdateMessage(cats);
+    };
+    return ExtensionHelper;
+}());
+ExtensionHelper.registered = false;
+exports.ExtensionHelper = ExtensionHelper;
+//# sourceMappingURL=ExtensionHelper.js.map
+
+/***/ }),
+/* 3 */
 /***/ (function(module, exports) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -1054,262 +1258,55 @@ exports.compareByGeneratedPositionsInflated = compareByGeneratedPositionsInflate
 
 
 /***/ }),
-/* 3 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var CategoryService_1 = __webpack_require__(5);
-var LoggerOptions_1 = __webpack_require__(0);
-var MessageUtils_1 = __webpack_require__(7);
-var ExtensionHelper = (function () {
-    function ExtensionHelper() {
-        // Private constructor
-    }
-    /**
-     * Enables the window event listener to listen to messages (from extensions).
-     * Can be registered/enabled only once.
-     */
-    ExtensionHelper.register = function () {
-        if (!ExtensionHelper.registered) {
-            ExtensionHelper.registered = true;
-            var listener = function (evt) {
-                var msg = evt.data;
-                if (msg !== null) {
-                    ExtensionHelper.processMessageFromExtension(msg);
-                }
-            };
-            if (typeof window !== "undefined") {
-                window.removeEventListener("message", listener);
-                window.addEventListener("message", listener);
-            }
-        }
-    };
-    ExtensionHelper.processMessageFromExtension = function (msg) {
-        if (!ExtensionHelper.registered) {
-            return;
-        }
-        /* tslint:disable:no-console */
-        if (msg.from === "tsl-extension") {
-            var data = msg.data;
-            switch (data.type) {
-                case "register":
-                    ExtensionHelper.enableExtensionIntegration();
-                    break;
-                case "request-change-loglevel":
-                    var valueRequest = data.value;
-                    var catsApplied = ExtensionHelper.applyLogLevel(valueRequest.categoryId, valueRequest.logLevel, valueRequest.recursive);
-                    if (catsApplied.length > 0) {
-                        // Send changes back
-                        ExtensionHelper.sendCategoriesRuntimeUpdateMessage(catsApplied);
-                    }
-                    break;
-                default:
-                    console.log("Unknown command to process message from extension, command was: " + data.type);
-                    break;
-            }
-        }
-        else if (msg.from !== "tsl-logging") {
-            console.log("Dropping unknown message: " + JSON.stringify(msg));
-        }
-        /* tslint:enable:no-console */
-    };
-    ExtensionHelper.sendCategoryLogMessage = function (msg) {
-        if (!ExtensionHelper.registered) {
-            return;
-        }
-        var categoryIds = msg.getCategories().map(function (cat) {
-            return cat.id;
-        });
-        var content = {
-            type: "log-message",
-            value: {
-                categories: categoryIds,
-                errorAsStack: msg.getErrorAsStack(),
-                formattedMessage: MessageUtils_1.MessageFormatUtils.renderDefaultMessage(msg, false),
-                logLevel: LoggerOptions_1.LogLevel[msg.getLevel()].toString(),
-                message: msg.getMessage(),
-                resolvedErrorMessage: msg.isResolvedErrorMessage()
-            }
-        };
-        var message = {
-            data: content,
-            from: "tsl-logging",
-        };
-        ExtensionHelper.sendMessage(message);
-    };
-    ExtensionHelper.sendCategoriesRuntimeUpdateMessage = function (categories) {
-        if (!ExtensionHelper.registered) {
-            return;
-        }
-        var service = CategoryService_1.CategoryServiceImpl.getInstance();
-        var catLevels = { categories: Array() };
-        categories.forEach(function (cat) {
-            var catSettings = service.getCategorySettings(cat);
-            if (catSettings != null) {
-                catLevels.categories.push({ id: cat.id, logLevel: LoggerOptions_1.LogLevel[catSettings.logLevel].toString() });
-            }
-        });
-        var content = {
-            type: "categories-rt-update",
-            value: catLevels,
-        };
-        var message = {
-            data: content,
-            from: "tsl-logging"
-        };
-        ExtensionHelper.sendMessage(message);
-    };
-    ExtensionHelper.sendRootCategoriesToExtension = function () {
-        if (!ExtensionHelper.registered) {
-            return;
-        }
-        var categories = CategoryService_1.CategoryServiceImpl.getInstance().getRootCategories().map(function (cat) {
-            return ExtensionHelper.getCategoryAsJSON(cat);
-        });
-        var content = {
-            type: "root-categories-tree",
-            value: categories
-        };
-        var message = {
-            data: content,
-            from: "tsl-logging"
-        };
-        ExtensionHelper.sendMessage(message);
-    };
-    /**
-     * If extension integration is enabled, will send the root categories over to the extension.
-     * Otherwise does nothing.
-     */
-    ExtensionHelper.getCategoryAsJSON = function (cat) {
-        var childCategories = cat.children.map(function (child) {
-            return ExtensionHelper.getCategoryAsJSON(child);
-        });
-        return {
-            children: childCategories,
-            id: cat.id,
-            logLevel: LoggerOptions_1.LogLevel[cat.logLevel].toString(),
-            name: cat.name,
-            parentId: (cat.parent != null ? cat.parent.id : null),
-        };
-    };
-    ExtensionHelper.applyLogLevel = function (categoryId, logLevel, recursive) {
-        var cats = [];
-        var category = CategoryService_1.CategoryServiceImpl.getInstance().getCategoryById(categoryId);
-        if (category != null) {
-            ExtensionHelper._applyLogLevelRecursive(category, LoggerOptions_1.LogLevel.fromString(logLevel), recursive, cats);
-        }
-        else {
-            /* tslint:disable:no-console */
-            console.log("Could not change log level, failed to find category with id: " + categoryId);
-        }
-        return cats;
-    };
-    ExtensionHelper._applyLogLevelRecursive = function (category, logLevel, recursive, cats) {
-        var categorySettings = CategoryService_1.CategoryServiceImpl.getInstance().getCategorySettings(category);
-        if (categorySettings != null) {
-            categorySettings.logLevel = logLevel;
-            cats.push(category);
-            if (recursive) {
-                category.children.forEach(function (child) {
-                    ExtensionHelper._applyLogLevelRecursive(child, logLevel, recursive, cats);
-                });
-            }
-        }
-    };
-    ExtensionHelper.getAllCategories = function () {
-        var cats = [];
-        var addCats = function (cat, allCats) {
-            allCats.push(cat);
-            cat.children.forEach(function (catChild) {
-                addCats(catChild, allCats);
-            });
-        };
-        CategoryService_1.CategoryServiceImpl.getInstance().getRootCategories().forEach(function (cat) {
-            addCats(cat, cats);
-        });
-        return cats;
-    };
-    ExtensionHelper.sendMessage = function (msg) {
-        if (!ExtensionHelper.registered) {
-            return;
-        }
-        if (typeof window !== "undefined") {
-            window.postMessage(msg, "*");
-        }
-    };
-    /**
-     *  Extension framework will call this to enable the integration between two,
-     *  after this call the framework will respond with postMessage() messages.
-     */
-    ExtensionHelper.enableExtensionIntegration = function () {
-        if (!ExtensionHelper.registered) {
-            return;
-        }
-        var instance = CategoryService_1.CategoryServiceImpl.getInstance();
-        instance.enableExtensionIntegration();
-        // Send over all categories
-        ExtensionHelper.sendRootCategoriesToExtension();
-        // Send over the current runtime levels
-        var cats = ExtensionHelper.getAllCategories();
-        ExtensionHelper.sendCategoriesRuntimeUpdateMessage(cats);
-    };
-    return ExtensionHelper;
-}());
-ExtensionHelper.registered = false;
-exports.ExtensionHelper = ExtensionHelper;
-//# sourceMappingURL=ExtensionHelper.js.map
-
-/***/ }),
 /* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 var DataStructures_1 = __webpack_require__(1);
-var MessageUtils_1 = __webpack_require__(7);
+var MessageUtils_1 = __webpack_require__(6);
 var LoggerOptions_1 = __webpack_require__(0);
 var CategoryLogMessageImpl = (function () {
     function CategoryLogMessageImpl(message, error, categories, date, level, logFormat, ready) {
         this._resolvedErrorMessage = false;
-        this._errorAsStack = null;
-        this._message = message;
-        this._error = error;
-        this._categories = categories;
-        this._date = date;
-        this._level = level;
-        this._logFormat = logFormat;
-        this._ready = ready;
+        this.errorAsStack = null;
+        this.message = message;
+        this.error = error;
+        this.categories = categories;
+        this.date = date;
+        this.level = level;
+        this.logFormat = logFormat;
+        this.ready = ready;
     }
     CategoryLogMessageImpl.prototype.getMessage = function () {
-        return this._message;
+        return this.message;
     };
     CategoryLogMessageImpl.prototype.getErrorAsStack = function () {
-        return this._errorAsStack;
+        return this.errorAsStack;
     };
     CategoryLogMessageImpl.prototype.setErrorAsStack = function (stack) {
-        this._errorAsStack = stack;
+        this.errorAsStack = stack;
     };
     CategoryLogMessageImpl.prototype.getError = function () {
-        return this._error;
+        return this.error;
     };
     CategoryLogMessageImpl.prototype.getCategories = function () {
-        return this._categories;
+        return this.categories;
     };
     CategoryLogMessageImpl.prototype.getDate = function () {
-        return this._date;
+        return this.date;
     };
     CategoryLogMessageImpl.prototype.getLevel = function () {
-        return this._level;
+        return this.level;
     };
     CategoryLogMessageImpl.prototype.getLogFormat = function () {
-        return this._logFormat;
+        return this.logFormat;
     };
     CategoryLogMessageImpl.prototype.isReady = function () {
-        return this._ready;
+        return this.ready;
     };
     CategoryLogMessageImpl.prototype.setReady = function (value) {
-        this._ready = value;
+        this.ready = value;
     };
     Object.defineProperty(CategoryLogMessageImpl.prototype, "resolvedErrorMessage", {
         get: function () {
@@ -1481,17 +1478,17 @@ var AbstractCategoryLogger = (function () {
         for (var _i = 4; _i < arguments.length; _i++) {
             categories[_i - 4] = arguments[_i];
         }
-        var logCategories;
+        var logCateries;
         // Log root category by default if none present
         if (categories !== undefined && categories.length > 0) {
-            logCategories = categories;
+            logCateries = categories;
         }
         else {
-            logCategories = [];
-            logCategories.push(this.rootCategory);
+            logCateries = [];
+            logCateries.push(this.rootCategory);
         }
         var _loop_1 = function (i) {
-            var category = logCategories[i];
+            var category = logCateries[i];
             if (category == null) {
                 throw new Error("Cannot have a null element within categories, at index=" + i);
             }
@@ -1503,13 +1500,13 @@ var AbstractCategoryLogger = (function () {
             if (settings.logLevel <= level) {
                 var actualError = error != null ? error() : null;
                 if (actualError == null) {
-                    var logMessage = new CategoryLogMessageImpl(msg(), actualError, logCategories, new Date(), level, settings.logFormat, true);
+                    var logMessage = new CategoryLogMessageImpl(msg(), actualError, logCateries, new Date(), level, settings.logFormat, true);
                     logMessage.resolvedErrorMessage = resolved;
                     this_1.allMessages.addTail(logMessage);
                     this_1.processMessages();
                 }
                 else {
-                    var logMessage_1 = new CategoryLogMessageImpl(msg(), actualError, logCategories, new Date(), level, settings.logFormat, false);
+                    var logMessage_1 = new CategoryLogMessageImpl(msg(), actualError, logCateries, new Date(), level, settings.logFormat, false);
                     logMessage_1.resolvedErrorMessage = resolved;
                     this_1.allMessages.addTail(logMessage_1);
                     MessageUtils_1.MessageFormatUtils.renderError(actualError).then(function (stack) {
@@ -1524,7 +1521,7 @@ var AbstractCategoryLogger = (function () {
         var this_1 = this;
         // Get the runtime levels for given categories. If their level is lower than given level, we log.
         // In addition we pass along which category/categories we log this statement for.
-        for (var i = 0; i < logCategories.length; i++) {
+        for (var i = 0; i < logCateries.length; i++) {
             var state_1 = _loop_1(i);
             if (state_1 === "break")
                 break;
@@ -1558,13 +1555,13 @@ exports.AbstractCategoryLogger = AbstractCategoryLogger;
 
 "use strict";
 
+var ExtensionHelper_1 = __webpack_require__(2);
 var DataStructures_1 = __webpack_require__(1);
 var LoggerOptions_1 = __webpack_require__(0);
-var CategoryConsoleLoggerImpl_1 = __webpack_require__(9);
-var CategoryDelegateLoggerImpl_1 = __webpack_require__(10);
-var CategoryExtensionLoggerImpl_1 = __webpack_require__(22);
-var CategoryMessageBufferImpl_1 = __webpack_require__(11);
-var ExtensionHelper_1 = __webpack_require__(3);
+var CategoryConsoleLoggerImpl_1 = __webpack_require__(8);
+var CategoryDelegateLoggerImpl_1 = __webpack_require__(9);
+var CategoryExtensionLoggerImpl_1 = __webpack_require__(21);
+var CategoryMessageBufferImpl_1 = __webpack_require__(10);
 /**
  * RuntimeSettings for a category, at runtime these are associated to a category.
  */
@@ -1685,9 +1682,6 @@ var CategoryDefaultConfiguration = (function () {
         enumerable: true,
         configurable: true
     });
-    CategoryDefaultConfiguration.prototype.copy = function () {
-        return new CategoryDefaultConfiguration(this.logLevel, this.loggerType, this.logFormat.copy(), this.callBackLogger);
-    };
     return CategoryDefaultConfiguration;
 }());
 exports.CategoryDefaultConfiguration = CategoryDefaultConfiguration;
@@ -1698,36 +1692,29 @@ exports.CategoryDefaultConfiguration = CategoryDefaultConfiguration;
  */
 var CategoryServiceImpl = (function () {
     function CategoryServiceImpl() {
-        this._defaultConfig = new CategoryDefaultConfiguration();
+        this.defaultConfig = new CategoryDefaultConfiguration();
         // All registered root categories
-        this._rootCategories = [];
+        this.rootCategories = [];
         // Key of map is path of category
-        this._categoryRuntimeSettings = new DataStructures_1.SimpleMap();
-        // Same, but these are never changed and are used to restore the previous state by the CategoryLoggerControl.
-        this._categoryOriginalRuntimeSettings = new DataStructures_1.SimpleMap();
+        this.categoryRuntimeSettings = new DataStructures_1.SimpleMap();
         // Key is name of root logger.
-        this._rootLoggers = new DataStructures_1.SimpleMap();
+        this.rootLoggers = new DataStructures_1.SimpleMap();
         // Private constructor
         ExtensionHelper_1.ExtensionHelper.register();
     }
     CategoryServiceImpl.getInstance = function () {
-        // Load on-demand, to assure webpack ordering of module usage doesn't screw things over
-        // for us when we accidentally change the order.
-        if (CategoryServiceImpl._INSTANCE === null) {
-            CategoryServiceImpl._INSTANCE = new CategoryServiceImpl();
-        }
-        return CategoryServiceImpl._INSTANCE;
+        return CategoryServiceImpl.INSTANCE;
     };
     CategoryServiceImpl.prototype.getLogger = function (root) {
         if (!this.rootCategoryExists(root)) {
             throw new Error("Given category " + root.name + " is not registered as a root category. You must use the root category to retrieve a logger.");
         }
-        var pair = this._rootLoggers.get(root.name);
+        var pair = this.rootLoggers.get(root.name);
         if (pair != null) {
             return pair.y;
         }
         var logger = new CategoryDelegateLoggerImpl_1.CategoryDelegateLoggerImpl(this.createRootLogger(root));
-        this._rootLoggers.put(root.name, new DataStructures_1.TuplePair(root, logger));
+        this.rootLoggers.put(root.name, new DataStructures_1.TuplePair(root, logger));
         return logger;
     };
     /**
@@ -1735,17 +1722,13 @@ var CategoryServiceImpl = (function () {
      * After this you need to re-register your categories etc.
      */
     CategoryServiceImpl.prototype.clear = function () {
-        this._rootCategories = [];
-        this._categoryRuntimeSettings.clear();
-        this._categoryOriginalRuntimeSettings.clear();
-        this._rootLoggers.clear();
+        this.rootCategories = [];
+        this.categoryRuntimeSettings.clear();
+        this.rootLoggers.clear();
         this.setDefaultConfiguration(new CategoryDefaultConfiguration());
     };
     CategoryServiceImpl.prototype.getCategorySettings = function (category) {
-        return this._categoryRuntimeSettings.get(category.getCategoryPath());
-    };
-    CategoryServiceImpl.prototype.getOriginalCategorySettings = function (category) {
-        return this._categoryOriginalRuntimeSettings.get(category.getCategoryPath());
+        return this.categoryRuntimeSettings.get(category.getCategoryPath());
     };
     /**
      * Set the default configuration. New root loggers created get this
@@ -1758,32 +1741,25 @@ var CategoryServiceImpl = (function () {
     CategoryServiceImpl.prototype.setDefaultConfiguration = function (config, reset) {
         var _this = this;
         if (reset === void 0) { reset = false; }
-        this._defaultConfig = config;
+        this.defaultConfig = config;
         if (reset) {
             // Reset all runtimesettings (this will reset it for roots & children all at once).
             var newRuntimeSettings_1 = new DataStructures_1.SimpleMap();
-            var newOriginalRuntimeSettings_1 = new DataStructures_1.SimpleMap();
-            this._categoryRuntimeSettings.keys().forEach(function (key) {
-                var setting = _this._categoryRuntimeSettings.get(key);
-                if (setting !== null) {
-                    var defSettings = _this._defaultConfig.copy();
-                    var settings = new CategoryRuntimeSettings(setting.category, defSettings.logLevel, defSettings.loggerType, defSettings.logFormat, defSettings.callBackLogger);
-                    var defSettingsOriginal = _this._defaultConfig.copy();
-                    var settingsOriginal = new CategoryRuntimeSettings(setting.category, defSettingsOriginal.logLevel, defSettingsOriginal.loggerType, defSettingsOriginal.logFormat, defSettingsOriginal.callBackLogger);
+            this.categoryRuntimeSettings.keys().forEach(function (key) {
+                var setting = _this.categoryRuntimeSettings.get(key);
+                if (setting != null) {
+                    var settings = new CategoryRuntimeSettings(setting.category, _this.defaultConfig.logLevel, _this.defaultConfig.loggerType, _this.defaultConfig.logFormat, _this.defaultConfig.callBackLogger);
                     newRuntimeSettings_1.put(key, settings);
-                    newOriginalRuntimeSettings_1.put(key, settingsOriginal);
                 }
                 else {
                     throw new Error("No setting associated with key=" + key);
                 }
             });
-            this._categoryRuntimeSettings.clear();
-            this._categoryOriginalRuntimeSettings.clear();
-            this._categoryRuntimeSettings = newRuntimeSettings_1;
-            this._categoryOriginalRuntimeSettings = newOriginalRuntimeSettings_1;
+            this.categoryRuntimeSettings.clear();
+            this.categoryRuntimeSettings = newRuntimeSettings_1;
             // Now initialize a new logger and put it on the delegate. Loggers we give out
             // are guaranteed to be wrapped inside the delegate logger.
-            this._rootLoggers.values().forEach(function (pair) {
+            this.rootLoggers.values().forEach(function (pair) {
                 // Set the new logger type
                 pair.y.delegate = _this.createRootLogger(pair.x);
             });
@@ -1815,7 +1791,7 @@ var CategoryServiceImpl = (function () {
             });
         }
         if (resetRootLogger && this.rootCategoryExists(category)) {
-            var tupleLogger = this._rootLoggers.get(category.name);
+            var tupleLogger = this.rootLoggers.get(category.name);
             if (tupleLogger !== null) {
                 tupleLogger.y.delegate = this.createRootLogger(tupleLogger.x);
             }
@@ -1828,13 +1804,13 @@ var CategoryServiceImpl = (function () {
         var parent = category.parent;
         if (parent == null) {
             // Register the root category
-            for (var _i = 0, _a = this._rootCategories; _i < _a.length; _i++) {
+            for (var _i = 0, _a = this.rootCategories; _i < _a.length; _i++) {
                 var rootCategory = _a[_i];
                 if (rootCategory.name === category.name) {
                     throw new Error("Cannot add this rootCategory with name: " + category.name + ", another root category is already registered with that name.");
                 }
             }
-            this._rootCategories.push(category);
+            this.rootCategories.push(category);
         }
         this.initializeRuntimeSettingsForCategory(category);
     };
@@ -1844,7 +1820,7 @@ var CategoryServiceImpl = (function () {
      */
     CategoryServiceImpl.prototype.enableExtensionIntegration = function () {
         var _this = this;
-        this._rootLoggers.values().forEach(function (pair) {
+        this.rootLoggers.values().forEach(function (pair) {
             // Set the new logger type if needed.
             var delegateLogger = pair.y;
             if (!(delegateLogger instanceof CategoryExtensionLoggerImpl_1.CategoryExtensionLoggerImpl)) {
@@ -1859,7 +1835,7 @@ var CategoryServiceImpl = (function () {
      * Return all root categories currently registered.
      */
     CategoryServiceImpl.prototype.getRootCategories = function () {
-        return this._rootCategories.slice(0);
+        return this.rootCategories.slice(0);
     };
     /**
      * Return Category by id
@@ -1867,7 +1843,7 @@ var CategoryServiceImpl = (function () {
      * @returns {Category} or null if not found
      */
     CategoryServiceImpl.prototype.getCategoryById = function (id) {
-        var result = this._categoryRuntimeSettings.values().filter(function (cat) { return cat.category.id === id; })
+        var result = this.categoryRuntimeSettings.values().filter(function (cat) { return cat.category.id === id; })
             .map(function (cat) { return cat.category; });
         if (result.length === 1) {
             return result[0];
@@ -1875,17 +1851,13 @@ var CategoryServiceImpl = (function () {
         return null;
     };
     CategoryServiceImpl.prototype.initializeRuntimeSettingsForCategory = function (category) {
-        var settings = this._categoryRuntimeSettings.get(category.getCategoryPath());
-        if (settings !== null) {
+        var settings = this.categoryRuntimeSettings.get(category.getCategoryPath());
+        if (settings != null) {
             throw new Error("Category with path: " + category.getCategoryPath() + " is already registered?");
         }
         // Passing the callback is not really needed for child categories, but don't really care.
-        var defSettings = this._defaultConfig.copy();
-        settings = new CategoryRuntimeSettings(category, defSettings.logLevel, defSettings.loggerType, defSettings.logFormat, defSettings.callBackLogger);
-        var defSettingsOriginal = this._defaultConfig.copy();
-        var settingsOriginal = new CategoryRuntimeSettings(category, defSettingsOriginal.logLevel, defSettingsOriginal.loggerType, defSettingsOriginal.logFormat, defSettingsOriginal.callBackLogger);
-        this._categoryRuntimeSettings.put(category.getCategoryPath(), settings);
-        this._categoryOriginalRuntimeSettings.put(category.getCategoryPath(), settingsOriginal);
+        settings = new CategoryRuntimeSettings(category, this.defaultConfig.logLevel, this.defaultConfig.loggerType, this.defaultConfig.logFormat, this.defaultConfig.callBackLogger);
+        this.categoryRuntimeSettings.put(category.getCategoryPath(), settings);
     };
     CategoryServiceImpl.prototype.rootCategoryExists = function (rootCategory) {
         if (rootCategory == null || rootCategory === undefined) {
@@ -1895,31 +1867,30 @@ var CategoryServiceImpl = (function () {
         if (parent != null) {
             throw new Error("Parent must be null for a root category");
         }
-        return this._rootCategories.indexOf(rootCategory) !== -1;
+        return this.rootCategories.indexOf(rootCategory) !== -1;
     };
     CategoryServiceImpl.prototype.createRootLogger = function (category) {
         // Default is always a console logger
-        switch (this._defaultConfig.loggerType) {
+        switch (this.defaultConfig.loggerType) {
             case LoggerOptions_1.LoggerType.Console:
                 return new CategoryConsoleLoggerImpl_1.CategoryConsoleLoggerImpl(category, this);
             case LoggerOptions_1.LoggerType.MessageBuffer:
                 return new CategoryMessageBufferImpl_1.CategoryMessageBufferLoggerImpl(category, this);
             case LoggerOptions_1.LoggerType.Custom:
-                if (this._defaultConfig.callBackLogger == null) {
+                if (this.defaultConfig.callBackLogger == null) {
                     throw new Error("Cannot create custom logger, custom callback is null");
                 }
                 else {
-                    return this._defaultConfig.callBackLogger(category, this);
+                    return this.defaultConfig.callBackLogger(category, this);
                 }
             default:
-                throw new Error("Cannot create a Logger for LoggerType: " + this._defaultConfig.loggerType);
+                throw new Error("Cannot create a Logger for LoggerType: " + this.defaultConfig.loggerType);
         }
     };
     return CategoryServiceImpl;
 }());
 // Singleton category service, used by CategoryServiceFactory as well as Categories.
-// Loaded on demand. Do NOT change as webpack may pack things in wrong order otherwise.
-CategoryServiceImpl._INSTANCE = null;
+CategoryServiceImpl.INSTANCE = new CategoryServiceImpl();
 exports.CategoryServiceImpl = CategoryServiceImpl;
 /**
  * Categorized service for logging, where logging is bound to categories which
@@ -1993,252 +1964,7 @@ exports.CategoryServiceFactory = CategoryServiceFactory;
 
 "use strict";
 
-var LoggerOptions_1 = __webpack_require__(0);
-var DataStructures_1 = __webpack_require__(1);
-var MessageUtils_1 = __webpack_require__(7);
-var LogMessageInternalImpl = (function () {
-    function LogMessageInternalImpl(loggerName, message, errorAsStack, error, logGroupRule, date, level, ready) {
-        this._errorAsStack = null;
-        this._error = null;
-        this._loggerName = loggerName;
-        this._message = message;
-        this._errorAsStack = errorAsStack;
-        this._error = error;
-        this._logGroupRule = logGroupRule;
-        this._date = date;
-        this._level = level;
-        this._ready = ready;
-    }
-    Object.defineProperty(LogMessageInternalImpl.prototype, "loggerName", {
-        get: function () {
-            return this._loggerName;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(LogMessageInternalImpl.prototype, "message", {
-        get: function () {
-            return this._message;
-        },
-        set: function (value) {
-            this._message = value;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(LogMessageInternalImpl.prototype, "errorAsStack", {
-        get: function () {
-            return this._errorAsStack;
-        },
-        set: function (value) {
-            this._errorAsStack = value;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(LogMessageInternalImpl.prototype, "error", {
-        get: function () {
-            return this._error;
-        },
-        set: function (value) {
-            this._error = value;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(LogMessageInternalImpl.prototype, "logGroupRule", {
-        get: function () {
-            return this._logGroupRule;
-        },
-        set: function (value) {
-            this._logGroupRule = value;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(LogMessageInternalImpl.prototype, "date", {
-        get: function () {
-            return this._date;
-        },
-        set: function (value) {
-            this._date = value;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(LogMessageInternalImpl.prototype, "level", {
-        get: function () {
-            return this._level;
-        },
-        set: function (value) {
-            this._level = value;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(LogMessageInternalImpl.prototype, "ready", {
-        get: function () {
-            return this._ready;
-        },
-        set: function (value) {
-            this._ready = value;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    return LogMessageInternalImpl;
-}());
-/**
- * Abstract base logger, extend to easily implement a custom logger that
- * logs wherever you want. You only need to implement doLog(msg: LogMessage) and
- * log that somewhere (it will contain format and everything else).
- */
-var AbstractLogger = (function () {
-    function AbstractLogger(name, logGroupRuntimeSettings) {
-        this._allMessages = new DataStructures_1.LinkedList();
-        this._open = true;
-        this._name = name;
-        this._logGroupRuntimeSettings = logGroupRuntimeSettings;
-    }
-    Object.defineProperty(AbstractLogger.prototype, "name", {
-        get: function () {
-            return this._name;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    AbstractLogger.prototype.trace = function (msg, error) {
-        if (error === void 0) { error = null; }
-        this._log(LoggerOptions_1.LogLevel.Trace, msg, error);
-    };
-    AbstractLogger.prototype.debug = function (msg, error) {
-        if (error === void 0) { error = null; }
-        this._log(LoggerOptions_1.LogLevel.Debug, msg, error);
-    };
-    AbstractLogger.prototype.info = function (msg, error) {
-        if (error === void 0) { error = null; }
-        this._log(LoggerOptions_1.LogLevel.Info, msg, error);
-    };
-    AbstractLogger.prototype.warn = function (msg, error) {
-        if (error === void 0) { error = null; }
-        this._log(LoggerOptions_1.LogLevel.Warn, msg, error);
-    };
-    AbstractLogger.prototype.error = function (msg, error) {
-        if (error === void 0) { error = null; }
-        this._log(LoggerOptions_1.LogLevel.Error, msg, error);
-    };
-    AbstractLogger.prototype.fatal = function (msg, error) {
-        if (error === void 0) { error = null; }
-        this._log(LoggerOptions_1.LogLevel.Fatal, msg, error);
-    };
-    AbstractLogger.prototype.tracec = function (msg, error) {
-        this._logc(LoggerOptions_1.LogLevel.Trace, msg, error);
-    };
-    AbstractLogger.prototype.debugc = function (msg, error) {
-        this._logc(LoggerOptions_1.LogLevel.Debug, msg, error);
-    };
-    AbstractLogger.prototype.infoc = function (msg, error) {
-        this._logc(LoggerOptions_1.LogLevel.Info, msg, error);
-    };
-    AbstractLogger.prototype.warnc = function (msg, error) {
-        this._logc(LoggerOptions_1.LogLevel.Warn, msg, error);
-    };
-    AbstractLogger.prototype.errorc = function (msg, error) {
-        this._logc(LoggerOptions_1.LogLevel.Error, msg, error);
-    };
-    AbstractLogger.prototype.fatalc = function (msg, error) {
-        this._logc(LoggerOptions_1.LogLevel.Fatal, msg, error);
-    };
-    AbstractLogger.prototype.isTraceEnabled = function () {
-        return this._logGroupRuntimeSettings.level === LoggerOptions_1.LogLevel.Trace;
-    };
-    AbstractLogger.prototype.isDebugEnabled = function () {
-        return this._logGroupRuntimeSettings.level <= LoggerOptions_1.LogLevel.Debug;
-    };
-    AbstractLogger.prototype.isInfoEnabled = function () {
-        return this._logGroupRuntimeSettings.level <= LoggerOptions_1.LogLevel.Info;
-    };
-    AbstractLogger.prototype.isWarnEnabled = function () {
-        return this._logGroupRuntimeSettings.level <= LoggerOptions_1.LogLevel.Warn;
-    };
-    AbstractLogger.prototype.isErrorEnabled = function () {
-        return this._logGroupRuntimeSettings.level <= LoggerOptions_1.LogLevel.Error;
-    };
-    AbstractLogger.prototype.isFatalEnabled = function () {
-        return this._logGroupRuntimeSettings.level <= LoggerOptions_1.LogLevel.Fatal;
-    };
-    AbstractLogger.prototype.getLogLevel = function () {
-        return this._logGroupRuntimeSettings.level;
-    };
-    AbstractLogger.prototype.isOpen = function () {
-        return this._open;
-    };
-    AbstractLogger.prototype.close = function () {
-        this._open = false;
-        this._allMessages.clear();
-    };
-    AbstractLogger.prototype.createDefaultLogMessage = function (msg) {
-        return MessageUtils_1.MessageFormatUtils.renderDefaultLog4jMessage(msg, true);
-    };
-    AbstractLogger.prototype._log = function (level, msg, error) {
-        if (error === void 0) { error = null; }
-        if (this._open && this._logGroupRuntimeSettings.level <= level) {
-            this._allMessages.addTail(this.createMessage(level, msg, new Date(), error));
-            this.processMessages();
-        }
-    };
-    AbstractLogger.prototype._logc = function (level, msg, error) {
-        if (this._open && this._logGroupRuntimeSettings.level <= level) {
-            this._allMessages.addTail(this.createMessage(level, msg(), new Date(), error !== undefined && error !== null ? error() : null));
-            this.processMessages();
-        }
-    };
-    AbstractLogger.prototype.createMessage = function (level, msg, date, error) {
-        var _this = this;
-        if (error === void 0) { error = null; }
-        if (error !== null) {
-            var message_1 = new LogMessageInternalImpl(this._name, msg, null, error, this._logGroupRuntimeSettings.logGroupRule, date, level, false);
-            MessageUtils_1.MessageFormatUtils.renderError(error).then(function (stack) {
-                message_1.errorAsStack = stack;
-                message_1.ready = true;
-                _this.processMessages();
-            });
-            return message_1;
-        }
-        return new LogMessageInternalImpl(this._name, msg, null, error, this._logGroupRuntimeSettings.logGroupRule, date, level, true);
-    };
-    AbstractLogger.prototype.processMessages = function () {
-        // Basically we wait until errors are resolved (those messages
-        // may not be ready).
-        var msgs = this._allMessages;
-        if (msgs.getSize() > 0) {
-            do {
-                var msg = msgs.getHead();
-                if (msg != null) {
-                    if (!msg.ready) {
-                        break;
-                    }
-                    msgs.removeHead();
-                    // This can never be null normally, but strict null checking ...
-                    if (msg.message !== null) {
-                        this.doLog(msg);
-                    }
-                }
-            } while (msgs.getSize() > 0);
-        }
-    };
-    return AbstractLogger;
-}());
-exports.AbstractLogger = AbstractLogger;
-//# sourceMappingURL=AbstractLogger.js.map
-
-/***/ }),
-/* 7 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var ST = __webpack_require__(35);
+var ST = __webpack_require__(34);
 var LoggerOptions_1 = __webpack_require__(0);
 /**
  * Some utilities to format messages.
@@ -2312,7 +2038,7 @@ var MessageFormatUtils = (function () {
         return ds;
     };
     /**
-     * Renders given category log message in default format.
+     * Renders given category log message
      * @param msg Message to format
      * @param addStack If true adds the stack to the output, otherwise skips it
      * @returns {string} Formatted message
@@ -2339,30 +2065,8 @@ var MessageFormatUtils = (function () {
             result += "]";
         }
         result += " " + msg.getMessage();
-        if (addStack && msg.getErrorAsStack() !== null) {
+        if (addStack && msg.getErrorAsStack() != null) {
             result += "\n" + msg.getErrorAsStack();
-        }
-        return result;
-    };
-    /**
-     * Renders given log4j log message in default format.
-     * @param msg Message to format
-     * @param addStack If true adds the stack to the output, otherwise skips it
-     * @returns {string} Formatted message
-     */
-    MessageFormatUtils.renderDefaultLog4jMessage = function (msg, addStack) {
-        var format = msg.logGroupRule.logFormat;
-        var result = "";
-        if (format.showTimeStamp) {
-            result += MessageFormatUtils.renderDate(msg.date, format.dateFormat) + " ";
-        }
-        result += LoggerOptions_1.LogLevel[msg.level].toUpperCase() + " ";
-        if (format.showLoggerName) {
-            result += "[" + msg.loggerName + "]";
-        }
-        result += " " + msg.message;
-        if (addStack && msg.errorAsStack !== null) {
-            result += "\n" + msg.errorAsStack;
         }
         return result;
     };
@@ -2391,15 +2095,15 @@ exports.MessageFormatUtils = MessageFormatUtils;
 //# sourceMappingURL=MessageUtils.js.map
 
 /***/ }),
-/* 8 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 var DataStructures_1 = __webpack_require__(1);
 var LoggerOptions_1 = __webpack_require__(0);
-var LoggerFactoryImpl_1 = __webpack_require__(23);
-var ExtensionHelper_1 = __webpack_require__(3);
+var LoggerFactoryImpl_1 = __webpack_require__(22);
+var ExtensionHelper_1 = __webpack_require__(2);
 /**
  * Defines a LogGroupRule, this allows you to either have everything configured the same way
  * or for example loggers that start with name model. It allows you to group loggers together
@@ -2580,11 +2284,7 @@ var LFServiceImpl = (function () {
         ExtensionHelper_1.ExtensionHelper.register();
     }
     LFServiceImpl.getInstance = function () {
-        // Loaded on demand. Do NOT change as webpack may pack things in wrong order otherwise.
-        if (LFServiceImpl._INSTANCE === null) {
-            LFServiceImpl._INSTANCE = new LFServiceImpl();
-        }
-        return LFServiceImpl._INSTANCE;
+        return LFServiceImpl.INSTANCE;
     };
     /**
      * Create a new LoggerFactory with given options (if any). If no options
@@ -2656,8 +2356,7 @@ var LFServiceImpl = (function () {
     };
     return LFServiceImpl;
 }());
-// Loaded on demand. Do NOT change as webpack may pack things in wrong order otherwise.
-LFServiceImpl._INSTANCE = null;
+LFServiceImpl.INSTANCE = new LFServiceImpl();
 /**
  * Create and configure your LoggerFactory from here.
  */
@@ -2708,7 +2407,7 @@ exports.LFService = LFService;
 //# sourceMappingURL=LoggerFactoryService.js.map
 
 /***/ }),
-/* 9 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2779,7 +2478,7 @@ exports.CategoryConsoleLoggerImpl = CategoryConsoleLoggerImpl;
 //# sourceMappingURL=CategoryConsoleLoggerImpl.js.map
 
 /***/ }),
-/* 10 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2935,7 +2634,7 @@ exports.CategoryDelegateLoggerImpl = CategoryDelegateLoggerImpl;
 //# sourceMappingURL=CategoryDelegateLoggerImpl.js.map
 
 /***/ }),
-/* 11 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2976,7 +2675,7 @@ exports.CategoryMessageBufferLoggerImpl = CategoryMessageBufferLoggerImpl;
 //# sourceMappingURL=CategoryMessageBufferImpl.js.map
 
 /***/ }),
-/* 12 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2986,8 +2685,274 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var AbstractLogger_1 = __webpack_require__(6);
+var DataStructures_1 = __webpack_require__(1);
+var MessageUtils_1 = __webpack_require__(6);
 var LoggerOptions_1 = __webpack_require__(0);
+var Message = (function () {
+    function Message(ready, logLevel, message) {
+        if (message === void 0) { message = null; }
+        this._ready = ready;
+        this._logLevel = logLevel;
+        this._message = message;
+    }
+    Object.defineProperty(Message.prototype, "ready", {
+        get: function () {
+            return this._ready;
+        },
+        set: function (value) {
+            this._ready = value;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Message.prototype, "message", {
+        get: function () {
+            return this._message;
+        },
+        set: function (value) {
+            this._message = value;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Message.prototype, "logLevel", {
+        get: function () {
+            return this._logLevel;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    return Message;
+}());
+exports.Message = Message;
+/**
+ * Abstract base logger, extend to easily implement a custom logger that
+ * logs wherever you want. You only need to implement doLog(msg: string) and
+ * log that somewhere (it will contain format and everything else).
+ */
+var AbstractLogger = (function () {
+    function AbstractLogger(name, rule) {
+        this._allMessages = new DataStructures_1.LinkedList();
+        this._open = true;
+        this._name = name;
+        this._rule = rule;
+        this._level = rule.level;
+    }
+    Object.defineProperty(AbstractLogger.prototype, "name", {
+        get: function () {
+            return this._name;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    AbstractLogger.prototype.trace = function (msg, error) {
+        if (error === void 0) { error = null; }
+        this._log(LoggerOptions_1.LogLevel.Trace, msg, error);
+    };
+    AbstractLogger.prototype.debug = function (msg, error) {
+        if (error === void 0) { error = null; }
+        this._log(LoggerOptions_1.LogLevel.Debug, msg, error);
+    };
+    AbstractLogger.prototype.info = function (msg, error) {
+        if (error === void 0) { error = null; }
+        this._log(LoggerOptions_1.LogLevel.Info, msg, error);
+    };
+    AbstractLogger.prototype.warn = function (msg, error) {
+        if (error === void 0) { error = null; }
+        this._log(LoggerOptions_1.LogLevel.Warn, msg, error);
+    };
+    AbstractLogger.prototype.error = function (msg, error) {
+        if (error === void 0) { error = null; }
+        this._log(LoggerOptions_1.LogLevel.Error, msg, error);
+    };
+    AbstractLogger.prototype.fatal = function (msg, error) {
+        if (error === void 0) { error = null; }
+        this._log(LoggerOptions_1.LogLevel.Fatal, msg, error);
+    };
+    AbstractLogger.prototype.tracec = function (msg, error) {
+        this._logc(LoggerOptions_1.LogLevel.Trace, msg, error);
+    };
+    AbstractLogger.prototype.debugc = function (msg, error) {
+        this._logc(LoggerOptions_1.LogLevel.Debug, msg, error);
+    };
+    AbstractLogger.prototype.infoc = function (msg, error) {
+        this._logc(LoggerOptions_1.LogLevel.Info, msg, error);
+    };
+    AbstractLogger.prototype.warnc = function (msg, error) {
+        this._logc(LoggerOptions_1.LogLevel.Warn, msg, error);
+    };
+    AbstractLogger.prototype.errorc = function (msg, error) {
+        this._logc(LoggerOptions_1.LogLevel.Error, msg, error);
+    };
+    AbstractLogger.prototype.fatalc = function (msg, error) {
+        this._logc(LoggerOptions_1.LogLevel.Fatal, msg, error);
+    };
+    AbstractLogger.prototype.isTraceEnabled = function () {
+        return this._level === LoggerOptions_1.LogLevel.Trace;
+    };
+    AbstractLogger.prototype.isDebugEnabled = function () {
+        return this._level <= LoggerOptions_1.LogLevel.Debug;
+    };
+    AbstractLogger.prototype.isInfoEnabled = function () {
+        return this._level <= LoggerOptions_1.LogLevel.Info;
+    };
+    AbstractLogger.prototype.isWarnEnabled = function () {
+        return this._level <= LoggerOptions_1.LogLevel.Warn;
+    };
+    AbstractLogger.prototype.isErrorEnabled = function () {
+        return this._level <= LoggerOptions_1.LogLevel.Error;
+    };
+    AbstractLogger.prototype.isFatalEnabled = function () {
+        return this._level <= LoggerOptions_1.LogLevel.Fatal;
+    };
+    AbstractLogger.prototype.getLogLevel = function () {
+        return this._level;
+    };
+    AbstractLogger.prototype.isOpen = function () {
+        return this._open;
+    };
+    AbstractLogger.prototype.close = function () {
+        this._open = false;
+        this._allMessages.clear();
+    };
+    /**
+     * Do not override by end user, will be gone in 0.3 release.
+     */
+    AbstractLogger.prototype._addMessage = function (msg) {
+        // Make sure to make Message internal class again when this one is gone!
+        this._allMessages.addTail(msg);
+    };
+    /**
+     * Do not override by end user, will be gone in 0.3 release.
+     */
+    AbstractLogger.prototype._log = function (level, msg, error) {
+        if (error === void 0) { error = null; }
+        if (this._open && this._level <= level) {
+            this._allMessages.addTail(this.createMessage(level, msg, new Date(), error));
+            this.processMessages();
+        }
+    };
+    /**
+     * Do not override by end user, will be gone in 0.3 release.
+     */
+    AbstractLogger.prototype._logc = function (level, msg, error) {
+        if (this._open && this._level <= level) {
+            this._allMessages.addTail(this.createMessage(level, msg(), new Date(), error !== undefined && error != null ? error() : null));
+            this.processMessages();
+        }
+    };
+    /**
+     * Do not override by end user, will be gone in 0.3 release.
+     */
+    AbstractLogger.prototype.createMessage = function (level, msg, date, error) {
+        var _this = this;
+        if (error === void 0) { error = null; }
+        var result = "";
+        if (this._rule.logFormat.showTimeStamp) {
+            result += MessageUtils_1.MessageFormatUtils.renderDate(date, this._rule.logFormat.dateFormat) + " ";
+        }
+        result += LoggerOptions_1.LogLevel[level].toUpperCase() + " ";
+        if (this._rule.logFormat.showLoggerName) {
+            result += "[" + this._name + "]";
+        }
+        result += " " + msg;
+        if (error != null) {
+            var message_1 = new Message(false, level);
+            MessageUtils_1.MessageFormatUtils.renderError(error).then(function (stackResult) {
+                result += "\n" + stackResult;
+                message_1.message = result;
+                message_1.ready = true;
+                _this.processMessages();
+            });
+            return message_1;
+        }
+        return new Message(true, level, result);
+    };
+    /**
+     * Do not override by end user, will be gone in 0.3 release.
+     */
+    AbstractLogger.prototype.processMessages = function () {
+        // Basically we wait until errors are resolved (those messages
+        // may not be ready).
+        var msgs = this._allMessages;
+        if (msgs.getSize() > 0) {
+            do {
+                var msg = msgs.getHead();
+                if (msg != null) {
+                    if (!msg.ready) {
+                        break;
+                    }
+                    msgs.removeHead();
+                    // This can never be null normally, but strict null checking ...
+                    if (msg.message != null) {
+                        this.doLog(msg.message, msg.logLevel);
+                    }
+                }
+            } while (msgs.getSize() > 0);
+        }
+    };
+    return AbstractLogger;
+}());
+exports.AbstractLogger = AbstractLogger;
+/**
+ * Future base logger, temporal name will replace AbstractLogger in future 0.3 release.
+ */
+var AbstractBaseLogger = (function (_super) {
+    __extends(AbstractBaseLogger, _super);
+    function AbstractBaseLogger(name, logGroupRuntimeSettings) {
+        var _this = _super.call(this, name, logGroupRuntimeSettings.logGroupRule) || this;
+        _this._logGroupRuntimeSettings = logGroupRuntimeSettings;
+        return _this;
+    }
+    /**
+     * Do not override by end user, will be gone in 0.3 release.
+     */
+    AbstractBaseLogger.prototype._log = function (level, msg, error) {
+        if (error === void 0) { error = null; }
+        if (this._open && this._logGroupRuntimeSettings.level <= level) {
+            this._addMessage(this.createMessage(level, msg, new Date(), error));
+            this.processMessages();
+        }
+    };
+    /**
+     * Do not override by end user, will be gone in 0.3 release.
+     */
+    AbstractBaseLogger.prototype._logc = function (level, msg, error) {
+        if (this._open && this._logGroupRuntimeSettings.level <= level) {
+            this._addMessage(this.createMessage(level, msg(), new Date(), error !== undefined && error != null ? error() : null));
+            this.processMessages();
+        }
+    };
+    /**
+     * Do not override by end user, will be gone in 0.3 release.
+     */
+    AbstractBaseLogger.prototype.createMessage = function (level, msg, date, error) {
+        var _this = this;
+        if (error === void 0) { error = null; }
+        var result = "";
+        if (this._logGroupRuntimeSettings.logFormat.showTimeStamp) {
+            result += MessageUtils_1.MessageFormatUtils.renderDate(date, this._logGroupRuntimeSettings.logFormat.dateFormat) + " ";
+        }
+        result += LoggerOptions_1.LogLevel[level].toUpperCase() + " ";
+        if (this._logGroupRuntimeSettings.logFormat.showLoggerName) {
+            result += "[" + this._name + "]";
+        }
+        result += " " + msg;
+        if (error != null) {
+            var message_2 = new Message(false, level);
+            MessageUtils_1.MessageFormatUtils.renderError(error).then(function (stackResult) {
+                result += "\n" + stackResult;
+                message_2.message = result;
+                message_2.ready = true;
+                _this.processMessages();
+            });
+            return message_2;
+        }
+        return new Message(true, level, result);
+    };
+    return AbstractBaseLogger;
+}(AbstractLogger));
+exports.AbstractBaseLogger = AbstractBaseLogger;
 /**
  * Simple logger, that logs to the console. If the console is unavailable will throw exception.
  */
@@ -2996,11 +2961,9 @@ var ConsoleLoggerImpl = (function (_super) {
     function ConsoleLoggerImpl(name, logGroupRuntimeSettings) {
         return _super.call(this, name, logGroupRuntimeSettings) || this;
     }
-    ConsoleLoggerImpl.prototype.doLog = function (message) {
+    ConsoleLoggerImpl.prototype.doLog = function (msg, logLevel) {
         if (console !== undefined) {
             var logged = false;
-            var logLevel = message.level;
-            var msg = this.createDefaultLogMessage(message);
             /* tslint:disable:no-console */
             switch (logLevel) {
                 case LoggerOptions_1.LogLevel.Trace:
@@ -3039,26 +3002,12 @@ var ConsoleLoggerImpl = (function (_super) {
             }
         }
         else {
-            throw new Error("Console is not defined, cannot log msg: " + message.message);
+            throw new Error("Console is not defined, cannot log msg: " + msg);
         }
     };
     return ConsoleLoggerImpl;
-}(AbstractLogger_1.AbstractLogger));
+}(AbstractBaseLogger));
 exports.ConsoleLoggerImpl = ConsoleLoggerImpl;
-//# sourceMappingURL=ConsoleLoggerImpl.js.map
-
-/***/ }),
-/* 13 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
-var AbstractLogger_1 = __webpack_require__(6);
 /**
  * Logger which buffers all messages, use with care due to possible high memory footprint.
  * Can be convenient in some cases. Call toString() for full output, or cast to this class
@@ -3083,16 +3032,16 @@ var MessageBufferLoggerImpl = (function (_super) {
             return msg;
         }).join("\n");
     };
-    MessageBufferLoggerImpl.prototype.doLog = function (message) {
-        this.messages.push(this.createDefaultLogMessage(message));
+    MessageBufferLoggerImpl.prototype.doLog = function (msg, logLevel) {
+        this.messages.push(msg);
     };
     return MessageBufferLoggerImpl;
-}(AbstractLogger_1.AbstractLogger));
+}(AbstractBaseLogger));
 exports.MessageBufferLoggerImpl = MessageBufferLoggerImpl;
-//# sourceMappingURL=MessageBufferLoggerImpl.js.map
+//# sourceMappingURL=LoggerImpl.js.map
 
 /***/ }),
-/* 14 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -3102,7 +3051,7 @@ exports.MessageBufferLoggerImpl = MessageBufferLoggerImpl;
  * http://opensource.org/licenses/BSD-3-Clause
  */
 
-var util = __webpack_require__(2);
+var util = __webpack_require__(3);
 var has = Object.prototype.hasOwnProperty;
 
 /**
@@ -3202,7 +3151,7 @@ exports.ArraySet = ArraySet;
 
 
 /***/ }),
-/* 15 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -3242,7 +3191,7 @@ exports.ArraySet = ArraySet;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-var base64 = __webpack_require__(25);
+var base64 = __webpack_require__(24);
 
 // A single base 64 digit can contain 6 bits of data. For the base 64 variable
 // length quantities we use in the source map spec, the first bit is the sign,
@@ -3348,7 +3297,7 @@ exports.decode = function base64VLQ_decode(aStr, aIndex, aOutParam) {
 
 
 /***/ }),
-/* 16 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -3358,10 +3307,10 @@ exports.decode = function base64VLQ_decode(aStr, aIndex, aOutParam) {
  * http://opensource.org/licenses/BSD-3-Clause
  */
 
-var base64VLQ = __webpack_require__(15);
-var util = __webpack_require__(2);
-var ArraySet = __webpack_require__(14).ArraySet;
-var MappingList = __webpack_require__(27).MappingList;
+var base64VLQ = __webpack_require__(13);
+var util = __webpack_require__(3);
+var ArraySet = __webpack_require__(12).ArraySet;
+var MappingList = __webpack_require__(26).MappingList;
 
 /**
  * An instance of the SourceMapGenerator represents a source map which is
@@ -3758,7 +3707,7 @@ exports.SourceMapGenerator = SourceMapGenerator;
 
 
 /***/ }),
-/* 17 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (root, factory) {
@@ -3874,389 +3823,43 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 
 
 /***/ }),
-/* 18 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var DataStructures_1 = __webpack_require__(1);
-var CategoryService_1 = __webpack_require__(5);
-var LoggerOptions_1 = __webpack_require__(0);
-/**
- * Implementation class for CategoryServiceControl.
- */
-var CategoryServiceControlImpl = (function () {
-    function CategoryServiceControlImpl() {
+var CategoryControl_1 = __webpack_require__(19);
+var LogGroupControl_1 = __webpack_require__(20);
+var LogControlImpl = (function () {
+    function LogControlImpl() {
     }
-    CategoryServiceControlImpl.prototype.help = function () {
+    /* tslint:enable:no-trailing-whitespace */
+    LogControlImpl.prototype.help = function () {
         /* tslint:disable:no-console */
-        console.log(CategoryServiceControlImpl._help);
+        console.log(LogControlImpl._help);
         /* tslint:enable:no-console */
     };
-    CategoryServiceControlImpl.prototype.example = function () {
+    LogControlImpl.prototype.example = function () {
         /* tslint:disable:no-console */
-        console.log(CategoryServiceControlImpl._example);
+        console.log(LogControlImpl._example);
         /* tslint:enable:no-console */
     };
-    CategoryServiceControlImpl.prototype.showSettings = function (id) {
-        if (id === void 0) { id = "all"; }
-        var result = new DataStructures_1.StringBuilder();
-        var service = CategoryServiceControlImpl._getCategoryService();
-        var categories = CategoryServiceControlImpl._getCategories(id);
-        categories.forEach(function (category) {
-            CategoryServiceControlImpl._processCategory(service, category, result, 0);
-        });
-        /* tslint:disable:no-console */
-        console.log(result.toString());
-        /* tslint:enable:no-console */
+    LogControlImpl.prototype.getLFServiceControl = function () {
+        return new LogGroupControl_1.LoggerControlImpl();
     };
-    CategoryServiceControlImpl.prototype.change = function (settings) {
-        var service = CategoryServiceControlImpl._getCategoryService();
-        var categories = CategoryServiceControlImpl._getCategories(settings.category);
-        var logLevel = null;
-        var formatEnum = null;
-        var showCategoryName = null;
-        var showTimestamp = null;
-        var result = null;
-        var addResult = function (value) {
-            if (result !== null) {
-                result += ", ";
-            }
-            if (result === null) {
-                result = value;
-            }
-            else {
-                result += value;
-            }
-        };
-        addResult("recursive=" + settings.recursive);
-        if (typeof settings.logLevel === "string") {
-            logLevel = LoggerOptions_1.LogLevel.fromString(settings.logLevel);
-            addResult("logLevel=" + settings.logLevel);
-        }
-        if (typeof settings.logFormat === "string") {
-            formatEnum = LoggerOptions_1.DateFormatEnum.fromString(settings.logFormat);
-            addResult("logFormat=" + settings.logFormat);
-        }
-        if (typeof settings.showCategoryName === "boolean") {
-            showCategoryName = settings.showCategoryName;
-            addResult("showCategoryName=" + settings.showCategoryName);
-        }
-        if (typeof settings.showTimestamp === "boolean") {
-            showTimestamp = settings.showTimestamp;
-            addResult("showTimestamp=" + settings.showTimestamp);
-        }
-        var applyChanges = function (cat) {
-            var categorySettings = service.getCategorySettings(cat);
-            // Should not happen but make tslint happy
-            if (categorySettings !== null) {
-                if (logLevel !== null) {
-                    categorySettings.logLevel = logLevel;
-                }
-                if (formatEnum !== null) {
-                    categorySettings.logFormat.dateFormat.formatEnum = formatEnum;
-                }
-                if (showTimestamp !== null) {
-                    categorySettings.logFormat.showTimeStamp = showTimestamp;
-                }
-                if (showCategoryName !== null) {
-                    categorySettings.logFormat.showCategoryName = showCategoryName;
-                }
-            }
-        };
-        categories.forEach(function (cat) { return CategoryServiceControlImpl._applyToCategory(cat, settings.recursive, applyChanges); });
-        /* tslint:disable:no-console */
-        console.log("Applied changes: " + result + " to categories '" + settings.category + "'.");
-        /* tslint:enable:no-console */
+    LogControlImpl.prototype.getCategoryControl = function () {
+        return new CategoryControl_1.CategoryControlImpl();
     };
-    CategoryServiceControlImpl.prototype.reset = function (id) {
-        if (id === void 0) { id = "all"; }
-        var service = CategoryServiceControlImpl._getCategoryService();
-        var categories = CategoryServiceControlImpl._getCategories(id);
-        var applyChanges = function (cat) {
-            var categorySettings = service.getCategorySettings(cat);
-            var original = service.getOriginalCategorySettings(cat);
-            // Should not happen but make tslint happy
-            if (categorySettings !== null && original !== null) {
-                categorySettings.logLevel = original.logLevel;
-                categorySettings.logFormat.dateFormat.formatEnum = original.logFormat.dateFormat.formatEnum;
-                categorySettings.logFormat.showTimeStamp = original.logFormat.showTimeStamp;
-                categorySettings.logFormat.showCategoryName = original.logFormat.showCategoryName;
-            }
-        };
-        categories.forEach(function (cat) { return CategoryServiceControlImpl._applyToCategory(cat, true, applyChanges); });
-        /* tslint:disable:no-console */
-        console.log("Applied reset to category: " + id + ".");
-        /* tslint:enable:no-console */
-    };
-    CategoryServiceControlImpl._processCategory = function (service, category, result, indent) {
-        var settings = service.getCategorySettings(category);
-        if (settings !== null) {
-            result.append("  " + category.id + ": ");
-            if (indent > 0) {
-                for (var i = 0; i < indent; i++) {
-                    result.append("  ");
-                }
-            }
-            result.append(category.name + " (" + LoggerOptions_1.LogLevel[settings.logLevel].toString() + "@" + LoggerOptions_1.LoggerType[settings.loggerType].toString() + ")\n");
-            if (category.children.length > 0) {
-                category.children.forEach(function (child) {
-                    CategoryServiceControlImpl._processCategory(service, child, result, indent + 1);
-                });
-            }
-        }
-    };
-    CategoryServiceControlImpl._applyToCategory = function (category, recursive, apply) {
-        apply(category);
-        if (recursive) {
-            category.children.forEach(function (child) {
-                CategoryServiceControlImpl._applyToCategory(child, recursive, apply);
-            });
-        }
-    };
-    CategoryServiceControlImpl._getCategoryService = function () {
-        return CategoryService_1.CategoryServiceFactory.getRuntimeSettings();
-    };
-    CategoryServiceControlImpl._getCategories = function (idCategory) {
-        var service = CategoryServiceControlImpl._getCategoryService();
-        var categories = [];
-        if (idCategory === "all") {
-            categories = service.getRootCategories();
-        }
-        else {
-            var category = service.getCategoryById(idCategory);
-            if (category === null) {
-                throw new Error("Failed to find category with id " + idCategory);
-            }
-            categories.push(category);
-        }
-        return categories;
-    };
-    return CategoryServiceControlImpl;
+    return LogControlImpl;
 }());
-CategoryServiceControlImpl._help = "\n  help(): void\n    ** Shows this help.\n    \n  example(): void\n    ** Shows an example on how to use this.\n    \n  showSettings(id: number | \"all\" = \"all\"): void\n    ** Shows settings for a specific category, or for all. The id of categories can be found by calling this method without parameter.\n    \n  change(settings: CategoryServiceControlSettings): void\n    ** Changes the current settings for one or all categories. \n    ** \n       CategoryServiceControlSettings, properties of object:\n         category: number | \"all\"\n           ** Apply to specific category, or \"all\".\n           ** Required        \n        \n         recursive: boolean\n           ** Apply to child categories (true) or not.\n           ** Required\n           \n         logLevel: \"Fatal\" | \"Error\" | \"Warn\" | \"Info\" | \"Debug\" | \"Trace\" | undefined\n           ** Set log level, undefined will not change the setting.\n           ** Optional\n         \n         logFormat: \"Default\" | \"YearMonthDayTime\" | \"YearDayMonthWithFullTime\" | \"YearDayMonthTime\" | undefined\n           ** Set the log format, undefined will not change the setting.\n           ** Optional\n         \n         showTimestamp: boolean | undefined  \n           ** Whether to show timestamp, undefined will not change the setting.\n           ** Optional\n         \n         showCategoryName: boolean | undefined\n           ** Whether to show the category name, undefined will not change the setting.\n           ** Optional\n           \n   reset(id: number | \"all\"): void\n     ** Resets everything to original values, for one specific or for all categories.\n";
-CategoryServiceControlImpl._example = "\n  Examples:\n    change({category: \"all\", recursive:true, logLevel: \"Info\"}) \n      ** Change loglevel to Info for all categories, apply to child categories as well.\n     \n    change({category: 1, recursive:false, logLevel: \"Warn\"})\n      ** Change logLevel for category 1, do not recurse.\n      \n    change({category: \"all\", recursive:true, logLevel: \"Debug\", logFormat: \"YearDayMonthTime\", showTimestamp:false, showCategoryName:false})    \n      ** Change loglevel to Debug for all categories, apply format, do not show timestamp and category names - recursively to child categories.    \n      \n";
-exports.CategoryServiceControlImpl = CategoryServiceControlImpl;
-//# sourceMappingURL=CategoryServiceControl.js.map
+/* tslint:disable:no-trailing-whitespace */
+LogControlImpl._help = "\n  help()\n    ** Shows this help.\n    \n  example()\n    ** Shows code example with short explanation on using this.\n\n  getLFServiceControl(): LoggerControl\n    ** Returns LoggerControl object.\n    ** Can be used to control LogGroups\n\n  getCategoryControl(): CategoryControl\n    ** Returns CategoryControl object.\n";
+LogControlImpl._example = "\n  // First line you already did, or you would not see this example.\n  const lc = TSL.getLogControl();\n  lc.help(); // Prints help\n  const lgc = lc.getLFServiceControl();  // Retrieve LoggerControl object\n    \n";
+exports.LogControlImpl = LogControlImpl;
+//# sourceMappingURL=LogControl.js.map
 
 /***/ }),
-/* 19 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var LoggerOptions_1 = __webpack_require__(0);
-var LoggerFactoryService_1 = __webpack_require__(8);
-var DataStructures_1 = __webpack_require__(1);
-var LoggerControlImpl = (function () {
-    function LoggerControlImpl() {
-    }
-    LoggerControlImpl.prototype.help = function () {
-        /* tslint:disable:no-console */
-        console.log(LoggerControlImpl._help);
-        /* tslint:enable:no-console */
-    };
-    LoggerControlImpl.prototype.listFactories = function () {
-        var rtSettingsFactories = LoggerControlImpl._getRuntimeSettingsLoggerFactories();
-        var result = new DataStructures_1.StringBuilder();
-        result.appendLine("Registered LoggerFactories (index / name)");
-        for (var i = 0; i < rtSettingsFactories.length; i++) {
-            var rtSettingsFactory = rtSettingsFactories[i];
-            result.append("  " + i).append(": " + rtSettingsFactory.getName() + "\n");
-        }
-        /* tslint:disable:no-console */
-        console.log(result.toString());
-        /* tslint:enable:no-console */
-    };
-    LoggerControlImpl.prototype.showSettings = function (id) {
-        if (id === void 0) { id = "all"; }
-        var result = [];
-        if (id === "all") {
-            var idx_1 = 0;
-            LoggerControlImpl._getRuntimeSettingsLoggerFactories().forEach(function (item) {
-                result.push(new DataStructures_1.TuplePair(idx_1++, item));
-            });
-        }
-        else {
-            var settings = LoggerControlImpl._getRuntimeSettingsLoggerFactories();
-            if (id >= 0 && id < settings.length) {
-                result.push(new DataStructures_1.TuplePair(id, settings[id]));
-            }
-            else {
-                throw new Error("Requested number: " + id + " was not found.");
-            }
-        }
-        for (var _i = 0, result_1 = result; _i < result_1.length; _i++) {
-            var setting = result_1[_i];
-            /* tslint:disable:no-console */
-            console.log("  LoggerFactory: " + setting.y.getName() + " (id=" + setting.x + ")");
-            var logGroupRuntimeSettings = setting.y.getLogGroupRuntimeSettings();
-            for (var g = 0; g < logGroupRuntimeSettings.length; g++) {
-                var groupSetting = logGroupRuntimeSettings[g];
-                console.log("     LogGroup: (id=" + g + ")");
-                console.log("       RegExp: " + groupSetting.logGroupRule.regExp.source);
-                console.log("       Level: " + LoggerOptions_1.LogLevel[groupSetting.level].toString());
-                console.log("       LoggerType: " + LoggerOptions_1.LoggerType[groupSetting.loggerType].toString());
-            }
-        }
-    };
-    LoggerControlImpl.prototype.reset = function (idFactory) {
-        if (idFactory === void 0) { idFactory = "all"; }
-        var loggerFactoriesSettings = LoggerControlImpl._getRuntimeSettingsLoggerFactories();
-        var result = [];
-        if (idFactory === "all") {
-            result = loggerFactoriesSettings;
-        }
-        else {
-            if (idFactory >= 0 && idFactory < loggerFactoriesSettings.length) {
-                result.push(loggerFactoriesSettings[idFactory]);
-            }
-        }
-        result.forEach(function (setting) {
-            /* tslint:disable:no-console */
-            console.log("Reset all settings for factory " + idFactory);
-            /* tslint:enable:no-console */
-            var control = new LoggerFactoryControlImpl(setting);
-            control.reset();
-        });
-    };
-    LoggerControlImpl.prototype.getLoggerFactoryControl = function (idFactory) {
-        var loggerFactoriesSettings = LoggerControlImpl._getRuntimeSettingsLoggerFactories();
-        if (idFactory >= 0 && idFactory < loggerFactoriesSettings.length) {
-            return new LoggerFactoryControlImpl(loggerFactoriesSettings[idFactory]);
-        }
-        throw new Error("idFactory is invalid (less than 0) or non existing id.");
-    };
-    LoggerControlImpl._getRuntimeSettingsLoggerFactories = function () {
-        return LoggerControlImpl._getSettings().getRuntimeSettingsForLoggerFactories();
-    };
-    LoggerControlImpl._getSettings = function () {
-        return LoggerFactoryService_1.LFService.getRuntimeSettings();
-    };
-    return LoggerControlImpl;
-}());
-LoggerControlImpl._help = "\n  help(): void\n    ** Shows this help.\n    \n  listFactories(): void\n    ** List all registered LoggerFactories with associated log groups with respective ids (ids can be used to target a factory and/or group).\n    \n  showSettings(idFactory: number | \"all\"): void\n    ** Show log group settings for idFactory (use listFactories to find id for a LoggerFactory). If idFactory is \"all\" shows all factories. \n  \n  getLoggerFactoryControl(idFactory: number): LoggerFactoryControl\n    ** Return LoggerFactoryControl when found for given idFactory or throws Error if invalid or null, get the id by using listFactories()\n    \n  reset(idFactory: number | \"all\"): void\n    ** Resets given factory or all factories back to original values. \n";
-exports.LoggerControlImpl = LoggerControlImpl;
-var LoggerFactoryControlImpl = (function () {
-    function LoggerFactoryControlImpl(settings) {
-        this._settings = settings;
-    }
-    LoggerFactoryControlImpl.prototype.help = function () {
-        /* tslint:disable:no-console */
-        console.log(LoggerFactoryControlImpl._help);
-        /* tslint:enable:no-console */
-    };
-    LoggerFactoryControlImpl.prototype.example = function () {
-        /* tslint:disable:no-console */
-        console.log(LoggerFactoryControlImpl._example);
-        /* tslint:enable:no-console */
-    };
-    LoggerFactoryControlImpl.prototype.showSettings = function (id) {
-        if (id === void 0) { id = "all"; }
-        var result = new DataStructures_1.StringBuilder();
-        var logGroupRuntimeSettings = this._settings.getLogGroupRuntimeSettings();
-        result.appendLine("Registered LogGroups (index / expression)");
-        for (var i = 0; i < logGroupRuntimeSettings.length; i++) {
-            var logGroupRuntimeSetting = logGroupRuntimeSettings[i];
-            result.appendLine("  " + i + ": " + logGroupRuntimeSetting.logGroupRule.regExp.source + ", logLevel=" +
-                LoggerOptions_1.LogLevel[logGroupRuntimeSetting.level].toString() + ", showTimestamp=" + logGroupRuntimeSetting.logFormat.showTimeStamp +
-                ", showLoggerName=" + logGroupRuntimeSetting.logFormat.showLoggerName +
-                ", format=" + LoggerOptions_1.DateFormatEnum[logGroupRuntimeSetting.logFormat.dateFormat.formatEnum].toString());
-        }
-        /* tslint:disable:no-console */
-        console.log(result.toString());
-        /* tslint:enable:no-console */
-    };
-    LoggerFactoryControlImpl.prototype.change = function (settings) {
-        var logGroupRuntimeSettings = this._getLogGroupRunTimeSettingsFor(settings.group);
-        var logLevel = null;
-        var formatEnum = null;
-        var showLoggerName = null;
-        var showTimestamp = null;
-        var result = null;
-        var addResult = function (value) {
-            if (result !== null) {
-                result += ", ";
-            }
-            if (result === null) {
-                result = value;
-            }
-            else {
-                result += value;
-            }
-        };
-        if (typeof settings.logLevel === "string") {
-            logLevel = LoggerOptions_1.LogLevel.fromString(settings.logLevel);
-            addResult("logLevel=" + settings.logLevel);
-        }
-        if (typeof settings.logFormat === "string") {
-            formatEnum = LoggerOptions_1.DateFormatEnum.fromString(settings.logFormat);
-            addResult("logFormat=" + settings.logFormat);
-        }
-        if (typeof settings.showLoggerName === "boolean") {
-            showLoggerName = settings.showLoggerName;
-            addResult("showLoggerName=" + settings.showLoggerName);
-        }
-        if (typeof settings.showTimestamp === "boolean") {
-            showTimestamp = settings.showTimestamp;
-            addResult("showTimestamp=" + settings.showTimestamp);
-        }
-        logGroupRuntimeSettings.forEach(function (s) {
-            if (logLevel !== null) {
-                s.level = logLevel;
-            }
-            if (formatEnum !== null) {
-                s.logFormat.dateFormat.formatEnum = formatEnum;
-            }
-            if (showTimestamp !== null) {
-                s.logFormat.showTimeStamp = showTimestamp;
-            }
-            if (showLoggerName !== null) {
-                s.logFormat.showLoggerName = showLoggerName;
-            }
-        });
-        /* tslint:disable:no-console */
-        console.log("Applied changes: " + result + " to log groups '" + settings.group + "'.");
-        /* tslint:enable:no-console */
-    };
-    LoggerFactoryControlImpl.prototype.reset = function (idGroup) {
-        if (idGroup === void 0) { idGroup = "all"; }
-        var settings = this._getLogGroupRunTimeSettingsFor(idGroup);
-        for (var _i = 0, settings_1 = settings; _i < settings_1.length; _i++) {
-            var setting = settings_1[_i];
-            setting.level = setting.logGroupRule.level;
-            setting.logFormat.showTimeStamp = setting.logGroupRule.logFormat.showTimeStamp;
-            setting.logFormat.showLoggerName = setting.logGroupRule.logFormat.showLoggerName;
-            setting.logFormat.dateFormat.formatEnum = setting.logGroupRule.logFormat.dateFormat.formatEnum;
-        }
-        /* tslint:disable:no-console */
-        console.log("Reset all settings for group " + idGroup);
-        /* tslint:enable:no-console */
-    };
-    LoggerFactoryControlImpl.prototype._getLogGroupRunTimeSettingsFor = function (idGroup) {
-        var settings = [];
-        if (idGroup === "all") {
-            settings = this._settings.getLogGroupRuntimeSettings();
-        }
-        else {
-            this._checkIndex(idGroup);
-            settings.push(this._settings.getLogGroupRuntimeSettings()[idGroup]);
-        }
-        return settings;
-    };
-    LoggerFactoryControlImpl.prototype._checkIndex = function (index) {
-        if (index < 0 || index >= this._settings.getLogGroupRuntimeSettings().length) {
-            throw new Error("Invalid index, use listLogGroups to find out a valid one.");
-        }
-    };
-    return LoggerFactoryControlImpl;
-}());
-LoggerFactoryControlImpl._help = "\n  help(): void\n    ** Shows this help.\n    \n  example(): void\n    ** Shows an example of usage.\n\n  showSettings(id: number | \"all\"): void\n    ** Prints settings for given group id, \"all\" for all group.\n\n  change(settings: LogGroupControlSettings): void\n    ** Changes the current settings for one or all log groups. \n    ** \n       LogGroupControlSettings, properties of object:\n         group: number | \"all\"\n           ** Apply to specific group, or \"all\".\n           ** Required        \n           \n         logLevel: \"Fatal\" | \"Error\" | \"Warn\" | \"Info\" | \"Debug\" | \"Trace\" | undefined\n           ** Set log level, undefined will not change the setting.\n           ** Optional\n         \n         logFormat: \"Default\" | \"YearMonthDayTime\" | \"YearDayMonthWithFullTime\" | \"YearDayMonthTime\" | undefined\n           ** Set the log format, undefined will not change the setting.\n           ** Optional\n         \n         showTimestamp: boolean | undefined  \n           ** Whether to show timestamp, undefined will not change the setting.\n           ** Optional\n         \n         showLoggerName: boolean | undefined\n           ** Whether to show the logger name, undefined will not change the setting.\n           ** Optional  \n           \n  reset(id: number | \"all\"): void\n    ** Resets everything to original values, for one specific or for all groups.\n    \n  help():\n    ** Shows this help.\n";
-LoggerFactoryControlImpl._example = "\n  Examples:\n    change({group: \"all\", logLevel: \"Info\"}) \n      ** Change loglevel to Info for all groups.\n     \n    change({group: 1, recursive:false, logLevel: \"Warn\"})\n      ** Change logLevel for group 1 to Warn.\n      \n    change({group: \"all\", logLevel: \"Debug\", logFormat: \"YearDayMonthTime\", showTimestamp:false, showLoggerName:false})    \n      ** Change loglevel to Debug for all groups, apply format, do not show timestamp and logger names.      \n";
-//# sourceMappingURL=LogGroupControl.js.map
-
-/***/ }),
-/* 20 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4344,7 +3947,7 @@ exports.Category = Category;
 //# sourceMappingURL=CategoryLogger.js.map
 
 /***/ }),
-/* 21 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4615,7 +4218,230 @@ exports.JSONHelper = JSONHelper;
 //# sourceMappingURL=JSONHelper.js.map
 
 /***/ }),
-/* 22 */
+/* 19 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var DataStructures_1 = __webpack_require__(1);
+var CategoryService_1 = __webpack_require__(5);
+var LoggerOptions_1 = __webpack_require__(0);
+var CategoryControlImpl = (function () {
+    function CategoryControlImpl() {
+    }
+    CategoryControlImpl.prototype.help = function () {
+        /* tslint:disable:no-console */
+        console.log("help");
+        /* tslint:enable:no-console */
+    };
+    CategoryControlImpl.prototype.example = function () {
+        //
+    };
+    CategoryControlImpl.prototype.showSettings = function () {
+        var result = new DataStructures_1.StringBuilder();
+        var service = CategoryService_1.CategoryServiceFactory.getRuntimeSettings();
+        var count = 1;
+        service.getRootCategories().forEach(function (category) {
+            count = CategoryControlImpl._processCategory(service, category, result, count, 0);
+        });
+        /* tslint:disable:no-console */
+        console.log(result.toString());
+        /* tslint:enable:no-console */
+    };
+    CategoryControlImpl._processCategory = function (service, category, result, count, indent) {
+        var settings = service.getCategorySettings(category);
+        if (settings !== null) {
+            result.append("  " + count + ": ");
+            if (indent > 0) {
+                for (var i = 0; i < indent; i++) {
+                    result.append("  ");
+                }
+            }
+            result.append(category.name + " (" + LoggerOptions_1.LogLevel[settings.logLevel].toString() + "@" + LoggerOptions_1.LoggerType[settings.loggerType].toString() + ")\n");
+            count++;
+            if (category.children.length > 0) {
+                category.children.forEach(function (child) {
+                    count = CategoryControlImpl._processCategory(service, child, result, count, indent + 1);
+                });
+            }
+        }
+        return count;
+    };
+    return CategoryControlImpl;
+}());
+exports.CategoryControlImpl = CategoryControlImpl;
+//# sourceMappingURL=CategoryControl.js.map
+
+/***/ }),
+/* 20 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var LoggerOptions_1 = __webpack_require__(0);
+var LoggerFactoryService_1 = __webpack_require__(7);
+var DataStructures_1 = __webpack_require__(1);
+var LoggerControlImpl = (function () {
+    function LoggerControlImpl() {
+    }
+    LoggerControlImpl.prototype.help = function () {
+        /* tslint:disable:no-console */
+        console.log(LoggerControlImpl._help);
+        /* tslint:enable:no-console */
+    };
+    LoggerControlImpl.prototype.listFactories = function () {
+        var rtSettingsFactories = LoggerControlImpl._getRuntimeSettingsLoggerFactories();
+        var result = new DataStructures_1.StringBuilder();
+        result.appendLine("Registered LoggerFactories (index / name)");
+        for (var i = 0; i < rtSettingsFactories.length; i++) {
+            var rtSettingsFactory = rtSettingsFactories[i];
+            result.append("  " + i).append(": " + rtSettingsFactory.getName() + "\n");
+        }
+        /* tslint:disable:no-console */
+        console.log(result.toString());
+        /* tslint:enable:no-console */
+    };
+    LoggerControlImpl.prototype.showSettings = function (id) {
+        if (id === void 0) { id = null; }
+        var result = [];
+        if (id == null) {
+            var idx_1 = 0;
+            LoggerControlImpl._getSettings().getRuntimeSettingsForLoggerFactories().forEach(function (item) {
+                result.push(new DataStructures_1.TuplePair(idx_1++, item));
+            });
+        }
+        else {
+            var settings = LoggerControlImpl._getRuntimeSettingsLoggerFactories();
+            if (id >= 0 && id < settings.length) {
+                result.push(new DataStructures_1.TuplePair(id, settings[id]));
+            }
+            else {
+                throw new Error("Requested number: " + id + " was not found.");
+            }
+        }
+        for (var _i = 0, result_1 = result; _i < result_1.length; _i++) {
+            var setting = result_1[_i];
+            /* tslint:disable:no-console */
+            console.log("  LoggerFactory: " + setting.y.getName() + " (id=" + setting.x + ")");
+            var logGroupRuntimeSettings = setting.y.getLogGroupRuntimeSettings();
+            for (var g = 0; g < logGroupRuntimeSettings.length; g++) {
+                var groupSetting = logGroupRuntimeSettings[g];
+                console.log("     LogGroup: (id=" + g + ")");
+                console.log("       RegExp: " + groupSetting.logGroupRule.regExp.source);
+                console.log("       Level: " + LoggerOptions_1.LogLevel[groupSetting.level].toString());
+                console.log("       LoggerType: " + LoggerOptions_1.LoggerType[groupSetting.loggerType].toString());
+            }
+        }
+    };
+    LoggerControlImpl.prototype.getLoggerFactoryControl = function (idFactory) {
+        if (idFactory === null) {
+            throw new Error("idFactory argument is required");
+        }
+        var loggerFactoriesSettings = LoggerControlImpl._getSettings().getRuntimeSettingsForLoggerFactories();
+        if (idFactory >= 0 && idFactory < loggerFactoriesSettings.length) {
+            return new LoggerFactoryControlImpl(loggerFactoriesSettings[idFactory]);
+        }
+        throw new Error("idFactory is invalid (less than 0) or non existing id.");
+    };
+    LoggerControlImpl._getRuntimeSettingsLoggerFactories = function () {
+        return LoggerControlImpl._getSettings().getRuntimeSettingsForLoggerFactories();
+    };
+    LoggerControlImpl._getSettings = function () {
+        return LoggerFactoryService_1.LFService.getRuntimeSettings();
+    };
+    return LoggerControlImpl;
+}());
+LoggerControlImpl._help = "\n  help():\n    ** Shows this help.\n    \n  listFactories()\n    ** List all registered LoggerFactories with associated log groups with respective ids (ids can be used to target a factory and/or group).\n    \n  showSettings(idFactory: number | null)\n    ** Show log group settings for idFactory (use list() to find id for a LoggerFactory). If idFactory is null applies to all factories. \n  \n  getLoggerFactoryControl(idFactory: number): LoggerFactoryControl\n    ** Return LoggerFactoryControl when found for given idFactory or throws Error if invalid or null, get the id by using listFactories()\n";
+exports.LoggerControlImpl = LoggerControlImpl;
+var LoggerFactoryControlImpl = (function () {
+    function LoggerFactoryControlImpl(settings) {
+        this._settings = settings;
+    }
+    LoggerFactoryControlImpl.prototype.help = function () {
+        /* tslint:disable:no-console */
+        console.log(LoggerFactoryControlImpl._help);
+        /* tslint:enable:no-console */
+    };
+    LoggerFactoryControlImpl.prototype.listLogGroups = function () {
+        var result = new DataStructures_1.StringBuilder();
+        var logGroupRuntimeSettings = this._settings.getLogGroupRuntimeSettings();
+        result.appendLine("Registered LogGroups (index / expression)");
+        for (var i = 0; i < logGroupRuntimeSettings.length; i++) {
+            var logGroupRuntimeSetting = logGroupRuntimeSettings[i];
+            result.appendLine("  " + i + ": " + logGroupRuntimeSetting.logGroupRule.regExp.source + ", logLevel=" +
+                LoggerOptions_1.LogLevel[logGroupRuntimeSetting.level].toString() + ", showTimestamp=" + logGroupRuntimeSetting.logFormat.showTimeStamp +
+                ", showLoggerName=" + logGroupRuntimeSetting.logFormat.showLoggerName +
+                ", format=" + LoggerOptions_1.DateFormatEnum[logGroupRuntimeSetting.logFormat.dateFormat.formatEnum].toString());
+        }
+        /* tslint:disable:no-console */
+        console.log(result.toString());
+        /* tslint:enable:no-console */
+    };
+    LoggerFactoryControlImpl.prototype.setLogLevel = function (level, idGroup) {
+        if (idGroup === void 0) { idGroup = null; }
+        var newLevel = LoggerOptions_1.LogLevel.fromString(level);
+        var settings = this._getLogGroupRunTimeSettingsFor(idGroup);
+        for (var _i = 0, settings_1 = settings; _i < settings_1.length; _i++) {
+            var setting = settings_1[_i];
+            setting.level = newLevel;
+        }
+        /* tslint:disable:no-console */
+        console.log("LogLevel set to " + level + " for " + (idGroup != null ? " LogGroup " + idGroup + "." : " all LogGroups."));
+        /* tslint:enable:no-console */
+    };
+    LoggerFactoryControlImpl.prototype.setLogFormat = function (format, showTimestamp, showLoggerName, idGroup) {
+        if (showTimestamp === void 0) { showTimestamp = true; }
+        if (showLoggerName === void 0) { showLoggerName = true; }
+        if (idGroup === void 0) { idGroup = null; }
+        var formatEnum = LoggerOptions_1.DateFormatEnum.fromString(format);
+        var settings = this._getLogGroupRunTimeSettingsFor(idGroup);
+        for (var _i = 0, settings_2 = settings; _i < settings_2.length; _i++) {
+            var setting = settings_2[_i];
+            setting.logFormat.dateFormat.formatEnum = formatEnum;
+            setting.logFormat.showTimeStamp = showTimestamp;
+            setting.logFormat.showLoggerName = showLoggerName;
+        }
+        /* tslint:disable:no-console */
+        console.log("LogFormat set to " + format + " for " + (idGroup != null ? " LogGroup " + idGroup + "." : " all LogGroups."));
+        /* tslint:enable:no-console */
+    };
+    LoggerFactoryControlImpl.prototype.reset = function (idGroup) {
+        if (idGroup === void 0) { idGroup = null; }
+        var settings = this._getLogGroupRunTimeSettingsFor(idGroup);
+        for (var _i = 0, settings_3 = settings; _i < settings_3.length; _i++) {
+            var setting = settings_3[_i];
+            setting.level = setting.logGroupRule.level;
+            setting.logFormat.showTimeStamp = setting.logGroupRule.logFormat.showTimeStamp;
+            setting.logFormat.showLoggerName = setting.logGroupRule.logFormat.showLoggerName;
+            setting.logFormat.dateFormat.formatEnum = setting.logGroupRule.logFormat.dateFormat.formatEnum;
+        }
+        /* tslint:disable:no-console */
+        console.log("Reset all settings for " + (idGroup != null ? " LogGroup " + idGroup + "." : " all LogGroups."));
+        /* tslint:enable:no-console */
+    };
+    LoggerFactoryControlImpl.prototype._getLogGroupRunTimeSettingsFor = function (idGroup) {
+        var settings = [];
+        if (idGroup !== null) {
+            this._checkIndex(idGroup);
+            settings.push(this._settings.getLogGroupRuntimeSettings()[idGroup]);
+        }
+        else {
+            settings = this._settings.getLogGroupRuntimeSettings();
+        }
+        return settings;
+    };
+    LoggerFactoryControlImpl.prototype._checkIndex = function (index) {
+        if (index < 0 || index >= this._settings.getLogGroupRuntimeSettings().length) {
+            throw new Error("Invalid index, use listLogGroups to find out a valid one.");
+        }
+    };
+    return LoggerFactoryControlImpl;
+}());
+LoggerFactoryControlImpl._help = "\n  help():\n    ** Shows this help.\n    \n  listLogGroups()\n    ** Lists all registered LogGroups for this factory and their current settings.\n    \n  setLogLevel(level: string, idGroup: number | null = null)\n    ** Sets the log level for given LogGroup id, or if null for all LogGroups.\n     \n  setLogFormat(format: string, showTimestamp: boolean = true, showLoggerName: boolean = true, idGroup: number | null = null)\n    ** Sets the log format, whether to show a timestamp and whether to show a logger name for given group or all groups if null.\n  \n  reset(idGroup: number | null = null)\n    ** Reset everything back to original defaults for given LogGroup id, or all if null.\n";
+//# sourceMappingURL=LogGroupControl.js.map
+
+/***/ }),
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4625,7 +4451,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var ExtensionHelper_1 = __webpack_require__(3);
+var ExtensionHelper_1 = __webpack_require__(2);
 var AbstractCategoryLogger_1 = __webpack_require__(4);
 /**
  * This class should not be used directly, it is used for communication with the extension only.
@@ -4650,17 +4476,15 @@ exports.CategoryExtensionLoggerImpl = CategoryExtensionLoggerImpl;
 //# sourceMappingURL=CategoryExtensionLoggerImpl.js.map
 
 /***/ }),
-/* 23 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 var DataStructures_1 = __webpack_require__(1);
 var LoggerOptions_1 = __webpack_require__(0);
-var LoggerFactoryService_1 = __webpack_require__(8);
-var ConsoleLoggerImpl_1 = __webpack_require__(12);
-var MessageBufferLoggerImpl_1 = __webpack_require__(13);
-var AbstractLogger_1 = __webpack_require__(6);
+var LoggerFactoryService_1 = __webpack_require__(7);
+var LoggerImpl_1 = __webpack_require__(11);
 var LoggerFactoryImpl = (function () {
     function LoggerFactoryImpl(name, options) {
         this._loggers = new DataStructures_1.SimpleMap();
@@ -4700,8 +4524,7 @@ var LoggerFactoryImpl = (function () {
     };
     LoggerFactoryImpl.prototype.closeLoggers = function () {
         this._loggers.forEach(function (logger) {
-            // We can only close if AbstractLogger is used (our loggers, but user loggers may not extend it, even though unlikely).
-            if (logger != null && logger instanceof AbstractLogger_1.AbstractLogger) {
+            if (logger != null) {
                 logger.close();
             }
         });
@@ -4731,14 +4554,14 @@ var LoggerFactoryImpl = (function () {
                 var logger = void 0;
                 switch (logGroupRule.loggerType) {
                     case LoggerOptions_1.LoggerType.Console:
-                        logger = new ConsoleLoggerImpl_1.ConsoleLoggerImpl(named, logGroupRuntimeSettings);
+                        logger = new LoggerImpl_1.ConsoleLoggerImpl(named, logGroupRuntimeSettings);
                         break;
                     case LoggerOptions_1.LoggerType.MessageBuffer:
-                        logger = new MessageBufferLoggerImpl_1.MessageBufferLoggerImpl(named, logGroupRuntimeSettings);
+                        logger = new LoggerImpl_1.MessageBufferLoggerImpl(named, logGroupRuntimeSettings);
                         break;
                     case LoggerOptions_1.LoggerType.Custom:
                         if (logGroupRule.callBackLogger != null) {
-                            logger = logGroupRule.callBackLogger(named, logGroupRuntimeSettings);
+                            logger = logGroupRule.callBackLogger(named, logGroupRule);
                         }
                         else {
                             throw new Error("Cannot create a custom logger, custom callback is null");
@@ -4760,7 +4583,7 @@ exports.LoggerFactoryImpl = LoggerFactoryImpl;
 //# sourceMappingURL=LoggerFactoryImpl.js.map
 
 /***/ }),
-/* 24 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function(root, factory) {
@@ -4769,7 +4592,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 
     /* istanbul ignore next */
     if (true) {
-        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(17)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
+        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(15)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
 				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
 				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
@@ -4986,7 +4809,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 
 
 /***/ }),
-/* 25 */
+/* 24 */
 /***/ (function(module, exports) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -5059,7 +4882,7 @@ exports.decode = function (charCode) {
 
 
 /***/ }),
-/* 26 */
+/* 25 */
 /***/ (function(module, exports) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -5176,7 +4999,7 @@ exports.search = function search(aNeedle, aHaystack, aCompare, aBias) {
 
 
 /***/ }),
-/* 27 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -5186,7 +5009,7 @@ exports.search = function search(aNeedle, aHaystack, aCompare, aBias) {
  * http://opensource.org/licenses/BSD-3-Clause
  */
 
-var util = __webpack_require__(2);
+var util = __webpack_require__(3);
 
 /**
  * Determine whether mappingB is after mappingA with respect to generated
@@ -5261,7 +5084,7 @@ exports.MappingList = MappingList;
 
 
 /***/ }),
-/* 28 */
+/* 27 */
 /***/ (function(module, exports) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -5381,7 +5204,7 @@ exports.quickSort = function (ary, comparator) {
 
 
 /***/ }),
-/* 29 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -5391,11 +5214,11 @@ exports.quickSort = function (ary, comparator) {
  * http://opensource.org/licenses/BSD-3-Clause
  */
 
-var util = __webpack_require__(2);
-var binarySearch = __webpack_require__(26);
-var ArraySet = __webpack_require__(14).ArraySet;
-var base64VLQ = __webpack_require__(15);
-var quickSort = __webpack_require__(28).quickSort;
+var util = __webpack_require__(3);
+var binarySearch = __webpack_require__(25);
+var ArraySet = __webpack_require__(12).ArraySet;
+var base64VLQ = __webpack_require__(13);
+var quickSort = __webpack_require__(27).quickSort;
 
 function SourceMapConsumer(aSourceMap) {
   var sourceMap = aSourceMap;
@@ -6469,7 +6292,7 @@ exports.IndexedSourceMapConsumer = IndexedSourceMapConsumer;
 
 
 /***/ }),
-/* 30 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -6479,8 +6302,8 @@ exports.IndexedSourceMapConsumer = IndexedSourceMapConsumer;
  * http://opensource.org/licenses/BSD-3-Clause
  */
 
-var SourceMapGenerator = __webpack_require__(16).SourceMapGenerator;
-var util = __webpack_require__(2);
+var SourceMapGenerator = __webpack_require__(14).SourceMapGenerator;
+var util = __webpack_require__(3);
 
 // Matches a Windows-style `\r\n` newline or a `\n` newline used by all other
 // operating systems these days (capturing the result).
@@ -6882,7 +6705,7 @@ exports.SourceNode = SourceNode;
 
 
 /***/ }),
-/* 31 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*
@@ -6890,13 +6713,13 @@ exports.SourceNode = SourceNode;
  * Licensed under the New BSD license. See LICENSE.txt or:
  * http://opensource.org/licenses/BSD-3-Clause
  */
-exports.SourceMapGenerator = __webpack_require__(16).SourceMapGenerator;
-exports.SourceMapConsumer = __webpack_require__(29).SourceMapConsumer;
-exports.SourceNode = __webpack_require__(30).SourceNode;
+exports.SourceMapGenerator = __webpack_require__(14).SourceMapGenerator;
+exports.SourceMapConsumer = __webpack_require__(28).SourceMapConsumer;
+exports.SourceNode = __webpack_require__(29).SourceNode;
 
 
 /***/ }),
-/* 32 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (root, factory) {
@@ -7015,7 +6838,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 
 
 /***/ }),
-/* 33 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (root, factory) {
@@ -7024,7 +6847,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 
     /* istanbul ignore next */
     if (true) {
-        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(32)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
+        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(31)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
 				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
 				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
@@ -7069,7 +6892,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 
 
 /***/ }),
-/* 34 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function(root, factory) {
@@ -7078,7 +6901,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 
     /* istanbul ignore next */
     if (true) {
-        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(31), __webpack_require__(17)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
+        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(30), __webpack_require__(15)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
 				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
 				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
@@ -7381,7 +7204,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 
 
 /***/ }),
-/* 35 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function(root, factory) {
@@ -7390,7 +7213,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 
     /* istanbul ignore next */
     if (true) {
-        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(24), __webpack_require__(33), __webpack_require__(34)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
+        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(23), __webpack_require__(32), __webpack_require__(33)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
 				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
 				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
@@ -7606,7 +7429,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 
 
 /***/ }),
-/* 36 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7614,35 +7437,31 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
 }
-var LogGroupControl_1 = __webpack_require__(19);
-var CategoryServiceControl_1 = __webpack_require__(18);
-var ExtensionHelper_1 = __webpack_require__(3);
-exports.ExtensionHelper = ExtensionHelper_1.ExtensionHelper;
-// Category related
+// CategoryService related.
+var LogControl_1 = __webpack_require__(16);
+var ExtensionHelper_1 = __webpack_require__(2);
 var AbstractCategoryLogger_1 = __webpack_require__(4);
 exports.AbstractCategoryLogger = AbstractCategoryLogger_1.AbstractCategoryLogger;
-var CategoryConsoleLoggerImpl_1 = __webpack_require__(9);
+var CategoryConsoleLoggerImpl_1 = __webpack_require__(8);
 exports.CategoryConsoleLoggerImpl = CategoryConsoleLoggerImpl_1.CategoryConsoleLoggerImpl;
-var CategoryDelegateLoggerImpl_1 = __webpack_require__(10);
+var CategoryDelegateLoggerImpl_1 = __webpack_require__(9);
 exports.CategoryDelegateLoggerImpl = CategoryDelegateLoggerImpl_1.CategoryDelegateLoggerImpl;
-var CategoryLogger_1 = __webpack_require__(20);
+var CategoryLogger_1 = __webpack_require__(17);
 exports.Category = CategoryLogger_1.Category;
-var CategoryMessageBufferImpl_1 = __webpack_require__(11);
+var CategoryMessageBufferImpl_1 = __webpack_require__(10);
 exports.CategoryMessageBufferLoggerImpl = CategoryMessageBufferImpl_1.CategoryMessageBufferLoggerImpl;
 var CategoryService_1 = __webpack_require__(5);
 exports.CategoryDefaultConfiguration = CategoryService_1.CategoryDefaultConfiguration;
 exports.CategoryRuntimeSettings = CategoryService_1.CategoryRuntimeSettings;
 exports.CategoryServiceFactory = CategoryService_1.CategoryServiceFactory;
-var LoggerFactoryService_1 = __webpack_require__(8);
+var LoggerFactoryService_1 = __webpack_require__(7);
 exports.LoggerFactoryOptions = LoggerFactoryService_1.LoggerFactoryOptions;
 exports.LFService = LoggerFactoryService_1.LFService;
 exports.LogGroupRule = LoggerFactoryService_1.LogGroupRule;
-var AbstractLogger_1 = __webpack_require__(6);
-exports.AbstractLogger = AbstractLogger_1.AbstractLogger;
-var ConsoleLoggerImpl_1 = __webpack_require__(12);
-exports.ConsoleLoggerImpl = ConsoleLoggerImpl_1.ConsoleLoggerImpl;
-var MessageBufferLoggerImpl_1 = __webpack_require__(13);
-exports.MessageBufferLoggerImpl = MessageBufferLoggerImpl_1.MessageBufferLoggerImpl;
+var LoggerImpl_1 = __webpack_require__(11);
+exports.AbstractLogger = LoggerImpl_1.AbstractLogger;
+exports.ConsoleLoggerImpl = LoggerImpl_1.ConsoleLoggerImpl;
+exports.MessageBufferLoggerImpl = LoggerImpl_1.MessageBufferLoggerImpl;
 var LoggerOptions_1 = __webpack_require__(0);
 exports.CategoryLogFormat = LoggerOptions_1.CategoryLogFormat;
 exports.DateFormat = LoggerOptions_1.DateFormat;
@@ -7650,33 +7469,32 @@ exports.DateFormatEnum = LoggerOptions_1.DateFormatEnum;
 exports.LogFormat = LoggerOptions_1.LogFormat;
 exports.LoggerType = LoggerOptions_1.LoggerType;
 exports.LogLevel = LoggerOptions_1.LogLevel;
+var ExtensionHelper_2 = __webpack_require__(2);
+exports.ExtensionHelper = ExtensionHelper_2.ExtensionHelper;
 // Utilities
 var DataStructures_1 = __webpack_require__(1);
 exports.SimpleMap = DataStructures_1.SimpleMap;
 exports.LinkedList = DataStructures_1.LinkedList;
-__export(__webpack_require__(21));
-var MessageUtils_1 = __webpack_require__(7);
+__export(__webpack_require__(18));
+var MessageUtils_1 = __webpack_require__(6);
 exports.MessageFormatUtils = MessageUtils_1.MessageFormatUtils;
+// Allow extensions to talk with us.
+ExtensionHelper_1.ExtensionHelper.register();
 /*
  Functions to export on TSL libarary var.
 */
 // Export help function
 function help() {
     /* tslint:disable:no-console */
-    console.log("help()\n   ** Shows this help\n   \n getLogControl(): LoggerControl\n   ** Returns LoggerControl Object, use to dynamically change loglevels for log4j logging.\n   ** Call .help() on LoggerControl object for available options.\n   \n getCategoryControl(): CategoryServiceControl\n   ** Returns CategoryServiceControl Object, use to dynamically change loglevels for category logging.\n   ** Call .help() on CategoryServiceControl object for available options.   \n");
+    console.log("help()\n   ** Shows this help\n   \n getLogControl(): LogControl\n   ** Returns LogControl Object, use to dynamically change loglevels for LogGroups and Categories alike.\n   ** Call .help() on LogControl object for available options.\n");
     /* tslint:enable:no-console */
 }
 exports.help = help;
-// Export LogControl function (log4j)
+// Export LogControl function
 function getLogControl() {
-    return new LogGroupControl_1.LoggerControlImpl();
+    return new LogControl_1.LogControlImpl();
 }
 exports.getLogControl = getLogControl;
-// Export CategoryControl function
-function getCategoryControl() {
-    return new CategoryServiceControl_1.CategoryServiceControlImpl();
-}
-exports.getCategoryControl = getCategoryControl;
 //# sourceMappingURL=typescript-logging.js.map
 
 /***/ })

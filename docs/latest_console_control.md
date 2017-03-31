@@ -26,7 +26,7 @@ The log4j control object can be retrieved by:
 let control = TSL.getLogControl();
 ```
 
-This provides you access to the control object for log4j. This on itself provides several functions,
+This provides you access to the control object for log4j. This object provides several functions,
 but the most important ones for you to start with are:
 
 ```
@@ -53,8 +53,46 @@ factoryControl.reset();  // or factory.reset("all")
 
 Always use the help() on the objects for more details.
 
+Detailed documentation can be found in the docs.zip that can be downloaded from the main page, in particular you want to look at the LogGroupControl and LoggerFactory classes.
+
 ## Categorized console control
 
+This can be used if your application uses the categorized style of logging.
+
+The categorized control object can be retrieved by:
+```
+let control = TSL.getCategoryControl();
+```
+
+This provides you access to the control object for categories. This object provides several functions,
+but the most important ones for you to start with are:
+
+```
+control.help();
+control.showSettings();
+```
+
+Help provides an overview of available functions and how to use them.
+The change function allows you to change the settings for categories.
+
+The example below changes the log levels for categories.
+```
+let control = TSL.getCategoryControl();
+
+// Change all root categories recursively (so include childs), and the loglevel to Debug (so all existing/new loggers will log on Debug)
+control.change({category: "all", recursive:true, logLevel: "Debug"});
+
+// Change category 1, not it's childs and set the loglevel to warn. Use control.showSettings() to list available categories.
+control.change({category: 1, recursive:false, logLevel: "Warn"});
+
+// Resets everything back to original settings, before the changes.
+control.reset();
+
+```
+
+Always use the help() on the objects for more details.
+
+Detailed documentation can be found in the docs.zip that can be downloaded from the main page, in particular you want to look at the CategoryServiceControl class.
 
 ## Expose Console control API with webpack
 
@@ -100,7 +138,7 @@ LOGGING.CNT.help();
 let control = LOGGING.CNT.getLogControl();
 ~~~
 
-### Easy way using window object
+### Using window object
 
 The shortest and easiest way, just expose stuff on the window object (this only works in a browser!).
 

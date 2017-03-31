@@ -3,9 +3,9 @@
 This page describes the relevant changes per version.
 
 * 0.3.0 (current release)
-  * Added console control api for both log4j and categorized logging
-  * AbstractLogger (log4) doLog(..) modified, it passes raw message now. Not backwards compatible, see [migration](migration.md) for details.
-  * AbstractLogger (log4) constructor changed to accept runtime settings. Not backwards compatible, see [migration](migration.md) for details.
+  * Added console control api for both log4j and category style of logging
+  * **Potentially breaking change** AbstractLogger (log4) doLog(..) modified, it passes raw message now. Not backwards compatible, see [migration](migration.md) for details.
+  * **Potentially breaking change** AbstractLogger (log4) constructor changed to accept runtime settings. Not backwards compatible, see [migration](migration.md) for details.
   * ExtensionHelper does not unnecessary log on console when using chrome extension.
   * Code cleanup.
 * 0.2.1

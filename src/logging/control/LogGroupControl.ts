@@ -2,8 +2,6 @@ import {DateFormatEnum, LoggerType, LogLevel} from "../log/LoggerOptions";
 import {LoggerFactoryRuntimeSettings} from "../log/standard/LoggerFactoryRuntimeSettings";
 import {LFService, LFServiceRuntimeSettings, LogGroupRuntimeSettings} from "../log/standard/LoggerFactoryService";
 import {StringBuilder, TuplePair} from "../utils/DataStructures";
-import logger = Handlebars.logger;
-
 /**
  * Allows to change the settings for one or all LogGroups.
  * Options will be applied only if set, undefined options are ignored.
