@@ -3,6 +3,7 @@
 This page describes how the logging can be controlled dynamically using the console. There are two 'controls':
 * log4j console control
 * categorized console control
+
 Please see the sections below for details.
 
 The standard typescript-logging bundle exposes a variable called TSL, on which to start.
@@ -14,8 +15,7 @@ This variables exposes several functions to call:
 
 *The help provided by the logging objects is leading always, and should be consulted for more details!*
 
-**Webpack users read this first**
-To use the console api when webpack bundles your stuff, see [below](#expose-console-control-api-with-webpack).
+**Webpack users read this first**: To use the console api when webpack bundles your stuff, see [below](#expose-console-control-api-with-webpack).
 
 ## Log4j console control
 
