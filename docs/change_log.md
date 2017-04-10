@@ -2,6 +2,8 @@
 
 This page describes the relevant changes per version.
 
+* 0.3.1
+  * Fixed: [Remove "Dropping unknown message"](https://github.com/mreuvers/typescript-logging/issues/8)
 * 0.3.0 (current release)
   * Added console control api for both log4j and category style of logging
   * **Potentially breaking change** AbstractLogger (log4) doLog(..) modified, it passes raw message now. Not backwards compatible, see [migration](migration.md) for details.
