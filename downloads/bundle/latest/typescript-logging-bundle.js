@@ -1109,9 +1109,6 @@ var ExtensionHelper = (function () {
                     break;
             }
         }
-        else if (msg.from !== "tsl-logging") {
-            console.log("Dropping unknown message: " + JSON.stringify(msg));
-        }
         /* tslint:enable:no-console */
     };
     ExtensionHelper.sendCategoryLogMessage = function (msg) {
