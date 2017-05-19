@@ -6,7 +6,14 @@ import {
 import {CategoryDelegateLoggerImpl} from "../src/logging/log/category/CategoryDelegateLoggerImpl";
 import {LoggerType, DateFormatEnum, LogLevel, CategoryLogFormat, DateFormat} from "../src/logging/log/LoggerOptions";
 import {AbstractCategoryLogger, CategoryLogMessage} from "../src/logging/log/category/AbstractCategoryLogger";
+import {CategoryMessageBufferLoggerImpl} from "../src/logging/log/category/CategoryMessageBufferImpl";
 
+const getBufferedMessages = (logger: CategoryLogger): string[] => {
+  expect(logger instanceof CategoryDelegateLoggerImpl).toBeTruthy();
+  const actualLogger = (<CategoryDelegateLoggerImpl> logger).delegate;
+  expect(actualLogger instanceof CategoryMessageBufferLoggerImpl).toBeTruthy();
+  return (<CategoryMessageBufferLoggerImpl> actualLogger).getMessages();
+};
 
 describe("Categories", () => {
 
@@ -17,26 +24,25 @@ describe("Categories", () => {
     let child1 = new Category("root1_child1", root1);
     let root2Child1 = new Category("root2_child2", root2);
 
-
     let child11 = new Category("root1_child1_child11", child1);
     let child12 = new Category("root1_child1_child12", child1);
 
     expect(root1.parent).toBeNull();
-    expect(child1.parent == root1).toBeTruthy();
+    expect(child1.parent === root1).toBeTruthy();
     expect(root1.children.length).toEqual(1);
     expect(child1.children.length).toEqual(2);
-    expect(child11.parent == child1).toBeTruthy();
-    expect(child12.parent == child1).toBeTruthy();
+    expect(child11.parent === child1).toBeTruthy();
+    expect(child12.parent === child1).toBeTruthy();
     expect(child11.children.length).toEqual(0);
     expect(child12.children.length).toEqual(0);
 
     expect(root2.parent).toBeNull();
     expect(root2.children.length).toEqual(1);
-    expect(root2Child1.parent == root2).toBeTruthy();
-    expect(root2Child1.parent == root1).toBeFalsy();
+    expect(root2Child1.parent === root2).toBeTruthy();
+    expect(root2Child1.parent === root1).toBeFalsy();
   });
 
-  it("Fails when forbidden character is used in category",() => {
+  it("Fails when forbidden character is used in category", () => {
     expect(() => new Category("abc")).not.toThrow();
     expect(() => new Category("a#")).toThrow();
   });
@@ -44,7 +50,10 @@ describe("Categories", () => {
 
 describe("CategoryServiceFactory", () => {
 
-  let root1: Category | null, child1: Category | null, child11: Category | null, child12: Category | null;
+  let root1: Category | null = null;
+  let child1: Category | null = null;
+  let child11: Category | null = null;
+  let child12: Category | null = null;
   let logger: CategoryLogger | null;
 
   beforeEach(() => {
@@ -119,7 +128,7 @@ describe("CategoryServiceFactory", () => {
     expect(settings.loggerType === LoggerType.Console).toBeTruthy();
     expect(settings.logFormat.showCategoryName).toBeTruthy();
     expect(settings.logFormat.showTimeStamp).toBeTruthy();
-    expect(settings.logFormat.dateFormat.dateSeparator).toEqual('-');
+    expect(settings.logFormat.dateFormat.dateSeparator).toEqual("-");
     expect(settings.logFormat.dateFormat.formatEnum === DateFormatEnum.Default).toBeTruthy();
     expect(settings.logLevel === LogLevel.Error).toBeTruthy();
     expect(settings.callBackLogger).toBeNull();
@@ -155,9 +164,8 @@ describe("CategoryServiceFactory", () => {
       expect(settings.callBackLogger).toBeNull();
     };
 
-
     const configChanged = new CategoryDefaultConfiguration(
-      LogLevel.Info, LoggerType.MessageBuffer, new CategoryLogFormat(new DateFormat(DateFormatEnum.YearDayMonthWithFullTime, '/'), false, false)
+      LogLevel.Info, LoggerType.MessageBuffer, new CategoryLogFormat(new DateFormat(DateFormatEnum.YearDayMonthWithFullTime, "/"), false, false)
     );
     CategoryServiceFactory.setDefaultConfiguration(configChanged, true);
 
@@ -186,20 +194,6 @@ describe("CategoryServiceFactory", () => {
     checkChangedConfig(anotherChild, CategoryServiceFactory.getRuntimeSettings().getCategorySettings(anotherChild));
   });
 
-  class CustomLogger extends AbstractCategoryLogger {
-
-    private messages: string[] = [];
-
-    constructor(rootCategory: Category, runtimeSettings: RuntimeSettings, messages: string[]) {
-      super(rootCategory, runtimeSettings);
-      this.messages = messages;
-    }
-
-    protected doLog(msg: CategoryLogMessage): void {
-      this.messages.push(msg.getMessage());
-    }
-  }
-
   it("Can use a custom logger", () => {
     checkDefaultConfig(root1, CategoryServiceFactory.getRuntimeSettings().getCategorySettings(root1));
 
@@ -214,4 +208,83 @@ describe("CategoryServiceFactory", () => {
     rootLogger.info("Second Message");
     expect(messages).toEqual(["First Message", "Second Message"]);
   });
+
+  it("Can use a custom message formatter", () => {
+    checkDefaultConfig(root1, CategoryServiceFactory.getRuntimeSettings().getCategorySettings(root1));
+
+    const configChanged = new CategoryDefaultConfiguration(LogLevel.Info, LoggerType.MessageBuffer);
+    configChanged.formatterLogMessage = (msg: CategoryLogMessage): string => {
+      // Just shorten the message, will only have literal text.
+      return msg.getMessage();
+    };
+    CategoryServiceFactory.setDefaultConfiguration(configChanged, true);
+    const rootLogger = CategoryServiceFactory.getLogger(root1);
+    rootLogger.info("Hello root1!");
+    rootLogger.info("Hello child1!", child1);
+
+    expect(getBufferedMessages(rootLogger)).toEqual(["Hello root1!", "Hello child1!"]);
+  });
+
+  it("Cannot set custom message formatter when custom logger is used", () => {
+    checkDefaultConfig(root1, CategoryServiceFactory.getRuntimeSettings().getCategorySettings(root1));
+
+    const messages: string[] = [];
+    const configChanged = new CategoryDefaultConfiguration(
+      LogLevel.Info, LoggerType.Custom, new CategoryLogFormat(),
+      (rootCategory: Category, runtimeSettings: RuntimeSettings) => new CustomLogger(rootCategory, runtimeSettings, messages)
+    );
+    const formatterLogMessage = (msg: CategoryLogMessage): string => {
+      // Just shorten the message, will only have literal text.
+      return msg.getMessage();
+    };
+
+    expect(() => configChanged.formatterLogMessage = formatterLogMessage).toThrow("You cannot specify a formatter for log messages if your loggerType is Custom");
+    CategoryServiceFactory.setDefaultConfiguration(configChanged, true);
+  });
+
+  it("Can set different custom formatter on category than default", () => {
+    checkDefaultConfig(root1, CategoryServiceFactory.getRuntimeSettings().getCategorySettings(root1));
+
+    const defaultConfig = new CategoryDefaultConfiguration(LogLevel.Info, LoggerType.MessageBuffer);
+    defaultConfig.formatterLogMessage = (msg: CategoryLogMessage): string => {
+      // Just shorten the message, will only have literal text.
+      return msg.getMessage();
+    };
+
+    const formatterRoot2 = (msg: CategoryLogMessage): string => {
+      return msg.getMessage() + "_postFix";
+    };
+
+    const configRoot2 = new CategoryDefaultConfiguration(LogLevel.Debug, LoggerType.MessageBuffer);
+    configRoot2.formatterLogMessage = formatterRoot2;
+
+    const root2 = new Category("root2");
+
+    CategoryServiceFactory.setDefaultConfiguration(defaultConfig, true);
+    CategoryServiceFactory.setConfigurationCategory(configRoot2, root2, true);
+
+    const rootLogger = CategoryServiceFactory.getLogger(root1);
+    rootLogger.info("Hello root1!");
+    rootLogger.info("Hello child1!", child1);
+    const rootLogger2 = CategoryServiceFactory.getLogger(root2);
+    rootLogger2.debug("Hello root2!");
+
+    expect(getBufferedMessages(rootLogger)).toEqual(["Hello root1!", "Hello child1!"]);
+    expect(getBufferedMessages(rootLogger2)).toEqual(["Hello root2!_postFix"]);
+  });
+
+  class CustomLogger extends AbstractCategoryLogger {
+
+    private messages: string[] = [];
+
+    constructor(rootCategory: Category, runtimeSettings: RuntimeSettings, messages: string[]) {
+      super(rootCategory, runtimeSettings);
+      this.messages = messages;
+    }
+
+    protected doLog(msg: CategoryLogMessage): void {
+      this.messages.push(msg.getMessage());
+    }
+  }
+
 });

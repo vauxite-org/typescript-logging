@@ -6,6 +6,7 @@ import {CategoryExtensionLoggerImpl} from "./CategoryExtensionLoggerImpl";
 import {Category, CategoryLogger} from "./CategoryLogger";
 import {CategoryMessageBufferLoggerImpl} from "./CategoryMessageBufferImpl";
 import {ExtensionHelper} from "../../extension/ExtensionHelper";
+import {CategoryLogMessage} from "./AbstractCategoryLogger";
 
 /**
  * RuntimeSettings for a category, at runtime these are associated to a category.
@@ -18,15 +19,18 @@ export class CategoryRuntimeSettings {
   private _logFormat: CategoryLogFormat;
 
   private _callBackLogger: ((rootCategory: Category, runtimeSettings: RuntimeSettings) => CategoryLogger) | null;
+  private _formatterLogMessage: ((message: CategoryLogMessage) => string) | null = null;
 
   constructor(category: Category, logLevel: LogLevel = LogLevel.Error, loggerType: LoggerType = LoggerType.Console,
               logFormat: CategoryLogFormat = new CategoryLogFormat(),
-              callBackLogger: ((rootCategory: Category, runtimeSettings: RuntimeSettings) => CategoryLogger) | null = null) {
+              callBackLogger: ((rootCategory: Category, runtimeSettings: RuntimeSettings) => CategoryLogger) | null = null,
+              formatterLogMessage: ((message: CategoryLogMessage) => string) | null = null) {
     this._category = category;
     this._logLevel = logLevel;
     this._loggerType = loggerType;
     this._logFormat = logFormat;
     this._callBackLogger = callBackLogger;
+    this._formatterLogMessage = formatterLogMessage;
   }
 
   get category(): Category {
@@ -64,6 +68,14 @@ export class CategoryRuntimeSettings {
   set callBackLogger(value: ((rootCategory: Category, runtimeSettings: RuntimeSettings) => CategoryLogger) | null) {
     this._callBackLogger = value;
   }
+
+  get formatterLogMessage(): ((message: CategoryLogMessage) => string) | null {
+    return this._formatterLogMessage;
+  }
+
+  set formatterLogMessage(value: ((message: CategoryLogMessage) => string) | null) {
+    this._formatterLogMessage = value;
+  }
 }
 
 /**
@@ -99,6 +111,7 @@ export class CategoryDefaultConfiguration {
   private _logFormat: CategoryLogFormat;
 
   private _callBackLogger: ((rootCategory: Category, runtimeSettings: RuntimeSettings) => CategoryLogger) | null;
+  private _formatterLogMessage: ((message: CategoryLogMessage) => string) | null = null;
 
   /**
    * Create a new instance
@@ -137,8 +150,32 @@ export class CategoryDefaultConfiguration {
     return this._callBackLogger;
   }
 
+  /**
+   * Get the formatterLogMessage function, see comment on the setter.
+   * @returns {((message:CategoryLogMessage)=>string)|null}
+   */
+  get formatterLogMessage(): ((message: CategoryLogMessage) => string) | null {
+    return this._formatterLogMessage;
+  }
+
+  /**
+   * Set the default formatterLogMessage function, if set it is applied to all type of loggers except for a custom logger.
+   * By default this is null (not set). You can assign a function to allow custom formatting of a log message.
+   * Each log message will call this function then and expects your function to format the message and return a string.
+   * Will throw an error if you attempt to set a formatterLogMessage if the LoggerType is custom.
+   * @param value The formatter function, or null to reset it.
+   */
+  set formatterLogMessage(value: ((message: CategoryLogMessage) => string) | null) {
+    if (value !== null && this._loggerType === LoggerType.Custom) {
+      throw new Error("You cannot specify a formatter for log messages if your loggerType is Custom");
+    }
+    this._formatterLogMessage = value;
+  }
+
   public copy(): CategoryDefaultConfiguration {
-    return new CategoryDefaultConfiguration(this.logLevel, this.loggerType, this.logFormat.copy(), this.callBackLogger);
+    const config = new CategoryDefaultConfiguration(this.logLevel, this.loggerType, this.logFormat.copy(), this.callBackLogger);
+    config.formatterLogMessage = this.formatterLogMessage;
+    return config;
   }
 }
 
@@ -236,11 +273,11 @@ export class CategoryServiceImpl implements RuntimeSettings {
         if (setting !== null) {
           const defSettings = this._defaultConfig.copy();
           const settings = new CategoryRuntimeSettings(setting.category, defSettings.logLevel,
-            defSettings.loggerType, defSettings.logFormat, defSettings.callBackLogger);
+            defSettings.loggerType, defSettings.logFormat, defSettings.callBackLogger, defSettings.formatterLogMessage);
 
           const defSettingsOriginal = this._defaultConfig.copy();
           const settingsOriginal = new CategoryRuntimeSettings(setting.category, defSettingsOriginal.logLevel,
-            defSettingsOriginal.loggerType, defSettingsOriginal.logFormat, defSettingsOriginal.callBackLogger);
+            defSettingsOriginal.loggerType, defSettingsOriginal.logFormat, defSettingsOriginal.callBackLogger, defSettingsOriginal.formatterLogMessage);
           newRuntimeSettings.put(key, settings);
           newOriginalRuntimeSettings.put(key, settingsOriginal);
         }
@@ -280,6 +317,7 @@ export class CategoryServiceImpl implements RuntimeSettings {
     categorySettings.loggerType = config.loggerType;
     categorySettings.logFormat = config.logFormat;
     categorySettings.callBackLogger = config.callBackLogger;
+    categorySettings.formatterLogMessage = config.formatterLogMessage;
 
     // Apply the settings to children recursive if requested
     if (applyChildren) {
@@ -360,12 +398,12 @@ export class CategoryServiceImpl implements RuntimeSettings {
     // Passing the callback is not really needed for child categories, but don't really care.
     const defSettings = this._defaultConfig.copy();
     settings = new CategoryRuntimeSettings(category, defSettings.logLevel, defSettings.loggerType,
-      defSettings.logFormat, defSettings.callBackLogger
+      defSettings.logFormat, defSettings.callBackLogger, defSettings.formatterLogMessage
     );
 
     const defSettingsOriginal = this._defaultConfig.copy();
     const settingsOriginal = new CategoryRuntimeSettings(category, defSettingsOriginal.logLevel, defSettingsOriginal.loggerType,
-      defSettingsOriginal.logFormat, defSettingsOriginal.callBackLogger
+      defSettingsOriginal.logFormat, defSettingsOriginal.callBackLogger, defSettingsOriginal.formatterLogMessage
     );
     this._categoryRuntimeSettings.put(category.getCategoryPath(), settings);
     this._categoryOriginalRuntimeSettings.put(category.getCategoryPath(), settingsOriginal);

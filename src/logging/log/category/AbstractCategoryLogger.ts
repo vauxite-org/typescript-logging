@@ -204,6 +204,20 @@ export abstract class AbstractCategoryLogger implements CategoryLogger {
     return MessageFormatUtils.renderDefaultMessage(msg, true);
   }
 
+  /**
+   * Return optional message formatter. All LoggerTypes (except custom) will see if
+   * they have this, and if so use it to log.
+   * @returns {((message:CategoryLogMessage)=>string)|null}
+   */
+  protected _getMessageFormatter(): ((message: CategoryLogMessage) => string) | null {
+    const categorySettings = this.runtimeSettings.getCategorySettings(this.rootCategory);
+    // Should not happen but make ts happy
+    if (categorySettings === null) {
+      throw new Error("Did not find CategorySettings for rootCategory: " + this.rootCategory.name);
+    }
+    return categorySettings.formatterLogMessage;
+  }
+
   private _log(level: LogLevel, msg: string, error: Error | null = null, resolved: boolean = false, ...categories: Category[]): void {
     this._logInternal(level, () => msg, () => error, resolved, ...categories);
   }

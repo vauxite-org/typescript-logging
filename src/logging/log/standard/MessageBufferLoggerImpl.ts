@@ -1,4 +1,3 @@
-import {LogLevel} from "../LoggerOptions";
 import {LogGroupRuntimeSettings} from "./LoggerFactoryService";
 import {AbstractLogger, LogMessage} from "./AbstractLogger";
 

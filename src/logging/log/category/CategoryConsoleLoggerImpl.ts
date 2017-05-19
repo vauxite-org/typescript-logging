@@ -13,7 +13,15 @@ export class CategoryConsoleLoggerImpl extends AbstractCategoryLogger {
   }
 
   protected doLog(msg: CategoryLogMessage): void {
-    const fullMsg = this.createDefaultLogMessage(msg);
+    const messageFormatter = this._getMessageFormatter();
+    let fullMsg: string;
+    if (messageFormatter === null) {
+      fullMsg = this.createDefaultLogMessage(msg);
+    }
+    else {
+      fullMsg = messageFormatter(msg);
+    }
+
     if (console !== undefined) {
       let logged = false;
 
