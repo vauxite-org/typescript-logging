@@ -243,4 +243,4 @@ Some things may not fit the library and could be rejected, so if you are unsure 
 
 ## History
 
-For history please check the [changelog](docs/change_log.md)
+For history and changes please check the [changelog](docs/change_log.md)
