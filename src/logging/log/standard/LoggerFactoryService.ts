@@ -5,6 +5,7 @@ import {LoggerFactoryImpl} from "./LoggerFactoryImpl";
 import {LoggerFactoryRuntimeSettings} from "./LoggerFactoryRuntimeSettings";
 import {Logger} from "./Logger";
 import {ExtensionHelper} from "../../extension/ExtensionHelper";
+import {LogMessage} from "./AbstractLogger";
 
 /**
  * Defines a LogGroupRule, this allows you to either have everything configured the same way
@@ -19,6 +20,7 @@ export class LogGroupRule {
   private _loggerType: LoggerType;
   private _logFormat: LogFormat;
   private _callBackLogger: ((name: string, settings: LogGroupRuntimeSettings) => Logger) | null;
+  private _formatterLogMessage: ((message: LogMessage) => string) | null = null;
 
   /**
    * Create a LogGroupRule. Basically you define what logger name(s) match for this group, what level should be used what logger type (where to log)
@@ -57,6 +59,28 @@ export class LogGroupRule {
 
   get callBackLogger(): ((name: string, settings: LogGroupRuntimeSettings) => Logger) | null {
     return this._callBackLogger;
+  }
+
+  /**
+   * Get the formatterLogMessage function, see comment on the setter.
+   * @returns {((message:LogMessage)=>string)|null}
+   */
+  get formatterLogMessage(): ((message: LogMessage) => string) | null {
+    return this._formatterLogMessage;
+  }
+
+  /**
+   * Set the default formatterLogMessage function, if set it is applied to all type of loggers except for a custom logger.
+   * By default this is null (not set). You can assign a function to allow custom formatting of a log message.
+   * Each log message will call this function then and expects your function to format the message and return a string.
+   * Will throw an error if you attempt to set a formatterLogMessage if the LoggerType is custom.
+   * @param value The formatter function, or null to reset it.
+   */
+  set formatterLogMessage(value: ((message: LogMessage) => string) | null) {
+    if (value !== null && this._loggerType === LoggerType.Custom) {
+      throw new Error("You cannot specify a formatter for log messages if your loggerType is Custom");
+    }
+    this._formatterLogMessage = value;
   }
 }
 
@@ -110,6 +134,7 @@ export class LogGroupRuntimeSettings {
   private _loggerType: LoggerType;
   private _logFormat: LogFormat;
   private _callBackLogger: ((name: string, settings: LogGroupRuntimeSettings) => Logger) | null;
+  private _formatterLogMessage: ((message: LogMessage) => string) | null = null;
 
   constructor(logGroupRule: LogGroupRule) {
     this._logGroupRule = logGroupRule;
@@ -118,6 +143,7 @@ export class LogGroupRuntimeSettings {
     this._logFormat = new LogFormat(new DateFormat(logGroupRule.logFormat.dateFormat.formatEnum, logGroupRule.logFormat.dateFormat.dateSeparator),
       logGroupRule.logFormat.showTimeStamp, logGroupRule.logFormat.showLoggerName);
     this._callBackLogger = logGroupRule.callBackLogger;
+    this._formatterLogMessage = logGroupRule.formatterLogMessage;
   }
 
   /**
@@ -158,6 +184,14 @@ export class LogGroupRuntimeSettings {
 
   set callBackLogger(value: ((name: string, settings: LogGroupRuntimeSettings) => Logger) | null) {
     this._callBackLogger = value;
+  }
+
+  get formatterLogMessage(): ((message: LogMessage) => string) | null {
+    return this._formatterLogMessage;
+  }
+
+  set formatterLogMessage(value: ((message: LogMessage) => string) | null) {
+    this._formatterLogMessage = value;
   }
 }
 

@@ -1,8 +1,10 @@
-import {LogLevel} from "../src/logging/log/LoggerOptions";
+import {LogFormat, LoggerType, LogLevel} from "../src/logging/log/LoggerOptions";
 import {Logger} from "../src/logging/log/standard/Logger";
 import {LoggerFactory} from "../src/logging/log/standard/LoggerFactory";
 import {LoggerFactoryImpl} from "../src/logging/log/standard/LoggerFactoryImpl";
 import {LFService, LoggerFactoryOptions, LogGroupRule} from "../src/logging/log/standard/LoggerFactoryService";
+import {MessageBufferLoggerImpl} from "../src/logging/log/standard/MessageBufferLoggerImpl";
+import {AbstractLogger, LogMessage} from "../src/logging/log/standard/AbstractLogger";
 
 describe("LoggerFactory configuration", () => {
 
@@ -102,4 +104,29 @@ describe("LoggerFactory configuration", () => {
     expect(rtSettingsAgain === rtSettings).toBeTruthy();
   });
 
+  it("LogGroupRule can use a custom message formatter", () => {
+    const options = new LoggerFactoryOptions();
+    const rule = new LogGroupRule(new RegExp(".+"), LogLevel.Info, new LogFormat(), LoggerType.MessageBuffer);
+    // Message only
+    rule.formatterLogMessage = (message) => message.message;
+    options.addLogGroupRule(rule);
+
+    const factory = LFService.createNamedLoggerFactory("world", options);
+    const logger = factory.getLogger("MyLogger") as MessageBufferLoggerImpl;
+    logger.info("Hello world!");
+    expect(logger.getMessages()).toEqual(["Hello world!"]);
+  });
+
+  it("LogGroupRule cannot set custom message formatter when custom logger is used", () => {
+    const rule = new LogGroupRule(new RegExp(".+"), LogLevel.Info, new LogFormat(), LoggerType.Custom, (name, settings) => new CustomLogger(name, settings));
+    // This not allowed now.
+    expect(() => rule.formatterLogMessage = (message) => message.message).toThrow("You cannot specify a formatter for log messages if your loggerType is Custom");
+  });
+
+  class CustomLogger extends AbstractLogger {
+
+    protected doLog(msg: LogMessage): void {
+      // Don't care
+    }
+  }
 });

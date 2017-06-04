@@ -6,16 +6,16 @@ import {CategoryMessageBufferLoggerImpl} from "../src/logging/log/category/Categ
 
 const getMessagesAsString = (logger: CategoryLogger): string => {
   expect(logger instanceof CategoryDelegateLoggerImpl).toBeTruthy();
-  const actualLogger = (<CategoryDelegateLoggerImpl>logger).delegate;
+  const actualLogger = (<CategoryDelegateLoggerImpl> logger).delegate;
   expect(actualLogger instanceof CategoryMessageBufferLoggerImpl).toBeTruthy();
-  return (<CategoryMessageBufferLoggerImpl>actualLogger).toString();
+  return (<CategoryMessageBufferLoggerImpl> actualLogger).toString();
 };
 
 const getMessages = (logger: CategoryLogger): string[] => {
   expect(logger instanceof CategoryDelegateLoggerImpl).toBeTruthy();
-  const actualLogger = (<CategoryDelegateLoggerImpl>logger).delegate;
+  const actualLogger = (<CategoryDelegateLoggerImpl> logger).delegate;
   expect(actualLogger instanceof CategoryMessageBufferLoggerImpl).toBeTruthy();
-  return (<CategoryMessageBufferLoggerImpl>actualLogger).getMessages();
+  return (<CategoryMessageBufferLoggerImpl> actualLogger).getMessages();
 };
 
 describe("CategoryLogger...", () => {

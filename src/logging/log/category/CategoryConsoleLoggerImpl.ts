@@ -13,16 +13,16 @@ export class CategoryConsoleLoggerImpl extends AbstractCategoryLogger {
   }
 
   protected doLog(msg: CategoryLogMessage): void {
-    const messageFormatter = this._getMessageFormatter();
-    let fullMsg: string;
-    if (messageFormatter === null) {
-      fullMsg = this.createDefaultLogMessage(msg);
-    }
-    else {
-      fullMsg = messageFormatter(msg);
-    }
-
     if (console !== undefined) {
+      const messageFormatter = this._getMessageFormatter();
+      let fullMsg: string;
+      if (messageFormatter === null) {
+        fullMsg = this.createDefaultLogMessage(msg);
+      }
+      else {
+        fullMsg = messageFormatter(msg);
+      }
+
       let logged = false;
 
       /* tslint:disable:no-console */
@@ -65,7 +65,7 @@ export class CategoryConsoleLoggerImpl extends AbstractCategoryLogger {
       /* tslint:enable:no-console */
     }
     else {
-      throw new Error("Console is not defined, cannot log msg: " + fullMsg);
+      throw new Error("Console is not defined, cannot log msg: " + msg.getMessage());
     }
   }
 }

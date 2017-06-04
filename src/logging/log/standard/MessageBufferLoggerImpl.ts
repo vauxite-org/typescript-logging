@@ -30,6 +30,14 @@ export class MessageBufferLoggerImpl extends AbstractLogger {
   }
 
   protected doLog(message: LogMessage): void {
-    this.messages.push(this.createDefaultLogMessage(message));
+    const messageFormatter = this._getMessageFormatter();
+    let fullMsg: string;
+    if (messageFormatter === null) {
+      fullMsg = this.createDefaultLogMessage(message);
+    }
+    else {
+      fullMsg = messageFormatter(message);
+    }
+    this.messages.push(fullMsg);
   }
 }
