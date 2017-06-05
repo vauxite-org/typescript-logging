@@ -5,6 +5,7 @@ import {
 import {MessageBufferLoggerImpl} from "../src/logging/log/standard/MessageBufferLoggerImpl";
 import {LogLevel, LogFormat, LoggerType} from "../src/logging/log/LoggerOptions";
 import {AbstractLogger, LogMessage} from "../src/logging/log/standard/AbstractLogger";
+import {LoggerFactory} from "../src/logging/log/standard/LoggerFactory";
 
 /**
  * Custom logger for testing, only logs the last message.
@@ -132,6 +133,41 @@ describe("Loggers", () => {
       console.log(logger.toString());
     });
 
-  })
+  });
 
+  describe("LogData", () => {
+    const data = {key: "data"};
+    const msg = "Message";
+    let loggerFactory: LoggerFactory;
+    let logger: MessageBufferLoggerImpl;
+
+    beforeEach(() => {
+      loggerFactory = LFService.createLoggerFactory(new LoggerFactoryOptions().addLogGroupRule(new LogGroupRule(new RegExp(".+"), LogLevel.Info, new LogFormat(), LoggerType.MessageBuffer)));
+      logger = <MessageBufferLoggerImpl>loggerFactory.getLogger("ABC");
+    });
+
+    it("Can handle LogData with custom ds", () => {
+      logger.info({msg, data, ds: (d: any) => "hello " + d.key});
+
+      let messages: string[] = logger.getMessages();
+      expect(messages.length).toEqual(1);
+      expect(messages[0]).toContain(msg + " hello " + data.key);
+    });
+
+    it("Can handle LogData without custom ds", () => {
+      logger.info({msg, data});
+
+      let messages: string[] = logger.getMessages();
+      expect(messages.length).toEqual(1);
+      expect(messages[0]).toContain(msg + " " + JSON.stringify(data));
+    });
+
+    it("Can handle LogData without custom ds and only message", () => {
+      logger.info({msg});
+
+      let messages: string[] = logger.getMessages();
+      expect(messages.length).toEqual(1);
+      expect(messages[0]).toContain(msg);
+    });
+  });
 });
