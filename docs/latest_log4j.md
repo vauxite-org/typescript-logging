@@ -1,13 +1,32 @@
 # Documentation log4j style
 
-This page provides an overview of the log4j way of logging and its api. Please note that full API documentation can be found
+This page provides an overview of the log4j style of logging and its api. Please note that full API documentation can be found
 in the docs bundle.
 
 **Note**: _This api is not yet supported by the browser extension, it will be in a future release, please use categorized logging for that instead (see main page).
 
+## Formatting message
+
+If you do not need a custom logger but need a custom message for the other logger types (non-custom),
+you can specify a custom formatterLogMessage lambda instead. This allows you to change the log message without the need to implement a custom logger.
+
+The following code gives an example on how to do this (imports have been left out):
+~~~
+const options = new LoggerFactoryOptions();
+const rule = new LogGroupRule(new RegExp(".+"), LogLevel.Info);
+// Message only
+rule.formatterLogMessage = (message) => message.message;
+options.addLogGroupRule(rule);
+
+const factory = LFService.createNamedLoggerFactory("world", options);
+// This logger will use the custom formatted message now
+const logger = factory.getLogger("MyLogger");
+~~~
+The logger from the example above will now use the given custom formatterLogMessage, and will only log the message without any additional information such as time.
+
 ## Examples
 
-Below follow a few examples on how to use the log4j way of logging.
+Below follow a few examples on how to use the log4j style of logging.
 
 **Importing**
 ~~~
@@ -82,7 +101,6 @@ All classes can be imported from "typescript-logging".
   const loggerFactory = LFService.createLoggerFactory(loggerOptions);
   const logger = loggerFactory.getLogger("SomeName");  // This will return your logger now.
 ~~~
-
 
 ## API
 
@@ -246,7 +264,7 @@ This is an enumeration with the following values:
 
 ## Browser
 
-To use in the browser with javascript directly, download the (minified) library from [here](https://github.com/mreuvers/typescript-logging/tree/master/downloads/bundle/0.1.3).
+To use in the browser with javascript directly, download the (minified) library from [here](https://github.com/mreuvers/typescript-logging/tree/master/downloads/bundle/latest).
 The library is exposed by global variable TSL. See the example below.
 
 ~~~~

@@ -7,6 +7,14 @@ import {CategoryDelegateLoggerImpl} from "../src/logging/log/category/CategoryDe
 import {LoggerType, DateFormatEnum, LogLevel, CategoryLogFormat, DateFormat} from "../src/logging/log/LoggerOptions";
 import {AbstractCategoryLogger, CategoryLogMessage} from "../src/logging/log/category/AbstractCategoryLogger";
 import {LogData} from "../src/logging/log/LogData";
+import {CategoryMessageBufferLoggerImpl} from "../src/logging/log/category/CategoryMessageBufferImpl";
+
+const getBufferedMessages = (logger: CategoryLogger): string[] => {
+  expect(logger instanceof CategoryDelegateLoggerImpl).toBeTruthy();
+  const actualLogger = (<CategoryDelegateLoggerImpl> logger).delegate;
+  expect(actualLogger instanceof CategoryMessageBufferLoggerImpl).toBeTruthy();
+  return (<CategoryMessageBufferLoggerImpl> actualLogger).getMessages();
+};
 
 describe("Categories", () => {
 
@@ -43,10 +51,10 @@ describe("Categories", () => {
 
 describe("CategoryServiceFactory", () => {
 
-  let root1: Category | null;
-  let  child1: Category | null;
-  let child11: Category | null;
-  let child12: Category | null;
+  let root1: Category | null = null;
+  let child1: Category | null = null;
+  let child11: Category | null = null;
+  let child12: Category | null = null;
   let logger: CategoryLogger | null;
 
   beforeEach(() => {
@@ -187,20 +195,6 @@ describe("CategoryServiceFactory", () => {
     checkChangedConfig(anotherChild, CategoryServiceFactory.getRuntimeSettings().getCategorySettings(anotherChild));
   });
 
-  class CustomLogger extends AbstractCategoryLogger {
-
-    private messages: Array<string | LogData> = [];
-
-    constructor(rootCategory: Category, runtimeSettings: RuntimeSettings, messages: Array<string | LogData> ) {
-      super(rootCategory, runtimeSettings);
-      this.messages = messages;
-    }
-
-    protected doLog(msg: CategoryLogMessage): void {
-      this.messages.push(msg.getMessage());
-    }
-  }
-
   it("Can use a custom logger", () => {
     checkDefaultConfig(root1, CategoryServiceFactory.getRuntimeSettings().getCategorySettings(root1));
 
@@ -215,4 +209,86 @@ describe("CategoryServiceFactory", () => {
     rootLogger.info("Second Message");
     expect(messages).toEqual(["First Message", "Second Message"]);
   });
+
+  it("Can use a custom message formatter", () => {
+    checkDefaultConfig(root1, CategoryServiceFactory.getRuntimeSettings().getCategorySettings(root1));
+
+    const configChanged = new CategoryDefaultConfiguration(LogLevel.Info, LoggerType.MessageBuffer);
+    configChanged.formatterLogMessage = (msg: CategoryLogMessage): string => {
+      // Just shorten the message, will only have literal text.
+      const message = msg.getMessage();
+      return typeof(message) === "string" ? message : "";
+    };
+    CategoryServiceFactory.setDefaultConfiguration(configChanged, true);
+    const rootLogger = CategoryServiceFactory.getLogger(root1);
+    rootLogger.info("Hello root1!");
+    rootLogger.info("Hello child1!", child1);
+
+    expect(getBufferedMessages(rootLogger)).toEqual(["Hello root1!", "Hello child1!"]);
+  });
+
+  it("Cannot set custom message formatter when custom logger is used", () => {
+    checkDefaultConfig(root1, CategoryServiceFactory.getRuntimeSettings().getCategorySettings(root1));
+
+    const messages: string[] = [];
+    const configChanged = new CategoryDefaultConfiguration(
+      LogLevel.Info, LoggerType.Custom, new CategoryLogFormat(),
+      (rootCategory: Category, runtimeSettings: RuntimeSettings) => new CustomLogger(rootCategory, runtimeSettings, messages)
+    );
+    const formatterLogMessage = (msg: CategoryLogMessage): string => {
+      // Just shorten the message, will only have literal text.
+      const message = msg.getMessage();
+      return typeof(message) === "string" ? message : "";
+    };
+
+    expect(() => configChanged.formatterLogMessage = formatterLogMessage).toThrow("You cannot specify a formatter for log messages if your loggerType is Custom");
+    CategoryServiceFactory.setDefaultConfiguration(configChanged, true);
+  });
+
+  it("Can set different custom formatter on category than default", () => {
+    checkDefaultConfig(root1, CategoryServiceFactory.getRuntimeSettings().getCategorySettings(root1));
+
+    const defaultConfig = new CategoryDefaultConfiguration(LogLevel.Info, LoggerType.MessageBuffer);
+    defaultConfig.formatterLogMessage = (msg: CategoryLogMessage): string => {
+      // Just shorten the message, will only have literal text.
+      const message = msg.getMessage();
+      return typeof(message) === "string" ? message : "";
+    };
+
+    const formatterRoot2 = (msg: CategoryLogMessage): string => {
+      return msg.getMessage() + "_postFix";
+    };
+
+    const configRoot2 = new CategoryDefaultConfiguration(LogLevel.Debug, LoggerType.MessageBuffer);
+    configRoot2.formatterLogMessage = formatterRoot2;
+
+    const root2 = new Category("root2");
+
+    CategoryServiceFactory.setDefaultConfiguration(defaultConfig, true);
+    CategoryServiceFactory.setConfigurationCategory(configRoot2, root2, true);
+
+    const rootLogger = CategoryServiceFactory.getLogger(root1);
+    rootLogger.info("Hello root1!");
+    rootLogger.info("Hello child1!", child1);
+    const rootLogger2 = CategoryServiceFactory.getLogger(root2);
+    rootLogger2.debug("Hello root2!");
+
+    expect(getBufferedMessages(rootLogger)).toEqual(["Hello root1!", "Hello child1!"]);
+    expect(getBufferedMessages(rootLogger2)).toEqual(["Hello root2!_postFix"]);
+  });
+
+  class CustomLogger extends AbstractCategoryLogger {
+
+    private messages: Array<string | LogData> = [];
+
+    constructor(rootCategory: Category, runtimeSettings: RuntimeSettings, messages: Array<string | LogData> ) {
+      super(rootCategory, runtimeSettings);
+      this.messages = messages;
+    }
+
+    protected doLog(msg: CategoryLogMessage): void {
+      this.messages.push(msg.getMessage());
+    }
+  }
+
 });

@@ -259,6 +259,15 @@ export abstract class AbstractLogger implements Logger {
     return MessageFormatUtils.renderDefaultLog4jMessage(msg, true);
   }
 
+  /**
+   * Return optional message formatter. All LoggerTypes (except custom) will see if
+   * they have this, and if so use it to log.
+   * @returns {((message:LogMessage)=>string)|null}
+   */
+  protected _getMessageFormatter(): ((message: LogMessage) => string) | null {
+    return this._logGroupRuntimeSettings.formatterLogMessage;
+  }
+
   protected abstract doLog(msg: LogMessage): void;
 
   private _log(level: LogLevel, msg: string | LogData, error: Error | null = null): void {

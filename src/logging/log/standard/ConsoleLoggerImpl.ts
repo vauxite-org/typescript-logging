@@ -15,7 +15,16 @@ export class ConsoleLoggerImpl extends AbstractLogger {
     if (console !== undefined) {
       let logged = false;
       const logLevel = message.level;
-      const msg = this.createDefaultLogMessage(message);
+
+      const messageFormatter = this._getMessageFormatter();
+      let msg: string;
+      if (messageFormatter === null) {
+        msg = this.createDefaultLogMessage(message);
+      }
+      else {
+        msg = messageFormatter(message);
+      }
+
       /* tslint:disable:no-console */
       switch (logLevel) {
         case LogLevel.Trace:

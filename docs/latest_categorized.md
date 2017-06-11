@@ -99,6 +99,26 @@ Output (we assume we called the methods createProduct("Beer") and processMoney()
 2016-12-22 11:14:26,276 INFO [financial] Log to the new category
 ~~~
 
+## Formatting message
+
+If you do not need a custom logger but need a custom message for the other logger types (non-custom),
+you can specify a custom formatterLogMessage lambda instead. This allows you to change the log message without the need to implement a custom logger.
+
+The following code gives an example on how to do this (imports have been left out):
+~~~
+const defaultConfig = new CategoryDefaultConfiguration(LogLevel.Info, LoggerType.Console);
+defaultConfig.formatterLogMessage = (msg: CategoryLogMessage): string => {
+  // This example just shortens the message (will have no time info etc.)
+  return msg.getMessage();
+};
+CategoryServiceFactory.setDefaultConfiguration(defaultConfig);
+export const catRoot = new Category("service");
+
+// The logger will now use the given formatter from above.
+export const log: CategoryLogger = CategoryServiceFactory.getLogger(catRoot);
+~~~
+The logger from the example above will now use the given formatter, and will only log the message without any additional information such as time.
+
 ## Custom logger
 
 By default logging will go the console. In some cases you may want to use a custom logger which either logs differently or logs elsewhere.

@@ -20,7 +20,14 @@ export class CategoryMessageBufferLoggerImpl extends AbstractCategoryLogger {
   }
 
   protected doLog(msg: CategoryLogMessage): void {
-    const fullMsg = this.createDefaultLogMessage(msg);
+    const messageFormatter = this._getMessageFormatter();
+    let fullMsg: string;
+    if (messageFormatter === null) {
+      fullMsg = this.createDefaultLogMessage(msg);
+    }
+    else {
+      fullMsg = messageFormatter(msg);
+    }
     this.messages.push(fullMsg);
   }
 }

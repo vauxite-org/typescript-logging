@@ -2,6 +2,8 @@
 
 This page describes the relevant changes per version.
 
+* 0.4.0
+  * Added new feature to to both log4j and category style, to specify a formatterLogMessage function instead of custom logger, which allows you to override the formatting of the log message without having to create a custom logger. See documentation for details.
 * 0.3.1
   * Fixed: [Remove "Dropping unknown message"](https://github.com/mreuvers/typescript-logging/issues/8)
 * 0.3.0 (current release)
