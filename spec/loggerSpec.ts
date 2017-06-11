@@ -122,7 +122,7 @@ describe("Loggers", () => {
     logger.info("Fifth", new Error("fail"));
 
     const msgs = logger.getMessages();
-    waitsFor(() => msgs.length == 5, "Waited for 5 messages", 3000);
+    waitsFor(() => msgs.length === 5, "Waited for 5 messages", 3000);
     runs(() => {
       expect(msgs[0]).toContain("First");
       expect(msgs[1]).toContain("Second");
@@ -143,7 +143,7 @@ describe("Loggers", () => {
 
     beforeEach(() => {
       loggerFactory = LFService.createLoggerFactory(new LoggerFactoryOptions().addLogGroupRule(new LogGroupRule(new RegExp(".+"), LogLevel.Info, new LogFormat(), LoggerType.MessageBuffer)));
-      logger = <MessageBufferLoggerImpl>loggerFactory.getLogger("ABC");
+      logger = <MessageBufferLoggerImpl> loggerFactory.getLogger("ABC");
     });
 
     it("Can handle LogData with custom ds", () => {
@@ -151,7 +151,7 @@ describe("Loggers", () => {
 
       let messages: string[] = logger.getMessages();
       expect(messages.length).toEqual(1);
-      expect(messages[0]).toContain(msg + " hello " + data.key);
+      expect(messages[0]).toContain(msg + " [data]: hello " + data.key, "Failed message was: " + messages[0]);
     });
 
     it("Can handle LogData without custom ds", () => {
@@ -159,7 +159,7 @@ describe("Loggers", () => {
 
       let messages: string[] = logger.getMessages();
       expect(messages.length).toEqual(1);
-      expect(messages[0]).toContain(msg + " " + JSON.stringify(data));
+      expect(messages[0]).toContain(msg + " [data]: " + JSON.stringify(data), "Failed message was: " + messages[0]);
     });
 
     it("Can handle LogData without custom ds and only message", () => {

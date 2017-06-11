@@ -16,7 +16,7 @@ export interface LogMessage {
   readonly loggerName: string;
 
   /**
-   * Original, unformatted message.
+   * Original, unformatted message or LogData.
    */
   readonly message: string | LogData;
 
@@ -46,9 +46,10 @@ export interface LogMessage {
    */
   readonly level: LogLevel;
 
-  hasLogData(): boolean;
-
-  getLogData(): any;
+  /**
+   * Returns true if message represents LogData (false for a string message).
+   */
+  isMessageLogData(): boolean;
 }
 
 interface LogMessageInternal extends LogMessage {
@@ -86,15 +87,11 @@ class LogMessageInternalImpl implements LogMessageInternal {
     return this._loggerName;
   }
 
-  get message(): string {
-    if (!this.hasLogData()) {
-      return <string> this._message;
-    }
-
-    return (<LogData> this._message).msg;
+  get message(): string | LogData {
+    return this._message;
   }
 
-  set message(value: string) {
+  set message(value: string | LogData) {
     this._message = value;
   }
 
@@ -138,12 +135,8 @@ class LogMessageInternalImpl implements LogMessageInternal {
     this._level = value;
   }
 
-  public hasLogData(): boolean {
+  public isMessageLogData(): boolean {
     return typeof(this._message) !== "string";
-  }
-
-  public getLogData(): LogData {
-    return <LogData> this._message;
   }
 
   get ready(): boolean {
@@ -263,15 +256,7 @@ export abstract class AbstractLogger implements Logger {
   }
 
   protected createDefaultLogMessage(msg: LogMessage): string {
-    let dataString: string = "";
-    if (msg.hasLogData() && msg.getLogData().data != null) {
-      if (msg.getLogData().ds != null) {
-        dataString = " " + msg.getLogData().ds(msg.getLogData().data);
-      } else {
-        dataString = " " + JSON.stringify(msg.getLogData().data);
-      }
-    }
-    return MessageFormatUtils.renderDefaultLog4jMessage(msg, true) + dataString;
+    return MessageFormatUtils.renderDefaultLog4jMessage(msg, true);
   }
 
   protected abstract doLog(msg: LogMessage): void;
