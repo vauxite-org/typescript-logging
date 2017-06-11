@@ -114,8 +114,26 @@ export class MessageFormatUtils {
       result += "]";
     }
 
-    result += " " + msg.getMessage();
+    // Get the normal string message first
+    let actualStringMsg: string = "";
+    let dataString: string = "";
 
+    const messageOrLogData = msg.getMessage();
+
+    if (typeof messageOrLogData === "string") {
+      actualStringMsg = messageOrLogData;
+    }
+    else {
+      const logData = messageOrLogData;
+      actualStringMsg = logData.msg;
+
+      // We do have data?
+      if (logData.data) {
+        dataString = " [data]: " + (logData.ds ? logData.ds(logData.data) : JSON.stringify(logData.data));
+      }
+    }
+
+    result += " " + actualStringMsg + "" + dataString;
     if (addStack && msg.getErrorAsStack() !== null) {
       result += "\n" + msg.getErrorAsStack();
     }
@@ -141,7 +159,24 @@ export class MessageFormatUtils {
       result += "[" + msg.loggerName + "]";
     }
 
-    result += " " + msg.message;
+    // Get the normal string message first
+    let actualStringMsg: string = "";
+    let dataString: string = "";
+
+    if (typeof msg.message === "string") {
+      actualStringMsg = msg.message;
+    }
+    else {
+      const logData = msg.message;
+      actualStringMsg = logData.msg;
+
+      // We do have data?
+      if (logData.data) {
+        dataString = " [data]: " + (logData.ds ? logData.ds(logData.data) : JSON.stringify(logData.data));
+      }
+    }
+
+    result += " " + actualStringMsg + "" + dataString;
     if (addStack && msg.errorAsStack !== null) {
       result += "\n" + msg.errorAsStack;
     }

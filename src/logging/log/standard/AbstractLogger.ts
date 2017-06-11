@@ -3,6 +3,7 @@ import {LogGroupRule, LogGroupRuntimeSettings} from "./LoggerFactoryService";
 import {Logger} from "./Logger";
 import {LinkedList} from "../../utils/DataStructures";
 import {MessageFormatUtils} from "../../utils/MessageUtils";
+import {LogData} from "../LogData";
 
 /**
  * Log message, providing all data for a single message.
@@ -15,9 +16,9 @@ export interface LogMessage {
   readonly loggerName: string;
 
   /**
-   * Original, unformatted message.
+   * Original, unformatted message or LogData.
    */
-  readonly message: string;
+  readonly message: string | LogData;
 
   /**
    * Returns the resolved stack (based on error).
@@ -45,6 +46,10 @@ export interface LogMessage {
    */
   readonly level: LogLevel;
 
+  /**
+   * Returns true if message represents LogData (false for a string message).
+   */
+  isMessageLogData(): boolean;
 }
 
 interface LogMessageInternal extends LogMessage {
@@ -59,7 +64,7 @@ interface LogMessageInternal extends LogMessage {
 class LogMessageInternalImpl implements LogMessageInternal {
 
   private _loggerName: string;
-  private _message: string;
+  private _message: string | LogData;
   private _errorAsStack: string | null = null;
   private _error: Error | null = null;
   private _logGroupRule: LogGroupRule;
@@ -67,7 +72,7 @@ class LogMessageInternalImpl implements LogMessageInternal {
   private _level: LogLevel;
   private _ready: boolean;
 
-  constructor(loggerName: string, message: string, errorAsStack: string | null, error: Error | null, logGroupRule: LogGroupRule, date: Date, level: LogLevel, ready: boolean) {
+  constructor(loggerName: string, message: string | LogData, errorAsStack: string | null, error: Error | null, logGroupRule: LogGroupRule, date: Date, level: LogLevel, ready: boolean) {
     this._loggerName = loggerName;
     this._message = message;
     this._errorAsStack = errorAsStack;
@@ -82,11 +87,11 @@ class LogMessageInternalImpl implements LogMessageInternal {
     return this._loggerName;
   }
 
-  get message(): string {
+  get message(): string | LogData {
     return this._message;
   }
 
-  set message(value: string) {
+  set message(value: string | LogData) {
     this._message = value;
   }
 
@@ -130,6 +135,10 @@ class LogMessageInternalImpl implements LogMessageInternal {
     this._level = value;
   }
 
+  public isMessageLogData(): boolean {
+    return typeof(this._message) !== "string";
+  }
+
   get ready(): boolean {
     return this._ready;
   }
@@ -161,51 +170,51 @@ export abstract class AbstractLogger implements Logger {
     return this._name;
   }
 
-  public trace(msg: string, error: Error | null = null): void {
+  public trace(msg: string | LogData, error: Error | null = null): void {
     this._log(LogLevel.Trace, msg, error);
   }
 
-  public debug(msg: string, error: Error | null = null): void {
+  public debug(msg: string | LogData, error: Error | null = null): void {
     this._log(LogLevel.Debug, msg, error);
   }
 
-  public info(msg: string, error: Error | null = null): void {
+  public info(msg: string | LogData, error: Error | null = null): void {
     this._log(LogLevel.Info, msg, error);
   }
 
-  public warn(msg: string, error: Error | null = null): void {
+  public warn(msg: string | LogData, error: Error | null = null): void {
     this._log(LogLevel.Warn, msg, error);
   }
 
-  public error(msg: string, error: Error | null = null): void {
+  public error(msg: string | LogData, error: Error | null = null): void {
     this._log(LogLevel.Error, msg, error);
   }
 
-  public fatal(msg: string, error: Error | null = null): void {
+  public fatal(msg: string | LogData, error: Error | null = null): void {
     this._log(LogLevel.Fatal, msg, error);
   }
 
-  public tracec(msg: () => string, error?: () => Error | null): void {
+  public tracec(msg: () => string | LogData, error?: () => Error | null): void {
     this._logc(LogLevel.Trace, msg, error);
   }
 
-  public debugc(msg: () => string, error?: () => Error | null): void {
+  public debugc(msg: () => string | LogData, error?: () => Error | null): void {
     this._logc(LogLevel.Debug, msg, error);
   }
 
-  public infoc(msg: () => string, error?: () => Error | null): void {
+  public infoc(msg: () => string | LogData, error?: () => Error | null): void {
     this._logc(LogLevel.Info, msg, error);
   }
 
-  public warnc(msg: () => string, error?: () => Error | null): void {
+  public warnc(msg: () => string | LogData, error?: () => Error | null): void {
     this._logc(LogLevel.Warn, msg, error);
   }
 
-  public errorc(msg: () => string, error?: () => Error | null): void {
+  public errorc(msg: () => string | LogData, error?: () => Error | null): void {
     this._logc(LogLevel.Error, msg, error);
   }
 
-  public fatalc(msg: () => string, error?: () => Error | null): void {
+  public fatalc(msg: () => string | LogData, error?: () => Error | null): void {
     this._logc(LogLevel.Fatal, msg, error);
   }
 
@@ -252,21 +261,21 @@ export abstract class AbstractLogger implements Logger {
 
   protected abstract doLog(msg: LogMessage): void;
 
-  private _log(level: LogLevel, msg: string, error: Error | null = null): void {
+  private _log(level: LogLevel, msg: string | LogData, error: Error | null = null): void {
     if (this._open && this._logGroupRuntimeSettings.level <= level) {
       this._allMessages.addTail(this.createMessage(level, msg, new Date(), error));
       this.processMessages();
     }
   }
 
-  private _logc(level: LogLevel, msg: () => string, error?: () => Error | null): void {
+  private _logc(level: LogLevel, msg: () => string | LogData, error?: () => Error | null): void {
     if (this._open && this._logGroupRuntimeSettings.level <= level) {
       this._allMessages.addTail(this.createMessage(level, msg(), new Date(), error !== undefined && error !== null ? error() : null));
       this.processMessages();
     }
   }
 
-  private createMessage(level: LogLevel, msg: string, date: Date, error: Error | null = null): LogMessageInternal {
+  private createMessage(level: LogLevel, msg: string | LogData, date: Date, error: Error | null = null): LogMessageInternal {
     if (error !== null) {
       const message = new LogMessageInternalImpl(this._name, msg, null, error, this._logGroupRuntimeSettings.logGroupRule, date, level, false);
       MessageFormatUtils.renderError(error).then((stack: string) => {

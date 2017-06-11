@@ -1,4 +1,5 @@
 import {LogLevel} from "../LoggerOptions";
+import {LogData} from "../LogData";
 
 /**
  * The Logger interface used for logging.
@@ -35,29 +36,29 @@ export interface Logger {
    */
   readonly name: string;
 
-  trace(msg: string, error?: Error | null): void;
+  trace(msg: string | LogData, error?: Error | null): void;
 
-  debug(msg: string, error?: Error | null): void;
+  debug(msg: string | LogData, error?: Error | null): void;
 
-  info(msg: string, error?: Error | null): void;
+  info(msg: string | LogData, error?: Error | null): void;
 
-  warn(msg: string, error?: Error | null): void;
+  warn(msg: string | LogData, error?: Error | null): void;
 
-  error(msg: string, error?: Error | null): void;
+  error(msg: string | LogData, error?: Error | null): void;
 
-  fatal(msg: string, error?: Error | null): void;
+  fatal(msg: string | LogData, error?: Error | null): void;
 
-  tracec(msg: () => string, error?: () => Error | null): void;
+  tracec(msg: () => string | LogData, error?: () => Error | null): void;
 
-  debugc(msg: () => string, error?: () => Error | null): void;
+  debugc(msg: () => string | LogData, error?: () => Error | null): void;
 
-  infoc(msg: () => string, error?: () => Error | null): void;
+  infoc(msg: () => string | LogData, error?: () => Error | null): void;
 
-  warnc(msg: () => string, error?: () => Error | null): void;
+  warnc(msg: () => string | LogData, error?: () => Error | null): void;
 
-  errorc(msg: () => string, error?: () => Error | null): void;
+  errorc(msg: () => string | LogData, error?: () => Error | null): void;
 
-  fatalc(msg: () => string, error?: () => Error | null): void;
+  fatalc(msg: () => string | LogData, error?: () => Error | null): void;
 
   isTraceEnabled(): boolean;
 

@@ -1,5 +1,6 @@
 import {LogLevel} from "../LoggerOptions";
 import {CategoryServiceImpl} from "./CategoryService";
+import {LogData} from "../LogData";
 
 /**
  * Category for use with categorized logging.
@@ -81,17 +82,17 @@ export class Category {
  */
 export interface CategoryLogger {
 
-  trace(msg: string, ...categories: Category[]): void;
+  trace(msg: string | LogData, ...categories: Category[]): void;
 
-  debug(msg: string, ...categories: Category[]): void;
+  debug(msg: string | LogData, ...categories: Category[]): void;
 
-  info(msg: string, ...categories: Category[]): void;
+  info(msg: string | LogData, ...categories: Category[]): void;
 
-  warn(msg: string, ...categories: Category[]): void;
+  warn(msg: string | LogData, ...categories: Category[]): void;
 
-  error(msg: string, error: Error | null, ...categories: Category[]): void;
+  error(msg: string | LogData, error: Error | null, ...categories: Category[]): void;
 
-  fatal(msg: string, error: Error | null, ...categories: Category[]): void;
+  fatal(msg: string | LogData, error: Error | null, ...categories: Category[]): void;
 
   /**
    * This is a special opinionated way to log, that an exception (Error)
@@ -102,21 +103,21 @@ export interface CategoryLogger {
    * @param error Error
    * @param categories Categories to log for
    */
-  resolved(msg: string, error: Error | null, ...categories: Category[]): void;
+  resolved(msg: string | LogData, error: Error | null, ...categories: Category[]): void;
 
-  log(level: LogLevel, msg: string, error: Error | null, ...categories: Category[]): void;
+  log(level: LogLevel, msg: string | LogData, error: Error | null, ...categories: Category[]): void;
 
-  tracec(msg: () => string, ...categories: Category[]): void;
+  tracec(msg: () => string | LogData, ...categories: Category[]): void;
 
-  debugc(msg: () => string, ...categories: Category[]): void;
+  debugc(msg: () => string | LogData, ...categories: Category[]): void;
 
-  infoc(msg: () => string, ...categories: Category[]): void;
+  infoc(msg: () => string | LogData, ...categories: Category[]): void;
 
-  warnc(msg: () => string, ...categories: Category[]): void;
+  warnc(msg: () => string | LogData, ...categories: Category[]): void;
 
-  errorc(msg: () => string, error: () => Error | null, ...categories: Category[]): void;
+  errorc(msg: () => string | LogData, error: () => Error | null, ...categories: Category[]): void;
 
-  fatalc(msg: () => string, error: () => Error | null, ...categories: Category[]): void;
+  fatalc(msg: () => string | LogData, error: () => Error | null, ...categories: Category[]): void;
 
   /**
    * This is a special opinionated way to log, that an exception (Error)
@@ -127,8 +128,8 @@ export interface CategoryLogger {
    * @param error Error as closure
    * @param categories Categories to log for
    */
-  resolvedc(msg: () => string, error: () => Error | null, ...categories: Category[]): void;
+  resolvedc(msg: () => string | LogData, error: () => Error | null, ...categories: Category[]): void;
 
-  logc(level: LogLevel, msg: () => string, error: () => Error | null, ...categories: Category[]): void;
+  logc(level: LogLevel, msg: () => string | LogData, error: () => Error | null, ...categories: Category[]): void;
 
 }

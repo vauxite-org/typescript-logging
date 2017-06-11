@@ -6,16 +6,16 @@ import {CategoryMessageBufferLoggerImpl} from "../src/logging/log/category/Categ
 
 const getMessagesAsString = (logger: CategoryLogger): string => {
   expect(logger instanceof CategoryDelegateLoggerImpl).toBeTruthy();
-  const actualLogger = (<CategoryDelegateLoggerImpl>logger).delegate;
+  const actualLogger = (<CategoryDelegateLoggerImpl> logger).delegate;
   expect(actualLogger instanceof CategoryMessageBufferLoggerImpl).toBeTruthy();
-  return (<CategoryMessageBufferLoggerImpl>actualLogger).toString();
+  return (<CategoryMessageBufferLoggerImpl> actualLogger).toString();
 };
 
 const getMessages = (logger: CategoryLogger): string[] => {
   expect(logger instanceof CategoryDelegateLoggerImpl).toBeTruthy();
-  const actualLogger = (<CategoryDelegateLoggerImpl>logger).delegate;
+  const actualLogger = (<CategoryDelegateLoggerImpl> logger).delegate;
   expect(actualLogger instanceof CategoryMessageBufferLoggerImpl).toBeTruthy();
-  return (<CategoryMessageBufferLoggerImpl>actualLogger).getMessages();
+  return (<CategoryMessageBufferLoggerImpl> actualLogger).getMessages();
 };
 
 describe("CategoryLogger...", () => {
@@ -98,5 +98,42 @@ describe("CategoryLogger...", () => {
     expect(messages.length).toEqual(1);
     expect(messages[0]).toContain("[root] Dance");
 
+  });
+
+  describe("LogData", () => {
+    const data = {key: "data"};
+    const msg = "Message";
+    let logger: CategoryLogger;
+
+    beforeEach(() => {
+      // Need to switch to messagebuffer for testing, by default or it will go to console.
+      CategoryServiceFactory.setDefaultConfiguration(new CategoryDefaultConfiguration(LogLevel.Trace, LoggerType.MessageBuffer), true);
+
+      logger = CategoryServiceFactory.getLogger(catRoot);
+    });
+
+    it("Can handle LogData with custom ds", () => {
+      logger.info({msg, data, ds: (d: any) => "hello " + d.key}, catRoot);
+
+      let messages: string[] = getMessages(logger);
+      expect(messages.length).toEqual(1);
+      expect(messages[0]).toContain(msg + " [data]: hello " + data.key, "Failed message was: " + messages[0]);
+    });
+
+    it("Can handle LogData without custom ds", () => {
+      logger.info({msg, data}, catRoot);
+
+      let messages: string[] = getMessages(logger);
+      expect(messages.length).toEqual(1);
+      expect(messages[0]).toContain(msg + " [data]: " + JSON.stringify(data));
+    });
+
+    it("Can handle LogData without custom ds and only message", () => {
+      logger.info({msg}, catRoot);
+
+      let messages: string[] = getMessages(logger);
+      expect(messages.length).toEqual(1);
+      expect(messages[0]).toContain(msg);
+    });
   });
 });
