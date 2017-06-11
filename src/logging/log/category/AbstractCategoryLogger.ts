@@ -10,11 +10,7 @@ import {LogData} from "../LogData";
  */
 export interface CategoryLogMessage {
 
-  getMessage(): string;
-
-  hasLogData(): boolean;
-
-  getLogData(): any;
+  getMessage(): string | LogData;
 
   /**
    * Returns the resolved stack (based on error).
@@ -58,12 +54,8 @@ class CategoryLogMessageImpl implements CategoryLogMessage {
     this._ready = ready;
   }
 
-  public getMessage(): string {
-    if (!this.hasLogData()) {
-      return <string> this._message;
-    }
-
-    return (<LogData> this._message).msg;
+  public getMessage(): string | LogData {
+    return this._message;
   }
 
   public getErrorAsStack(): string | null {
@@ -92,14 +84,6 @@ class CategoryLogMessageImpl implements CategoryLogMessage {
 
   public getLogFormat(): CategoryLogFormat {
     return this._logFormat;
-  }
-
-  public hasLogData(): boolean {
-    return typeof(this._message) !== "string";
-  }
-
-  public getLogData(): LogData {
-    return <LogData> this._message;
   }
 
   public isReady(): boolean {
@@ -218,15 +202,7 @@ export abstract class AbstractCategoryLogger implements CategoryLogger {
   protected abstract doLog(msg: CategoryLogMessage): void;
 
   protected createDefaultLogMessage(msg: CategoryLogMessage): string {
-    let dataString: string = "";
-    if (msg.hasLogData() && msg.getLogData().data != null) {
-      if (msg.getLogData().ds != null) {
-        dataString = " " + msg.getLogData().ds(msg.getLogData().data);
-      } else {
-        dataString = " " + JSON.stringify(msg.getLogData().data);
-      }
-    }
-    return MessageFormatUtils.renderDefaultMessage(msg, true) + dataString;
+    return MessageFormatUtils.renderDefaultMessage(msg, true);
   }
 
   private _log(level: LogLevel, msg: string | LogData, error: Error | null = null, resolved: boolean = false, ...categories: Category[]): void {

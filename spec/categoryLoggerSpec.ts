@@ -6,16 +6,16 @@ import {CategoryMessageBufferLoggerImpl} from "../src/logging/log/category/Categ
 
 const getMessagesAsString = (logger: CategoryLogger): string => {
   expect(logger instanceof CategoryDelegateLoggerImpl).toBeTruthy();
-  const actualLogger = (<CategoryDelegateLoggerImpl>logger).delegate;
+  const actualLogger = (<CategoryDelegateLoggerImpl> logger).delegate;
   expect(actualLogger instanceof CategoryMessageBufferLoggerImpl).toBeTruthy();
-  return (<CategoryMessageBufferLoggerImpl>actualLogger).toString();
+  return (<CategoryMessageBufferLoggerImpl> actualLogger).toString();
 };
 
 const getMessages = (logger: CategoryLogger): string[] => {
   expect(logger instanceof CategoryDelegateLoggerImpl).toBeTruthy();
-  const actualLogger = (<CategoryDelegateLoggerImpl>logger).delegate;
+  const actualLogger = (<CategoryDelegateLoggerImpl> logger).delegate;
   expect(actualLogger instanceof CategoryMessageBufferLoggerImpl).toBeTruthy();
-  return (<CategoryMessageBufferLoggerImpl>actualLogger).getMessages();
+  return (<CategoryMessageBufferLoggerImpl> actualLogger).getMessages();
 };
 
 describe("CategoryLogger...", () => {
@@ -117,7 +117,7 @@ describe("CategoryLogger...", () => {
 
       let messages: string[] = getMessages(logger);
       expect(messages.length).toEqual(1);
-      expect(messages[0]).toContain(msg + " hello " + data.key);
+      expect(messages[0]).toContain(msg + " [data]: hello " + data.key, "Failed message was: " + messages[0]);
     });
 
     it("Can handle LogData without custom ds", () => {
@@ -125,7 +125,7 @@ describe("CategoryLogger...", () => {
 
       let messages: string[] = getMessages(logger);
       expect(messages.length).toEqual(1);
-      expect(messages[0]).toContain(msg + " " + JSON.stringify(data));
+      expect(messages[0]).toContain(msg + " [data]: " + JSON.stringify(data));
     });
 
     it("Can handle LogData without custom ds and only message", () => {

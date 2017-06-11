@@ -6,7 +6,7 @@ import {
 import {CategoryDelegateLoggerImpl} from "../src/logging/log/category/CategoryDelegateLoggerImpl";
 import {LoggerType, DateFormatEnum, LogLevel, CategoryLogFormat, DateFormat} from "../src/logging/log/LoggerOptions";
 import {AbstractCategoryLogger, CategoryLogMessage} from "../src/logging/log/category/AbstractCategoryLogger";
-
+import {LogData} from "../src/logging/log/LogData";
 
 describe("Categories", () => {
 
@@ -17,26 +17,25 @@ describe("Categories", () => {
     let child1 = new Category("root1_child1", root1);
     let root2Child1 = new Category("root2_child2", root2);
 
-
     let child11 = new Category("root1_child1_child11", child1);
     let child12 = new Category("root1_child1_child12", child1);
 
     expect(root1.parent).toBeNull();
-    expect(child1.parent == root1).toBeTruthy();
+    expect(child1.parent === root1).toBeTruthy();
     expect(root1.children.length).toEqual(1);
     expect(child1.children.length).toEqual(2);
-    expect(child11.parent == child1).toBeTruthy();
-    expect(child12.parent == child1).toBeTruthy();
+    expect(child11.parent === child1).toBeTruthy();
+    expect(child12.parent === child1).toBeTruthy();
     expect(child11.children.length).toEqual(0);
     expect(child12.children.length).toEqual(0);
 
     expect(root2.parent).toBeNull();
     expect(root2.children.length).toEqual(1);
-    expect(root2Child1.parent == root2).toBeTruthy();
-    expect(root2Child1.parent == root1).toBeFalsy();
+    expect(root2Child1.parent === root2).toBeTruthy();
+    expect(root2Child1.parent === root1).toBeFalsy();
   });
 
-  it("Fails when forbidden character is used in category",() => {
+  it("Fails when forbidden character is used in category", () => {
     expect(() => new Category("abc")).not.toThrow();
     expect(() => new Category("a#")).toThrow();
   });
@@ -44,7 +43,10 @@ describe("Categories", () => {
 
 describe("CategoryServiceFactory", () => {
 
-  let root1: Category | null, child1: Category | null, child11: Category | null, child12: Category | null;
+  let root1: Category | null;
+  let  child1: Category | null;
+  let child11: Category | null;
+  let child12: Category | null;
   let logger: CategoryLogger | null;
 
   beforeEach(() => {
@@ -119,7 +121,7 @@ describe("CategoryServiceFactory", () => {
     expect(settings.loggerType === LoggerType.Console).toBeTruthy();
     expect(settings.logFormat.showCategoryName).toBeTruthy();
     expect(settings.logFormat.showTimeStamp).toBeTruthy();
-    expect(settings.logFormat.dateFormat.dateSeparator).toEqual('-');
+    expect(settings.logFormat.dateFormat.dateSeparator).toEqual("-");
     expect(settings.logFormat.dateFormat.formatEnum === DateFormatEnum.Default).toBeTruthy();
     expect(settings.logLevel === LogLevel.Error).toBeTruthy();
     expect(settings.callBackLogger).toBeNull();
@@ -155,9 +157,8 @@ describe("CategoryServiceFactory", () => {
       expect(settings.callBackLogger).toBeNull();
     };
 
-
     const configChanged = new CategoryDefaultConfiguration(
-      LogLevel.Info, LoggerType.MessageBuffer, new CategoryLogFormat(new DateFormat(DateFormatEnum.YearDayMonthWithFullTime, '/'), false, false)
+      LogLevel.Info, LoggerType.MessageBuffer, new CategoryLogFormat(new DateFormat(DateFormatEnum.YearDayMonthWithFullTime, "/"), false, false)
     );
     CategoryServiceFactory.setDefaultConfiguration(configChanged, true);
 
@@ -188,9 +189,9 @@ describe("CategoryServiceFactory", () => {
 
   class CustomLogger extends AbstractCategoryLogger {
 
-    private messages: string[] = [];
+    private messages: Array<string | LogData> = [];
 
-    constructor(rootCategory: Category, runtimeSettings: RuntimeSettings, messages: string[]) {
+    constructor(rootCategory: Category, runtimeSettings: RuntimeSettings, messages: Array<string | LogData> ) {
       super(rootCategory, runtimeSettings);
       this.messages = messages;
     }

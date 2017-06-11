@@ -36,7 +36,7 @@ describe("Loggers", () => {
 
     expect(tmpLogger instanceof MessageBufferLoggerImpl).toBeTruthy();
 
-    const logger = <MessageBufferLoggerImpl>tmpLogger;
+    const logger = <MessageBufferLoggerImpl> tmpLogger;
     let messages: string[] = logger.getMessages();
     expect(messages.length).toEqual(0);
 
@@ -54,7 +54,7 @@ describe("Loggers", () => {
 
     // Error stack is constructed async, hence we do this async in the test.
     logger.error("Serious trouble!", new Error("Oops!"));
-    waitsFor(() => messages.length == 3, "Expected 3 messages in log", 3000);
+    waitsFor(() => messages.length === 3, "Expected 3 messages in log", 3000);
     runs(() => {
       expect(messages[2]).toContain("Serious trouble!");
       expect(messages[2]).toContain("ERROR");
@@ -74,14 +74,14 @@ describe("Loggers", () => {
 
     logger.info("Hello world");
 
-    const castLogger = <CustomLoggerImpl>logger;
+    const castLogger = <CustomLoggerImpl> logger;
 
     expect(castLogger.message).toContain("Hello world");
 
     const sameLogger = loggerFactory.getLogger("Hello.Special.Bla");
     expect(castLogger === sameLogger).toBeTruthy();
 
-    const otherLogger = <CustomLoggerImpl>loggerFactory.getLogger("Hello.Other");
+    const otherLogger = <CustomLoggerImpl> loggerFactory.getLogger("Hello.Other");
     expect(sameLogger === otherLogger).toBeFalsy();
 
     otherLogger.info("Test");
@@ -93,7 +93,7 @@ describe("Loggers", () => {
 
   it("Can use closures for logging", () => {
     const loggerFactory = LFService.createLoggerFactory(new LoggerFactoryOptions().addLogGroupRule(new LogGroupRule(new RegExp(".+"), LogLevel.Info, new LogFormat(), LoggerType.MessageBuffer)));
-    const logger = <MessageBufferLoggerImpl>loggerFactory.getLogger("ABC");
+    const logger = <MessageBufferLoggerImpl> loggerFactory.getLogger("ABC");
 
     logger.infoc(() => "Hello");
 
@@ -105,7 +105,7 @@ describe("Loggers", () => {
 
     // Should log
     logger.errorc(() => "YesMe!", () => new Error("Failed"));
-    waitsFor(() => logger.getMessages().length == 2, "Should have 2 messages by now", 3000);
+    waitsFor(() => logger.getMessages().length === 2, "Should have 2 messages by now", 3000);
     runs(() => {
       expect(logger.toString()).toContain("YesMe!");
       expect(logger.toString()).toContain("Failed");
@@ -114,7 +114,7 @@ describe("Loggers", () => {
 
   it("Will log in order", () => {
     const loggerFactory = LFService.createLoggerFactory(new LoggerFactoryOptions().addLogGroupRule(new LogGroupRule(new RegExp(".+"), LogLevel.Info, new LogFormat(), LoggerType.MessageBuffer)));
-    const logger = <MessageBufferLoggerImpl>loggerFactory.getLogger("ABC");
+    const logger = <MessageBufferLoggerImpl> loggerFactory.getLogger("ABC");
     logger.info("First");
     logger.info("Second", new Error("fail"));
     logger.info("Third", new Error("fail"));
@@ -129,8 +129,6 @@ describe("Loggers", () => {
       expect(msgs[2]).toContain("Third");
       expect(msgs[3]).toContain("Fourth");
       expect(msgs[4]).toContain("Fifth");
-
-      console.log(logger.toString());
     });
 
   });
