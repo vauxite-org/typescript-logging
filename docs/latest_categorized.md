@@ -21,6 +21,8 @@ Next to logging during development, it was also important to be able to trace pr
 The above is tackled by a different project [typescript-logging-extension](https://github.com/mreuvers/typescript-logging-extension) which
 currently can be used in Chrome, as a developer extension, if the category style of logging is used by the application.
 
+In addition of the extension, logging can be changed on console level as well.
+
 ## How
 
 The example below configures the logging in Config.ts and exports the relevant (sub)categories you want to log for
@@ -85,6 +87,14 @@ export class FinancialService {
 
   processMoney(): void {
     log.info("Log to the new category", catFin);
+
+    const data = { text: "letters" };
+
+    // Note we use LogData to pass in here! Also 'data' is just a shortcut for 'data: data' here.
+    log.info({msg: "LogData message", data}, catFin);
+
+    // This custom formats the additional data (ds lambda)
+    log.info({msg: "LogData message", data, ds: (value: any) => "[custom]: " + JSON.stringify(value)}, catFin);
   }
 
 }
@@ -97,7 +107,11 @@ Output (we assume we called the methods createProduct("Beer") and processMoney()
 2016-12-22 11:14:26,275 INFO [service] Creating product with name: Beer
 2016-12-22 11:14:26,275 INFO [product, customer] Creating product with name: Beer
 2016-12-22 11:14:26,276 INFO [financial] Log to the new category
+2016-12-22 11:14:26,277 INFO [financial] LogData message [data]: {"text":"letters"}
+2016-12-22 11:14:26,278 INFO [financial] LogData message [custom]: {"text":"letters"}
 ~~~
+
+For LogData interface see: [LogData](latest_log4j.md) close to the bottom of the page.
 
 ## Formatting message
 

@@ -34,11 +34,28 @@ import {LFService,LoggerFactoryOptions} from "typescript-logging"
 ~~~
 All classes can be imported from "typescript-logging".
 
-**Create default LoggerFactory and log**
+**Create default LoggerFactory with default options and log message**
 ~~~
   const factory = LFService.createLoggerFactory();
   const logger = factory.getLogger("SomeName");
   logger.info("Will log on info and higher by default");
+~~~
+
+**Create named LoggerFactory with default options and log messages using LogData**
+~~~
+  const factory = LFService.createNamedLoggerFactory("MyNamedFactory");
+  const logger = factory.getLogger("SomeName");
+
+  // No additional data, just message.
+  logger.info({msg: "Will log on info and higher by default"});
+
+  // Additional data is formatted using JSON.stringify(..) by default
+  const secretData = {secret: true, user: "secret"};
+  logger.info({msg: "a", data: secretData});
+
+  // Additional data is formatted according custom lambda, can be inlined too etc.
+  const formatter = (data: any) => "special stuff here: " + JSON.stringify(data)";
+  logger.info({msg: "hello!", data: secretData, ds: formatter});
 ~~~
 
 **Create LoggerFactory, use closures for logging**
@@ -112,9 +129,15 @@ The latest documentation also contains the classes below: Download [Documentatio
 ### LFService
 
 Use this to create and configure a LoggerFactory. The LoggerFactory is used to get loggers from.
-
-
 ~~~
+  /**
+   * Create a new LoggerFactory using given name (used for console api/extension).
+   * @param name Name Pick something short but distinguishable.
+   * @param options Options, optional
+   * @return {LoggerFactory}
+   */
+  public static createNamedLoggerFactory(name: string, options: LoggerFactoryOptions | null = null): LoggerFactory;
+
   /**
    * Create a new LoggerFactory with given options (if any). If no options
    * are specified, the LoggerFactory, will accept any named logger and will
@@ -122,7 +145,7 @@ Use this to create and configure a LoggerFactory. The LoggerFactory is used to g
    * @param options Options, optional.
    * @returns {LoggerFactory}
    */
-  static createLoggerFactory(options?: LoggerFactoryOptions): LoggerFactory
+  public static createLoggerFactory(options: LoggerFactoryOptions | null = null): LoggerFactory;
 ~~~
 
 ### LoggerFactory
@@ -131,24 +154,55 @@ Created by LFService. Than use getLogger(name: string) to get a new logger to lo
 
 ### Logger
 
-Used to log messages and optionally Errors.
+Used to log messages (or LogData) and optionally Errors.
 
 ~~~
-  debug(msg: string, error?: Error): void;
+export interface Logger {
 
-  debugc(msg:() => string, error?:() => Error): void;
+  /**
+   * Name of this logger (the name it was created with).
+   */
+  readonly name: string;
+
+  trace(msg: string | LogData, error?: Error | null): void;
+
+  debug(msg: string | LogData, error?: Error | null): void;
+
+  info(msg: string | LogData, error?: Error | null): void;
+
+  warn(msg: string | LogData, error?: Error | null): void;
+
+  error(msg: string | LogData, error?: Error | null): void;
+
+  fatal(msg: string | LogData, error?: Error | null): void;
+
+  tracec(msg: () => string | LogData, error?: () => Error | null): void;
+
+  debugc(msg: () => string | LogData, error?: () => Error | null): void;
+
+  infoc(msg: () => string | LogData, error?: () => Error | null): void;
+
+  warnc(msg: () => string | LogData, error?: () => Error | null): void;
+
+  errorc(msg: () => string | LogData, error?: () => Error | null): void;
+
+  fatalc(msg: () => string | LogData, error?: () => Error | null): void;
+
+  isTraceEnabled(): boolean;
 
   isDebugEnabled(): boolean;
+
+  isInfoEnabled(): boolean;
+
+  isWarnEnabled(): boolean;
+
+  isErrorEnabled(): boolean;
+
+  isFatalEnabled(): boolean;
+
+  getLogLevel(): LogLevel;
+}
 ~~~
-
-The above snippets shows only the debug related methods, this is the complete list of log methods:
-
-* trace / tracec / isTraceEnabled
-* debug / debugc / isDebugEnabled
-* info / infoc / isInfoEnabled
-* warn / warnc / isWarnEnabled
-* error / errorc / isErrorEnabled
-* fatal / fatalc / isFatalEnabled
 
 When the method ends with a 'c', it means that is a closure log method and should be used as such. Without the
 ending 'c', it is a normal method. Both types can be used, depending on preference and potentially performance reasons.
@@ -191,7 +245,7 @@ The logLevel specifies the level of logging when it's turned 'on'. E.g, the defa
 
 ### LogLevel
 
-Enumeration one of...
+Enumeration of...
 
 ~~~
 
@@ -261,6 +315,29 @@ This is an enumeration with the following values:
    */
   YearDayMonthTime
 ~~~
+
+## LogData
+
+```
+export interface LogData {
+
+  /**
+   * Message to log.
+   */
+  msg: string;
+
+  /**
+   * Optional additional data, by default JSON.stringify(..) is used to log it in addition to the message.
+   */
+  data?: any;
+
+  /**
+   * If present, and data is set - this lambda is used instead of JSON.stringify(..). Must return data as string.
+   * @param data Data to format
+   */
+  ds?(data: any): string;
+}
+```
 
 ## Browser
 
