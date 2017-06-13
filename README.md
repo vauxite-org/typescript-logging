@@ -4,8 +4,8 @@ Typescript library for logging. Simple and flexible in usage.
 
 * The library is written in typescript, so it will easily integrate with other Typescript projects.
 * Two logging styles supported (either can be used or both):
-  * Log4j style
   * Category style
+  * Log4j style
 * Api to control (console) logging at runtime through a browser's developer console.
 * Supports a separate chrome browser developer extension, which allows you to control logging at runtime through the chrome developer extension. For details please see: [Typescript Logging Developer Extension](#typescript-logging-developer-extension)
 
