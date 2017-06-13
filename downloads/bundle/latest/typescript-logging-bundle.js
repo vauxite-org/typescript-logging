@@ -1115,18 +1115,18 @@ var ExtensionHelper = (function () {
         if (!ExtensionHelper.registered) {
             return;
         }
-        var categoryIds = msg.getCategories().map(function (cat) {
+        var categoryIds = msg.categories.map(function (cat) {
             return cat.id;
         });
         var content = {
             type: "log-message",
             value: {
                 categories: categoryIds,
-                errorAsStack: msg.getErrorAsStack(),
+                errorAsStack: msg.errorAsStack,
                 formattedMessage: MessageUtils_1.MessageFormatUtils.renderDefaultMessage(msg, false),
-                logLevel: LoggerOptions_1.LogLevel[msg.getLevel()].toString(),
-                message: msg.getMessage(),
-                resolvedErrorMessage: msg.isResolvedErrorMessage()
+                logLevel: LoggerOptions_1.LogLevel[msg.level].toString(),
+                message: msg.messageAsString,
+                resolvedErrorMessage: msg.isResolvedErrorMessage
             }
         };
         var message = {
@@ -1278,30 +1278,93 @@ var CategoryLogMessageImpl = (function () {
         this._logFormat = logFormat;
         this._ready = ready;
     }
-    CategoryLogMessageImpl.prototype.getMessage = function () {
-        return this._message;
-    };
-    CategoryLogMessageImpl.prototype.getErrorAsStack = function () {
-        return this._errorAsStack;
-    };
-    CategoryLogMessageImpl.prototype.setErrorAsStack = function (stack) {
-        this._errorAsStack = stack;
-    };
-    CategoryLogMessageImpl.prototype.getError = function () {
-        return this._error;
-    };
-    CategoryLogMessageImpl.prototype.getCategories = function () {
-        return this._categories;
-    };
-    CategoryLogMessageImpl.prototype.getDate = function () {
-        return this._date;
-    };
-    CategoryLogMessageImpl.prototype.getLevel = function () {
-        return this._level;
-    };
-    CategoryLogMessageImpl.prototype.getLogFormat = function () {
-        return this._logFormat;
-    };
+    Object.defineProperty(CategoryLogMessageImpl.prototype, "message", {
+        get: function () {
+            return this._message;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(CategoryLogMessageImpl.prototype, "errorAsStack", {
+        get: function () {
+            return this._errorAsStack;
+        },
+        set: function (stack) {
+            this._errorAsStack = stack;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(CategoryLogMessageImpl.prototype, "error", {
+        get: function () {
+            return this._error;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(CategoryLogMessageImpl.prototype, "categories", {
+        get: function () {
+            return this._categories;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(CategoryLogMessageImpl.prototype, "date", {
+        get: function () {
+            return this._date;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(CategoryLogMessageImpl.prototype, "level", {
+        get: function () {
+            return this._level;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(CategoryLogMessageImpl.prototype, "logFormat", {
+        get: function () {
+            return this._logFormat;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(CategoryLogMessageImpl.prototype, "isMessageLogData", {
+        get: function () {
+            return typeof (this._message) !== "string";
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(CategoryLogMessageImpl.prototype, "messageAsString", {
+        get: function () {
+            if (typeof (this._message) === "string") {
+                return this._message;
+            }
+            return this._message.msg;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(CategoryLogMessageImpl.prototype, "logData", {
+        get: function () {
+            var result = null;
+            if (typeof (this._message) !== "string") {
+                result = this.message;
+            }
+            return result;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(CategoryLogMessageImpl.prototype, "isResolvedErrorMessage", {
+        get: function () {
+            return this._resolvedErrorMessage;
+        },
+        enumerable: true,
+        configurable: true
+    });
     CategoryLogMessageImpl.prototype.isReady = function () {
         return this._ready;
     };
@@ -1318,9 +1381,6 @@ var CategoryLogMessageImpl = (function () {
         enumerable: true,
         configurable: true
     });
-    CategoryLogMessageImpl.prototype.isResolvedErrorMessage = function () {
-        return this._resolvedErrorMessage;
-    };
     return CategoryLogMessageImpl;
 }());
 /**
@@ -1455,6 +1515,19 @@ var AbstractCategoryLogger = (function () {
     AbstractCategoryLogger.prototype.createDefaultLogMessage = function (msg) {
         return MessageUtils_1.MessageFormatUtils.renderDefaultMessage(msg, true);
     };
+    /**
+     * Return optional message formatter. All LoggerTypes (except custom) will see if
+     * they have this, and if so use it to log.
+     * @returns {((message:CategoryLogMessage)=>string)|null}
+     */
+    AbstractCategoryLogger.prototype._getMessageFormatter = function () {
+        var categorySettings = this.runtimeSettings.getCategorySettings(this.rootCategory);
+        // Should not happen but make ts happy
+        if (categorySettings === null) {
+            throw new Error("Did not find CategorySettings for rootCategory: " + this.rootCategory.name);
+        }
+        return categorySettings.formatterLogMessage;
+    };
     AbstractCategoryLogger.prototype._log = function (level, msg, error, resolved) {
         if (error === void 0) { error = null; }
         if (resolved === void 0) { resolved = false; }
@@ -1510,7 +1583,7 @@ var AbstractCategoryLogger = (function () {
                     logMessage_1.resolvedErrorMessage = resolved;
                     this_1.allMessages.addTail(logMessage_1);
                     MessageUtils_1.MessageFormatUtils.renderError(actualError).then(function (stack) {
-                        logMessage_1.setErrorAsStack(stack);
+                        logMessage_1.errorAsStack = stack;
                         logMessage_1.setReady(true);
                         _this.processMessages();
                     });
@@ -1566,16 +1639,19 @@ var ExtensionHelper_1 = __webpack_require__(3);
  * RuntimeSettings for a category, at runtime these are associated to a category.
  */
 var CategoryRuntimeSettings = (function () {
-    function CategoryRuntimeSettings(category, logLevel, loggerType, logFormat, callBackLogger) {
+    function CategoryRuntimeSettings(category, logLevel, loggerType, logFormat, callBackLogger, formatterLogMessage) {
         if (logLevel === void 0) { logLevel = LoggerOptions_1.LogLevel.Error; }
         if (loggerType === void 0) { loggerType = LoggerOptions_1.LoggerType.Console; }
         if (logFormat === void 0) { logFormat = new LoggerOptions_1.CategoryLogFormat(); }
         if (callBackLogger === void 0) { callBackLogger = null; }
+        if (formatterLogMessage === void 0) { formatterLogMessage = null; }
+        this._formatterLogMessage = null;
         this._category = category;
         this._logLevel = logLevel;
         this._loggerType = loggerType;
         this._logFormat = logFormat;
         this._callBackLogger = callBackLogger;
+        this._formatterLogMessage = formatterLogMessage;
     }
     Object.defineProperty(CategoryRuntimeSettings.prototype, "category", {
         get: function () {
@@ -1624,6 +1700,16 @@ var CategoryRuntimeSettings = (function () {
         enumerable: true,
         configurable: true
     });
+    Object.defineProperty(CategoryRuntimeSettings.prototype, "formatterLogMessage", {
+        get: function () {
+            return this._formatterLogMessage;
+        },
+        set: function (value) {
+            this._formatterLogMessage = value;
+        },
+        enumerable: true,
+        configurable: true
+    });
     return CategoryRuntimeSettings;
 }());
 exports.CategoryRuntimeSettings = CategoryRuntimeSettings;
@@ -1646,6 +1732,7 @@ var CategoryDefaultConfiguration = (function () {
         if (loggerType === void 0) { loggerType = LoggerOptions_1.LoggerType.Console; }
         if (logFormat === void 0) { logFormat = new LoggerOptions_1.CategoryLogFormat(); }
         if (callBackLogger === void 0) { callBackLogger = null; }
+        this._formatterLogMessage = null;
         this._logLevel = logLevel;
         this._loggerType = loggerType;
         this._logFormat = logFormat;
@@ -1682,8 +1769,34 @@ var CategoryDefaultConfiguration = (function () {
         enumerable: true,
         configurable: true
     });
+    Object.defineProperty(CategoryDefaultConfiguration.prototype, "formatterLogMessage", {
+        /**
+         * Get the formatterLogMessage function, see comment on the setter.
+         * @returns {((message:CategoryLogMessage)=>string)|null}
+         */
+        get: function () {
+            return this._formatterLogMessage;
+        },
+        /**
+         * Set the default formatterLogMessage function, if set it is applied to all type of loggers except for a custom logger.
+         * By default this is null (not set). You can assign a function to allow custom formatting of a log message.
+         * Each log message will call this function then and expects your function to format the message and return a string.
+         * Will throw an error if you attempt to set a formatterLogMessage if the LoggerType is custom.
+         * @param value The formatter function, or null to reset it.
+         */
+        set: function (value) {
+            if (value !== null && this._loggerType === LoggerOptions_1.LoggerType.Custom) {
+                throw new Error("You cannot specify a formatter for log messages if your loggerType is Custom");
+            }
+            this._formatterLogMessage = value;
+        },
+        enumerable: true,
+        configurable: true
+    });
     CategoryDefaultConfiguration.prototype.copy = function () {
-        return new CategoryDefaultConfiguration(this.logLevel, this.loggerType, this.logFormat.copy(), this.callBackLogger);
+        var config = new CategoryDefaultConfiguration(this.logLevel, this.loggerType, this.logFormat.copy(), this.callBackLogger);
+        config.formatterLogMessage = this.formatterLogMessage;
+        return config;
     };
     return CategoryDefaultConfiguration;
 }());
@@ -1750,11 +1863,11 @@ var CategoryServiceImpl = (function () {
      * applied as well, pass in reset=true (the default is false). All
      * categories will be reset then as well.
      * @param config New config
-     * @param reset Defaults to false. Set to true to reset all loggers and current runtimesettings.
+     * @param reset Defaults to true. Set to true to reset all loggers and current runtimesettings.
      */
     CategoryServiceImpl.prototype.setDefaultConfiguration = function (config, reset) {
         var _this = this;
-        if (reset === void 0) { reset = false; }
+        if (reset === void 0) { reset = true; }
         this._defaultConfig = config;
         if (reset) {
             // Reset all runtimesettings (this will reset it for roots & children all at once).
@@ -1764,9 +1877,9 @@ var CategoryServiceImpl = (function () {
                 var setting = _this._categoryRuntimeSettings.get(key);
                 if (setting !== null) {
                     var defSettings = _this._defaultConfig.copy();
-                    var settings = new CategoryRuntimeSettings(setting.category, defSettings.logLevel, defSettings.loggerType, defSettings.logFormat, defSettings.callBackLogger);
+                    var settings = new CategoryRuntimeSettings(setting.category, defSettings.logLevel, defSettings.loggerType, defSettings.logFormat, defSettings.callBackLogger, defSettings.formatterLogMessage);
                     var defSettingsOriginal = _this._defaultConfig.copy();
-                    var settingsOriginal = new CategoryRuntimeSettings(setting.category, defSettingsOriginal.logLevel, defSettingsOriginal.loggerType, defSettingsOriginal.logFormat, defSettingsOriginal.callBackLogger);
+                    var settingsOriginal = new CategoryRuntimeSettings(setting.category, defSettingsOriginal.logLevel, defSettingsOriginal.loggerType, defSettingsOriginal.logFormat, defSettingsOriginal.callBackLogger, defSettingsOriginal.formatterLogMessage);
                     newRuntimeSettings_1.put(key, settings);
                     newOriginalRuntimeSettings_1.put(key, settingsOriginal);
                 }
@@ -1791,12 +1904,12 @@ var CategoryServiceImpl = (function () {
      * @param config Config
      * @param category Category
      * @param applyChildren True to apply to child categories, defaults to false.
-     * @param resetRootLogger Defaults to false. If set to true and if category is a root category it will reset the root logger.
+     * @param resetRootLogger Defaults to true. If set to true and if category is a root category it will reset the root logger.
      */
     CategoryServiceImpl.prototype.setConfigurationCategory = function (config, category, applyChildren, resetRootLogger) {
         var _this = this;
         if (applyChildren === void 0) { applyChildren = false; }
-        if (resetRootLogger === void 0) { resetRootLogger = false; }
+        if (resetRootLogger === void 0) { resetRootLogger = true; }
         var categorySettings = this.getCategorySettings(category);
         if (categorySettings === null) {
             throw new Error("Given category is not registered: " + category.name);
@@ -1805,6 +1918,7 @@ var CategoryServiceImpl = (function () {
         categorySettings.loggerType = config.loggerType;
         categorySettings.logFormat = config.logFormat;
         categorySettings.callBackLogger = config.callBackLogger;
+        categorySettings.formatterLogMessage = config.formatterLogMessage;
         // Apply the settings to children recursive if requested
         if (applyChildren) {
             category.children.forEach(function (child) {
@@ -1878,9 +1992,9 @@ var CategoryServiceImpl = (function () {
         }
         // Passing the callback is not really needed for child categories, but don't really care.
         var defSettings = this._defaultConfig.copy();
-        settings = new CategoryRuntimeSettings(category, defSettings.logLevel, defSettings.loggerType, defSettings.logFormat, defSettings.callBackLogger);
+        settings = new CategoryRuntimeSettings(category, defSettings.logLevel, defSettings.loggerType, defSettings.logFormat, defSettings.callBackLogger, defSettings.formatterLogMessage);
         var defSettingsOriginal = this._defaultConfig.copy();
-        var settingsOriginal = new CategoryRuntimeSettings(category, defSettingsOriginal.logLevel, defSettingsOriginal.loggerType, defSettingsOriginal.logFormat, defSettingsOriginal.callBackLogger);
+        var settingsOriginal = new CategoryRuntimeSettings(category, defSettingsOriginal.logLevel, defSettingsOriginal.loggerType, defSettingsOriginal.logFormat, defSettingsOriginal.callBackLogger, defSettingsOriginal.formatterLogMessage);
         this._categoryRuntimeSettings.put(category.getCategoryPath(), settings);
         this._categoryOriginalRuntimeSettings.put(category.getCategoryPath(), settingsOriginal);
     };
@@ -1953,10 +2067,10 @@ var CategoryServiceFactory = (function () {
      * applied as well, pass in reset=true (the default is false). All
      * categories runtimesettings will be reset then as well.
      * @param config The new default configuration
-     * @param reset If true, will reset *all* runtimesettings for all loggers/categories to these.
+     * @param reset If true, will reset *all* runtimesettings for all loggers/categories to these. Default is true.
      */
     CategoryServiceFactory.setDefaultConfiguration = function (config, reset) {
-        if (reset === void 0) { reset = false; }
+        if (reset === void 0) { reset = true; }
         CategoryServiceImpl.getInstance().setDefaultConfiguration(config, reset);
     };
     /**
@@ -1964,11 +2078,11 @@ var CategoryServiceFactory = (function () {
      * @param config Config
      * @param category Category
      * @param applyChildren True to apply to child categories, defaults to false.
-     * @param resetRootLogger Defaults to false. If set to true and if category is a root category it will reset the root logger.
+     * @param resetRootLogger Defaults to true. If set to true and if category is a root category it will reset the root logger.
      */
     CategoryServiceFactory.setConfigurationCategory = function (config, category, applyChildren, resetRootLogger) {
         if (applyChildren === void 0) { applyChildren = false; }
-        if (resetRootLogger === void 0) { resetRootLogger = false; }
+        if (resetRootLogger === void 0) { resetRootLogger = true; }
         CategoryServiceImpl.getInstance().setConfigurationCategory(config, category, applyChildren, resetRootLogger);
     };
     /**
@@ -2073,12 +2187,40 @@ var LogMessageInternalImpl = (function () {
         enumerable: true,
         configurable: true
     });
+    Object.defineProperty(LogMessageInternalImpl.prototype, "isMessageLogData", {
+        get: function () {
+            return typeof (this._message) !== "string";
+        },
+        enumerable: true,
+        configurable: true
+    });
     Object.defineProperty(LogMessageInternalImpl.prototype, "ready", {
         get: function () {
             return this._ready;
         },
         set: function (value) {
             this._ready = value;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(LogMessageInternalImpl.prototype, "messageAsString", {
+        get: function () {
+            if (typeof (this._message) === "string") {
+                return this._message;
+            }
+            return this._message.msg;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(LogMessageInternalImpl.prototype, "logData", {
+        get: function () {
+            var result = null;
+            if (typeof (this._message) !== "string") {
+                result = this.message;
+            }
+            return result;
         },
         enumerable: true,
         configurable: true
@@ -2176,6 +2318,14 @@ var AbstractLogger = (function () {
     };
     AbstractLogger.prototype.createDefaultLogMessage = function (msg) {
         return MessageUtils_1.MessageFormatUtils.renderDefaultLog4jMessage(msg, true);
+    };
+    /**
+     * Return optional message formatter. All LoggerTypes (except custom) will see if
+     * they have this, and if so use it to log.
+     * @returns {((message:LogMessage)=>string)|null}
+     */
+    AbstractLogger.prototype._getMessageFormatter = function () {
+        return this._logGroupRuntimeSettings.formatterLogMessage;
     };
     AbstractLogger.prototype._log = function (level, msg, error) {
         if (error === void 0) { error = null; }
@@ -2316,18 +2466,18 @@ var MessageFormatUtils = (function () {
      */
     MessageFormatUtils.renderDefaultMessage = function (msg, addStack) {
         var result = "";
-        var logFormat = msg.getLogFormat();
+        var logFormat = msg.logFormat;
         if (logFormat.showTimeStamp) {
-            result += MessageFormatUtils.renderDate(msg.getDate(), logFormat.dateFormat) + " ";
+            result += MessageFormatUtils.renderDate(msg.date, logFormat.dateFormat) + " ";
         }
-        result += LoggerOptions_1.LogLevel[msg.getLevel()].toUpperCase();
-        if (msg.isResolvedErrorMessage()) {
+        result += LoggerOptions_1.LogLevel[msg.level].toUpperCase();
+        if (msg.isResolvedErrorMessage) {
             result += " (resolved)";
         }
         result += " ";
         if (logFormat.showCategoryName) {
             result += "[";
-            msg.getCategories().forEach(function (value, idx) {
+            msg.categories.forEach(function (value, idx) {
                 if (idx > 0) {
                     result += ", ";
                 }
@@ -2335,9 +2485,24 @@ var MessageFormatUtils = (function () {
             });
             result += "]";
         }
-        result += " " + msg.getMessage();
-        if (addStack && msg.getErrorAsStack() !== null) {
-            result += "\n" + msg.getErrorAsStack();
+        // Get the normal string message first
+        var actualStringMsg = "";
+        var dataString = "";
+        var messageOrLogData = msg.message;
+        if (typeof messageOrLogData === "string") {
+            actualStringMsg = messageOrLogData;
+        }
+        else {
+            var logData = messageOrLogData;
+            actualStringMsg = logData.msg;
+            // We do have data?
+            if (logData.data) {
+                dataString = " [data]: " + (logData.ds ? logData.ds(logData.data) : JSON.stringify(logData.data));
+            }
+        }
+        result += " " + actualStringMsg + "" + dataString;
+        if (addStack && msg.errorAsStack !== null) {
+            result += "\n" + msg.errorAsStack;
         }
         return result;
     };
@@ -2357,7 +2522,21 @@ var MessageFormatUtils = (function () {
         if (format.showLoggerName) {
             result += "[" + msg.loggerName + "]";
         }
-        result += " " + msg.message;
+        // Get the normal string message first
+        var actualStringMsg = "";
+        var dataString = "";
+        if (typeof msg.message === "string") {
+            actualStringMsg = msg.message;
+        }
+        else {
+            var logData = msg.message;
+            actualStringMsg = logData.msg;
+            // We do have data?
+            if (logData.data) {
+                dataString = " [data]: " + (logData.ds ? logData.ds(logData.data) : JSON.stringify(logData.data));
+            }
+        }
+        result += " " + actualStringMsg + "" + dataString;
         if (addStack && msg.errorAsStack !== null) {
             result += "\n" + msg.errorAsStack;
         }
@@ -2417,6 +2596,7 @@ var LogGroupRule = (function () {
         if (logFormat === void 0) { logFormat = new LoggerOptions_1.LogFormat(); }
         if (loggerType === void 0) { loggerType = LoggerOptions_1.LoggerType.Console; }
         if (callBackLogger === void 0) { callBackLogger = null; }
+        this._formatterLogMessage = null;
         this._regExp = regExp;
         this._level = level;
         this._logFormat = logFormat;
@@ -2454,6 +2634,30 @@ var LogGroupRule = (function () {
     Object.defineProperty(LogGroupRule.prototype, "callBackLogger", {
         get: function () {
             return this._callBackLogger;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(LogGroupRule.prototype, "formatterLogMessage", {
+        /**
+         * Get the formatterLogMessage function, see comment on the setter.
+         * @returns {((message:LogMessage)=>string)|null}
+         */
+        get: function () {
+            return this._formatterLogMessage;
+        },
+        /**
+         * Set the default formatterLogMessage function, if set it is applied to all type of loggers except for a custom logger.
+         * By default this is null (not set). You can assign a function to allow custom formatting of a log message.
+         * Each log message will call this function then and expects your function to format the message and return a string.
+         * Will throw an error if you attempt to set a formatterLogMessage if the LoggerType is custom.
+         * @param value The formatter function, or null to reset it.
+         */
+        set: function (value) {
+            if (value !== null && this._loggerType === LoggerOptions_1.LoggerType.Custom) {
+                throw new Error("You cannot specify a formatter for log messages if your loggerType is Custom");
+            }
+            this._formatterLogMessage = value;
         },
         enumerable: true,
         configurable: true
@@ -2509,11 +2713,13 @@ exports.LoggerFactoryOptions = LoggerFactoryOptions;
  */
 var LogGroupRuntimeSettings = (function () {
     function LogGroupRuntimeSettings(logGroupRule) {
+        this._formatterLogMessage = null;
         this._logGroupRule = logGroupRule;
         this._level = logGroupRule.level;
         this._loggerType = logGroupRule.loggerType;
         this._logFormat = new LoggerOptions_1.LogFormat(new LoggerOptions_1.DateFormat(logGroupRule.logFormat.dateFormat.formatEnum, logGroupRule.logFormat.dateFormat.dateSeparator), logGroupRule.logFormat.showTimeStamp, logGroupRule.logFormat.showLoggerName);
         this._callBackLogger = logGroupRule.callBackLogger;
+        this._formatterLogMessage = logGroupRule.formatterLogMessage;
     }
     Object.defineProperty(LogGroupRuntimeSettings.prototype, "logGroupRule", {
         /**
@@ -2562,6 +2768,16 @@ var LogGroupRuntimeSettings = (function () {
         },
         set: function (value) {
             this._callBackLogger = value;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(LogGroupRuntimeSettings.prototype, "formatterLogMessage", {
+        get: function () {
+            return this._formatterLogMessage;
+        },
+        set: function (value) {
+            this._formatterLogMessage = value;
         },
         enumerable: true,
         configurable: true
@@ -2726,11 +2942,18 @@ var CategoryConsoleLoggerImpl = (function (_super) {
         return _super.call(this, rootCategory, runtimeSettings) || this;
     }
     CategoryConsoleLoggerImpl.prototype.doLog = function (msg) {
-        var fullMsg = this.createDefaultLogMessage(msg);
         if (console !== undefined) {
+            var messageFormatter = this._getMessageFormatter();
+            var fullMsg = void 0;
+            if (messageFormatter === null) {
+                fullMsg = this.createDefaultLogMessage(msg);
+            }
+            else {
+                fullMsg = messageFormatter(msg);
+            }
             var logged = false;
             /* tslint:disable:no-console */
-            switch (msg.getLevel()) {
+            switch (msg.level) {
                 case LoggerOptions_1.LogLevel.Trace:
                     // Don't try trace we don't want stacks
                     break;
@@ -2760,14 +2983,14 @@ var CategoryConsoleLoggerImpl = (function (_super) {
                     }
                     break;
                 default:
-                    throw new Error("Unsupported level: " + msg.getLevel());
+                    throw new Error("Unsupported level: " + msg.level);
             }
             if (!logged) {
                 console.log(fullMsg);
             }
         }
         else {
-            throw new Error("Console is not defined, cannot log msg: " + fullMsg);
+            throw new Error("Console is not defined, cannot log msg: " + msg.messageAsString);
         }
     };
     return CategoryConsoleLoggerImpl;
@@ -2964,7 +3187,14 @@ var CategoryMessageBufferLoggerImpl = (function (_super) {
         }).join("\n");
     };
     CategoryMessageBufferLoggerImpl.prototype.doLog = function (msg) {
-        var fullMsg = this.createDefaultLogMessage(msg);
+        var messageFormatter = this._getMessageFormatter();
+        var fullMsg;
+        if (messageFormatter === null) {
+            fullMsg = this.createDefaultLogMessage(msg);
+        }
+        else {
+            fullMsg = messageFormatter(msg);
+        }
         this.messages.push(fullMsg);
     };
     return CategoryMessageBufferLoggerImpl;
@@ -2997,7 +3227,14 @@ var ConsoleLoggerImpl = (function (_super) {
         if (console !== undefined) {
             var logged = false;
             var logLevel = message.level;
-            var msg = this.createDefaultLogMessage(message);
+            var messageFormatter = this._getMessageFormatter();
+            var msg = void 0;
+            if (messageFormatter === null) {
+                msg = this.createDefaultLogMessage(message);
+            }
+            else {
+                msg = messageFormatter(message);
+            }
             /* tslint:disable:no-console */
             switch (logLevel) {
                 case LoggerOptions_1.LogLevel.Trace:
@@ -3081,7 +3318,15 @@ var MessageBufferLoggerImpl = (function (_super) {
         }).join("\n");
     };
     MessageBufferLoggerImpl.prototype.doLog = function (message) {
-        this.messages.push(this.createDefaultLogMessage(message));
+        var messageFormatter = this._getMessageFormatter();
+        var fullMsg;
+        if (messageFormatter === null) {
+            fullMsg = this.createDefaultLogMessage(message);
+        }
+        else {
+            fullMsg = messageFormatter(message);
+        }
+        this.messages.push(fullMsg);
     };
     return MessageBufferLoggerImpl;
 }(AbstractLogger_1.AbstractLogger));
@@ -6896,7 +7141,7 @@ exports.SourceNode = __webpack_require__(30).SourceNode;
 /* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (root, factory) {
+var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function(root, factory) {
     'use strict';
     // Universal Module Definition (UMD) to support AMD, CommonJS/Node.js, Rhino, and browsers.
 
@@ -6911,7 +7156,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
     } else {
         root.StackFrame = factory();
     }
-}(this, function () {
+}(this, function() {
     'use strict';
     function _isNumber(n) {
         return !isNaN(parseFloat(n)) && isFinite(n);
@@ -6922,7 +7167,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
     }
 
     function _getter(p) {
-        return function () {
+        return function() {
             return this[p];
         };
     }
@@ -6932,9 +7177,10 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
     var stringProps = ['fileName', 'functionName', 'source'];
     var arrayProps = ['args'];
 
+    var props = booleanProps.concat(numericProps, stringProps, arrayProps);
+
     function StackFrame(obj) {
         if (obj instanceof Object) {
-            var props = booleanProps.concat(numericProps.concat(stringProps.concat(arrayProps)));
             for (var i = 0; i < props.length; i++) {
                 if (obj.hasOwnProperty(props[i]) && obj[props[i]] !== undefined) {
                     this['set' + _capitalize(props[i])](obj[props[i]]);
@@ -6944,20 +7190,20 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
     }
 
     StackFrame.prototype = {
-        getArgs: function () {
+        getArgs: function() {
             return this.args;
         },
-        setArgs: function (v) {
+        setArgs: function(v) {
             if (Object.prototype.toString.call(v) !== '[object Array]') {
                 throw new TypeError('Args must be an Array');
             }
             this.args = v;
         },
 
-        getEvalOrigin: function () {
+        getEvalOrigin: function() {
             return this.evalOrigin;
         },
-        setEvalOrigin: function (v) {
+        setEvalOrigin: function(v) {
             if (v instanceof StackFrame) {
                 this.evalOrigin = v;
             } else if (v instanceof Object) {
@@ -6967,7 +7213,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
             }
         },
 
-        toString: function () {
+        toString: function() {
             var functionName = this.getFunctionName() || '{anonymous}';
             var args = '(' + (this.getArgs() || []).join(',') + ')';
             var fileName = this.getFileName() ? ('@' + this.getFileName()) : '';
@@ -6979,8 +7225,8 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 
     for (var i = 0; i < booleanProps.length; i++) {
         StackFrame.prototype['get' + _capitalize(booleanProps[i])] = _getter(booleanProps[i]);
-        StackFrame.prototype['set' + _capitalize(booleanProps[i])] = (function (p) {
-            return function (v) {
+        StackFrame.prototype['set' + _capitalize(booleanProps[i])] = (function(p) {
+            return function(v) {
                 this[p] = Boolean(v);
             };
         })(booleanProps[i]);
@@ -6988,8 +7234,8 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 
     for (var j = 0; j < numericProps.length; j++) {
         StackFrame.prototype['get' + _capitalize(numericProps[j])] = _getter(numericProps[j]);
-        StackFrame.prototype['set' + _capitalize(numericProps[j])] = (function (p) {
-            return function (v) {
+        StackFrame.prototype['set' + _capitalize(numericProps[j])] = (function(p) {
+            return function(v) {
                 if (!_isNumber(v)) {
                     throw new TypeError(p + ' must be a Number');
                 }
@@ -7000,8 +7246,8 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 
     for (var k = 0; k < stringProps.length; k++) {
         StackFrame.prototype['get' + _capitalize(stringProps[k])] = _getter(stringProps[k]);
-        StackFrame.prototype['set' + _capitalize(stringProps[k])] = (function (p) {
-            return function (v) {
+        StackFrame.prototype['set' + _capitalize(stringProps[k])] = (function(p) {
+            return function(v) {
                 this[p] = String(v);
             };
         })(stringProps[k]);
