@@ -92,20 +92,20 @@ export class MessageFormatUtils {
   public static renderDefaultMessage(msg: CategoryLogMessage, addStack: boolean): string {
     let result: string = "";
 
-    const logFormat = msg.getLogFormat();
+    const logFormat = msg.logFormat;
     if (logFormat.showTimeStamp) {
-      result += MessageFormatUtils.renderDate(msg.getDate(), logFormat.dateFormat) + " ";
+      result += MessageFormatUtils.renderDate(msg.date, logFormat.dateFormat) + " ";
     }
 
-    result += LogLevel[msg.getLevel()].toUpperCase();
-    if (msg.isResolvedErrorMessage()) {
+    result += LogLevel[msg.level].toUpperCase();
+    if (msg.isResolvedErrorMessage) {
       result += " (resolved)";
     }
     result += " ";
 
     if (logFormat.showCategoryName) {
       result += "[";
-      msg.getCategories().forEach((value: Category, idx: number) => {
+      msg.categories.forEach((value: Category, idx: number) => {
         if (idx > 0) {
           result += ", ";
         }
@@ -118,7 +118,7 @@ export class MessageFormatUtils {
     let actualStringMsg: string = "";
     let dataString: string = "";
 
-    const messageOrLogData = msg.getMessage();
+    const messageOrLogData = msg.message;
 
     if (typeof messageOrLogData === "string") {
       actualStringMsg = messageOrLogData;
@@ -134,8 +134,8 @@ export class MessageFormatUtils {
     }
 
     result += " " + actualStringMsg + "" + dataString;
-    if (addStack && msg.getErrorAsStack() !== null) {
-      result += "\n" + msg.getErrorAsStack();
+    if (addStack && msg.errorAsStack !== null) {
+      result += "\n" + msg.errorAsStack;
     }
 
     return result;

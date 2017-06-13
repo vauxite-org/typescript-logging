@@ -73,7 +73,7 @@ export class ExtensionHelper {
       return;
     }
 
-    const categoryIds = msg.getCategories().map((cat: Category) => {
+    const categoryIds = msg.categories.map((cat: Category) => {
       return cat.id;
     });
 
@@ -81,11 +81,11 @@ export class ExtensionHelper {
       type: "log-message",
       value: {
         categories: categoryIds,
-        errorAsStack: msg.getErrorAsStack(),
+        errorAsStack: msg.errorAsStack,
         formattedMessage: MessageFormatUtils.renderDefaultMessage(msg, false),
-        logLevel: LogLevel[msg.getLevel()].toString(),
-        message: msg.getMessage(),
-        resolvedErrorMessage: msg.isResolvedErrorMessage()
+        logLevel: LogLevel[msg.level].toString(),
+        message: msg.messageAsString,
+        resolvedErrorMessage: msg.isResolvedErrorMessage
       }
     } as ExtensionMessageContentJSON<ExtensionCategoryLogMessageJSON>;
 

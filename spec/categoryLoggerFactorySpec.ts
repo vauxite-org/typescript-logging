@@ -216,7 +216,7 @@ describe("CategoryServiceFactory", () => {
     const configChanged = new CategoryDefaultConfiguration(LogLevel.Info, LoggerType.MessageBuffer);
     configChanged.formatterLogMessage = (msg: CategoryLogMessage): string => {
       // Just shorten the message, will only have literal text.
-      const message = msg.getMessage();
+      const message = msg.messageAsString;
       return typeof(message) === "string" ? message : "";
     };
     CategoryServiceFactory.setDefaultConfiguration(configChanged, true);
@@ -237,7 +237,7 @@ describe("CategoryServiceFactory", () => {
     );
     const formatterLogMessage = (msg: CategoryLogMessage): string => {
       // Just shorten the message, will only have literal text.
-      const message = msg.getMessage();
+      const message = msg.messageAsString;
       return typeof(message) === "string" ? message : "";
     };
 
@@ -251,12 +251,12 @@ describe("CategoryServiceFactory", () => {
     const defaultConfig = new CategoryDefaultConfiguration(LogLevel.Info, LoggerType.MessageBuffer);
     defaultConfig.formatterLogMessage = (msg: CategoryLogMessage): string => {
       // Just shorten the message, will only have literal text.
-      const message = msg.getMessage();
+      const message = msg.messageAsString;
       return typeof(message) === "string" ? message : "";
     };
 
     const formatterRoot2 = (msg: CategoryLogMessage): string => {
-      return msg.getMessage() + "_postFix";
+      return msg.messageAsString + "_postFix";
     };
 
     const configRoot2 = new CategoryDefaultConfiguration(LogLevel.Debug, LoggerType.MessageBuffer);
@@ -287,7 +287,7 @@ describe("CategoryServiceFactory", () => {
     }
 
     protected doLog(msg: CategoryLogMessage): void {
-      this.messages.push(msg.getMessage());
+      this.messages.push(msg.messageAsString);
     }
   }
 

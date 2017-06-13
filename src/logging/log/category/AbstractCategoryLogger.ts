@@ -10,25 +10,41 @@ import {LogData} from "../LogData";
  */
 export interface CategoryLogMessage {
 
-  getMessage(): string | LogData;
+  readonly message: string | LogData;
 
   /**
    * Returns the resolved stack (based on error).
    * Available only when error is present.
    */
-  getErrorAsStack(): string | null;
+  readonly errorAsStack: string | null;
 
-  getError(): Error | null;
+  readonly error: Error | null;
 
-  getCategories(): Category[];
+  readonly categories: Category[];
 
-  getDate(): Date;
+  readonly date: Date;
 
-  getLevel(): LogLevel;
+  readonly level: LogLevel;
 
-  getLogFormat(): CategoryLogFormat;
+  readonly logFormat: CategoryLogFormat;
 
-  isResolvedErrorMessage(): boolean;
+  readonly isResolvedErrorMessage: boolean;
+
+  /**
+   * True if message represents LogData (false for a string message).
+   */
+  readonly isMessageLogData: boolean;
+
+  /**
+   * Always retrieves the message, from either the string directly
+   * or in case of LogData from LogData itself.
+   */
+  readonly messageAsString: string;
+
+  /**
+   * If present returns LogData, otherwise null.
+   */
+  readonly logData: LogData | null;
 }
 
 class CategoryLogMessageImpl implements CategoryLogMessage {
@@ -54,36 +70,59 @@ class CategoryLogMessageImpl implements CategoryLogMessage {
     this._ready = ready;
   }
 
-  public getMessage(): string | LogData {
+  get message(): string | LogData {
     return this._message;
   }
 
-  public getErrorAsStack(): string | null {
+  get errorAsStack(): string | null {
     return this._errorAsStack;
   }
 
-  public setErrorAsStack(stack: string): void {
-    this._errorAsStack = stack;
-  }
-
-  public getError(): Error | null {
+  get error(): Error | null {
     return this._error;
   }
 
-  public getCategories(): Category[] {
+  get categories(): Category[] {
     return this._categories;
   }
 
-  public getDate(): Date {
+  get date(): Date {
     return this._date;
   }
 
-  public getLevel(): LogLevel {
+  get level(): LogLevel {
     return this._level;
   }
 
-  public getLogFormat(): CategoryLogFormat {
+  get logFormat(): CategoryLogFormat {
     return this._logFormat;
+  }
+
+  get isMessageLogData(): boolean {
+    return typeof(this._message) !== "string";
+  }
+
+  get messageAsString(): string {
+    if (typeof(this._message) === "string") {
+      return this._message;
+    }
+    return this._message.msg;
+  }
+
+  get logData(): LogData | null {
+    let result: LogData | null = null;
+    if (typeof(this._message) !== "string") {
+      result = this.message as LogData;
+    }
+    return result;
+  }
+
+  get isResolvedErrorMessage(): boolean {
+    return this._resolvedErrorMessage;
+  }
+
+  set errorAsStack(stack: string | null) {
+    this._errorAsStack = stack;
   }
 
   public isReady(): boolean {
@@ -102,9 +141,6 @@ class CategoryLogMessageImpl implements CategoryLogMessage {
     this._resolvedErrorMessage = value;
   }
 
-  public isResolvedErrorMessage(): boolean {
-    return this._resolvedErrorMessage;
-  }
 }
 
 /**
@@ -265,7 +301,7 @@ export abstract class AbstractCategoryLogger implements CategoryLogger {
           logMessage.resolvedErrorMessage = resolved;
           this.allMessages.addTail(logMessage);
           MessageFormatUtils.renderError(actualError).then((stack: string) => {
-            logMessage.setErrorAsStack(stack);
+            logMessage.errorAsStack = stack;
             logMessage.setReady(true);
             this.processMessages();
           });

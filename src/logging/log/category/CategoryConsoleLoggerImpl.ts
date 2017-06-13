@@ -26,7 +26,7 @@ export class CategoryConsoleLoggerImpl extends AbstractCategoryLogger {
       let logged = false;
 
       /* tslint:disable:no-console */
-      switch (msg.getLevel()) {
+      switch (msg.level) {
         case LogLevel.Trace:
           // Don't try trace we don't want stacks
           break;
@@ -56,7 +56,7 @@ export class CategoryConsoleLoggerImpl extends AbstractCategoryLogger {
           }
           break;
         default:
-          throw new Error("Unsupported level: " + msg.getLevel());
+          throw new Error("Unsupported level: " + msg.level);
       }
 
       if (!logged) {
@@ -65,7 +65,7 @@ export class CategoryConsoleLoggerImpl extends AbstractCategoryLogger {
       /* tslint:enable:no-console */
     }
     else {
-      throw new Error("Console is not defined, cannot log msg: " + msg.getMessage());
+      throw new Error("Console is not defined, cannot log msg: " + msg.messageAsString);
     }
   }
 }

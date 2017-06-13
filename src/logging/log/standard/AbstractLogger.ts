@@ -22,7 +22,7 @@ export interface LogMessage {
 
   /**
    * Returns the resolved stack (based on error).
-   * Available only when error is present.
+   * Available only when error is present, null otherwise.
    */
   readonly errorAsStack: string | null;
 
@@ -47,9 +47,20 @@ export interface LogMessage {
   readonly level: LogLevel;
 
   /**
-   * Returns true if message represents LogData (false for a string message).
+   * True if message represents LogData (false for a string message).
    */
-  isMessageLogData(): boolean;
+  readonly isMessageLogData: boolean;
+
+  /**
+   * Always retrieves the message, from either the string directly
+   * or in case of LogData from LogData itself.
+   */
+  readonly messageAsString: string;
+
+  /**
+   * If present returns LogData, otherwise null.
+   */
+  readonly logData: LogData | null;
 }
 
 interface LogMessageInternal extends LogMessage {
@@ -135,7 +146,7 @@ class LogMessageInternalImpl implements LogMessageInternal {
     this._level = value;
   }
 
-  public isMessageLogData(): boolean {
+  get isMessageLogData(): boolean {
     return typeof(this._message) !== "string";
   }
 
@@ -145,6 +156,21 @@ class LogMessageInternalImpl implements LogMessageInternal {
 
   set ready(value: boolean) {
     this._ready = value;
+  }
+
+  get messageAsString(): string {
+    if (typeof(this._message) === "string") {
+      return this._message;
+    }
+    return this._message.msg;
+  }
+
+  get logData(): LogData | null {
+    let result: LogData | null = null;
+    if (typeof(this._message) !== "string") {
+      result = this.message as LogData;
+    }
+    return result;
   }
 }
 
