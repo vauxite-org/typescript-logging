@@ -259,9 +259,9 @@ export class CategoryServiceImpl implements RuntimeSettings {
    * applied as well, pass in reset=true (the default is false). All
    * categories will be reset then as well.
    * @param config New config
-   * @param reset Defaults to false. Set to true to reset all loggers and current runtimesettings.
+   * @param reset Defaults to true. Set to true to reset all loggers and current runtimesettings.
    */
-  public setDefaultConfiguration(config: CategoryDefaultConfiguration, reset: boolean = false): void {
+  public setDefaultConfiguration(config: CategoryDefaultConfiguration, reset: boolean = true): void {
     this._defaultConfig = config;
     if (reset) {
       // Reset all runtimesettings (this will reset it for roots & children all at once).
@@ -305,10 +305,10 @@ export class CategoryServiceImpl implements RuntimeSettings {
    * @param config Config
    * @param category Category
    * @param applyChildren True to apply to child categories, defaults to false.
-   * @param resetRootLogger Defaults to false. If set to true and if category is a root category it will reset the root logger.
+   * @param resetRootLogger Defaults to true. If set to true and if category is a root category it will reset the root logger.
    */
   public setConfigurationCategory(config: CategoryDefaultConfiguration, category: Category, applyChildren: boolean = false,
-                                  resetRootLogger: boolean = false): void {
+                                  resetRootLogger: boolean = true): void {
     const categorySettings = this.getCategorySettings(category);
     if (categorySettings === null) {
       throw new Error("Given category is not registered: " + category.name);
@@ -483,9 +483,9 @@ export class CategoryServiceFactory {
    * applied as well, pass in reset=true (the default is false). All
    * categories runtimesettings will be reset then as well.
    * @param config The new default configuration
-   * @param reset If true, will reset *all* runtimesettings for all loggers/categories to these.
+   * @param reset If true, will reset *all* runtimesettings for all loggers/categories to these. Default is true.
    */
-  public static setDefaultConfiguration(config: CategoryDefaultConfiguration, reset: boolean = false): void {
+  public static setDefaultConfiguration(config: CategoryDefaultConfiguration, reset: boolean = true): void {
     CategoryServiceImpl.getInstance().setDefaultConfiguration(config, reset);
   }
 
@@ -494,10 +494,10 @@ export class CategoryServiceFactory {
    * @param config Config
    * @param category Category
    * @param applyChildren True to apply to child categories, defaults to false.
-   * @param resetRootLogger Defaults to false. If set to true and if category is a root category it will reset the root logger.
+   * @param resetRootLogger Defaults to true. If set to true and if category is a root category it will reset the root logger.
    */
   public static setConfigurationCategory(config: CategoryDefaultConfiguration, category: Category, applyChildren: boolean = false,
-                                         resetRootLogger: boolean = false): void {
+                                         resetRootLogger: boolean = true): void {
     CategoryServiceImpl.getInstance().setConfigurationCategory(config, category, applyChildren, resetRootLogger);
   }
 

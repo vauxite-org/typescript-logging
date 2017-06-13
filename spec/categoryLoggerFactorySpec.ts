@@ -168,14 +168,14 @@ describe("CategoryServiceFactory", () => {
     const configChanged = new CategoryDefaultConfiguration(
       LogLevel.Info, LoggerType.MessageBuffer, new CategoryLogFormat(new DateFormat(DateFormatEnum.YearDayMonthWithFullTime, "/"), false, false)
     );
-    CategoryServiceFactory.setDefaultConfiguration(configChanged, true);
+    CategoryServiceFactory.setDefaultConfiguration(configChanged);
 
     checkChangedConfig(root1, CategoryServiceFactory.getRuntimeSettings().getCategorySettings(root1));
     checkChangedConfig(child1, CategoryServiceFactory.getRuntimeSettings().getCategorySettings(child1));
     checkChangedConfig(child11, CategoryServiceFactory.getRuntimeSettings().getCategorySettings(child11));
     checkChangedConfig(child12, CategoryServiceFactory.getRuntimeSettings().getCategorySettings(child12));
 
-    CategoryServiceFactory.setDefaultConfiguration(new CategoryDefaultConfiguration(), true);
+    CategoryServiceFactory.setDefaultConfiguration(new CategoryDefaultConfiguration());
     checkDefaultConfig(root1, CategoryServiceFactory.getRuntimeSettings().getCategorySettings(root1));
     checkDefaultConfig(child1, CategoryServiceFactory.getRuntimeSettings().getCategorySettings(child1));
     checkDefaultConfig(child11, CategoryServiceFactory.getRuntimeSettings().getCategorySettings(child11));
@@ -203,7 +203,7 @@ describe("CategoryServiceFactory", () => {
        LogLevel.Info, LoggerType.Custom, new CategoryLogFormat(),
       (rootCategory: Category, runtimeSettings: RuntimeSettings) => new CustomLogger(rootCategory, runtimeSettings, messages)
     );
-    CategoryServiceFactory.setDefaultConfiguration(configChanged, true);
+    CategoryServiceFactory.setDefaultConfiguration(configChanged);
     const rootLogger = CategoryServiceFactory.getLogger(root1);
     rootLogger.info("First Message");
     rootLogger.info("Second Message");
@@ -219,7 +219,7 @@ describe("CategoryServiceFactory", () => {
       const message = msg.messageAsString;
       return typeof(message) === "string" ? message : "";
     };
-    CategoryServiceFactory.setDefaultConfiguration(configChanged, true);
+    CategoryServiceFactory.setDefaultConfiguration(configChanged);
     const rootLogger = CategoryServiceFactory.getLogger(root1);
     rootLogger.info("Hello root1!");
     rootLogger.info("Hello child1!", child1);
@@ -242,7 +242,7 @@ describe("CategoryServiceFactory", () => {
     };
 
     expect(() => configChanged.formatterLogMessage = formatterLogMessage).toThrow("You cannot specify a formatter for log messages if your loggerType is Custom");
-    CategoryServiceFactory.setDefaultConfiguration(configChanged, true);
+    CategoryServiceFactory.setDefaultConfiguration(configChanged);
   });
 
   it("Can set different custom formatter on category than default", () => {
@@ -264,8 +264,8 @@ describe("CategoryServiceFactory", () => {
 
     const root2 = new Category("root2");
 
-    CategoryServiceFactory.setDefaultConfiguration(defaultConfig, true);
-    CategoryServiceFactory.setConfigurationCategory(configRoot2, root2, true);
+    CategoryServiceFactory.setDefaultConfiguration(defaultConfig);
+    CategoryServiceFactory.setConfigurationCategory(configRoot2, root2);
 
     const rootLogger = CategoryServiceFactory.getLogger(root1);
     rootLogger.info("Hello root1!");

@@ -6,7 +6,13 @@ This page describes the relevant changes per version.
   * Added new feature to to both log4j and category style, to specify a formatterLogMessage function instead of custom logger, which allows you to override the formatting of the log message without having to create a custom logger. Please see the docs for more details.
   * **Potentially breaking change** Both Logger and CategoryLogger message (LogMessage and CategoryLogMessage) now allow to log their message as: string | LogData (this was only string), LogData is an interface which allows you to also set a message (msg) and additional data if needed. Please see the docs for more details. Potentially breaks custom loggers, instead use properties and one of these to help you out: messageAsString, isMessageLogData and logData properties.
     * Thanks for the pull request @CSchulz !
+    * See also [issue 14](https://github.com/mreuvers/typescript-logging/issues/14)
   * **Potentially breaking change** Changed CategoryLogMessage and LogMessage, now both have readonly properties only for their data, instead of methods to get the information. If you use a custom logger this may break for you, to fix just use the properties data instead.
+    * See also [issue 9](https://github.com/mreuvers/typescript-logging/issues/9)
+  * CategoryServiceFactory
+    * Method setDefaultConfiguration, default reset parameter changed to true (from false). Reset of everything is now done by default.
+    * Method setConfigurationCategory, default reset parameter changed to true (from false). Resets root logger now.
+    * See also [issue 11](https://github.com/mreuvers/typescript-logging/issues/11)
 * 0.3.1
   * Fixed: [Remove "Dropping unknown message"](https://github.com/mreuvers/typescript-logging/issues/8)
 * 0.3.0 (current release)

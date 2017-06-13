@@ -37,7 +37,7 @@ describe("CategoryLogger...", () => {
 
   it("Default logs to error", () => {
     // Need to switch to messagebuffer for testing, by default or it will go to console.
-    CategoryServiceFactory.setDefaultConfiguration(new CategoryDefaultConfiguration(LogLevel.Error, LoggerType.MessageBuffer), true);
+    CategoryServiceFactory.setDefaultConfiguration(new CategoryDefaultConfiguration(LogLevel.Error, LoggerType.MessageBuffer));
 
     const logger = CategoryServiceFactory.getLogger(catRoot);
     logger.trace("Trace", catRoot);
@@ -60,7 +60,7 @@ describe("CategoryLogger...", () => {
   });
 
   it("Logs to different levels", () => {
-    CategoryServiceFactory.setDefaultConfiguration(new CategoryDefaultConfiguration(LogLevel.Trace, LoggerType.MessageBuffer), true);
+    CategoryServiceFactory.setDefaultConfiguration(new CategoryDefaultConfiguration(LogLevel.Trace, LoggerType.MessageBuffer));
 
     const logger = CategoryServiceFactory.getLogger(catRoot);
     logger.trace("Trace", catRoot);
@@ -81,7 +81,7 @@ describe("CategoryLogger...", () => {
   });
 
   it("Logs to root category by default", () => {
-    CategoryServiceFactory.setDefaultConfiguration(new CategoryDefaultConfiguration(LogLevel.Trace, LoggerType.MessageBuffer), true);
+    CategoryServiceFactory.setDefaultConfiguration(new CategoryDefaultConfiguration(LogLevel.Trace, LoggerType.MessageBuffer));
     const logger = CategoryServiceFactory.getLogger(catRoot);
 
     logger.info("Hello");
@@ -91,7 +91,7 @@ describe("CategoryLogger...", () => {
   });
 
   it("Logs to different levels", () => {
-    CategoryServiceFactory.setDefaultConfiguration(new CategoryDefaultConfiguration(LogLevel.Info, LoggerType.MessageBuffer), true);
+    CategoryServiceFactory.setDefaultConfiguration(new CategoryDefaultConfiguration(LogLevel.Info, LoggerType.MessageBuffer));
     const logger = CategoryServiceFactory.getLogger(catRoot);
     logger.infoc(() => "Dance", catRoot);
     const messages = getMessages(logger);
@@ -107,7 +107,7 @@ describe("CategoryLogger...", () => {
 
     beforeEach(() => {
       // Need to switch to messagebuffer for testing, by default or it will go to console.
-      CategoryServiceFactory.setDefaultConfiguration(new CategoryDefaultConfiguration(LogLevel.Trace, LoggerType.MessageBuffer), true);
+      CategoryServiceFactory.setDefaultConfiguration(new CategoryDefaultConfiguration(LogLevel.Trace, LoggerType.MessageBuffer));
 
       logger = CategoryServiceFactory.getLogger(catRoot);
     });
