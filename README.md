@@ -15,9 +15,9 @@ The javascript bundle can be used for normal javascript projects if needed (es5 
 
 Use npm to install for usage in your project.
 
-~~~
+```bash
 npm install --save typescript-logging
-~~~
+```
 No additional typings are required, these are included.
 
 Requires typescript 2.1.5+ (tested).
@@ -46,7 +46,7 @@ Note: Currently the chrome developer extension supports "category style logging"
 This provides a quick example (since 0.2.0+), please check the documentation section for full documentation.
 
 Config.ts
-~~~
+```typescript
 import {Category,CategoryLogger,CategoryServiceFactory,CategoryDefaultConfiguration,LogLevel} from "typescript-logging";
 
 // Optionally change default settings, in this example set default logging to Info.
@@ -60,10 +60,10 @@ export const catProd = new Category("product", catRoot);
 
 // Get a logger, this can be retrieved for root categories only (in the example above, the "service" category).
 export const log: CategoryLogger = CategoryServiceFactory.getLogger(catRoot);
-~~~
+```
 
 ElseWhere.ts
-~~~
+```typescript
 import {log,catProd} from "./Config"
 
 export class ElseWhere {
@@ -78,21 +78,21 @@ export class ElseWhere {
      log.infoc(() => `With template script: ${name}`, catProd);
   }
 }
-~~~
+```
 
 With the above example if magic("spell") is executed it will log:
-~~~
+```
 2016-01-07 11:14:26,273 INFO [product] Performing magic: spell
 2016-01-07 11:14:26,274 INFO [product] Performing magic once more: spell
 2016-01-07 11:14:26,275 INFO [product] With template script: spell
-~~~
+```
 
 ### Log4j style logging
 
 This provides a quick example (since 0.1.x), please check the documentation section for full documentation.
 
 ConfigLog4j.ts
-~~~
+```typescript
 import {LoggerFactory, LoggerFactoryOptions, LFService, LogGroupRule, LogLevel} from "typescript-logging";
 
 // Create options instance and specify 2 LogGroupRules:
@@ -105,10 +105,10 @@ const options = new LoggerFactoryOptions()
 // Create a named loggerfactory and pass in the options and export the factory.
 // Named is since version 0.2.+ (it's recommended for future usage)
 export const factory = LFService.createNamedLoggerFactory("LoggerFactory", options);
-~~~
+```
 
 ElseWhere.ts
-~~~
+```typescript
 import {factory} from "./ConfigLog4j";
 
 // Retrieve a logger (you can decide to use it per class and/or module or just
@@ -133,16 +133,16 @@ export class ElseWhere {
     log.infoc(() => `Casting magic spell: ${name}`);
   }
 }
-~~~
+```
 
 When the method magic("Lumina") is called on an ElseWhere instance, it will log:
-~~~
+```
 2017-02-15 20:43:52,807 DEBUG [model.Product] Casting debug magic spell: Lumina
 2017-02-15 20:43:52,809 INFO [somethingElse] Casting info magic spell: Lumina
 2017-02-15 20:43:52,810 DEBUG [model.Product] Casting lambda debug magic spell: Lumina
 2017-02-15 20:43:52,811 INFO [somethingElse] Casting lambda info magic spell: Lumina
 2017-02-15 20:43:52,812 INFO [model.Product] Casting magic spell: Lumina
-~~~
+```
 
 
 ## Console control API
@@ -186,7 +186,7 @@ Example:
 Project A is a core project (and thus used by other projects as a dependency), this project must make sure
 to *not* pack typescript-logging within it's module by using the external option:
 
-```
+```javascript
 var webpack = require("webpack");
 
 module.exports = {
@@ -217,17 +217,17 @@ Note: The extension currently only integrates with the category style of logging
 
 To build locally:
 
-~~~
+```bash
 npm run build
-~~~
+```
 
 ## Tests
 
 To run the tests:
 
-~~~
+```bash
 npm run test
-~~~
+```
 
 ## Bugs
 
