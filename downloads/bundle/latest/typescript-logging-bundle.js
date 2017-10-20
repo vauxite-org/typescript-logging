@@ -1922,8 +1922,12 @@ var CategoryServiceImpl = (function () {
         // Apply the settings to children recursive if requested
         if (applyChildren) {
             category.children.forEach(function (child) {
-                _this.setConfigurationCategory(config, child, applyChildren, resetRootLogger);
+                // False flag, a child cannot reset a rootlogger
+                _this.setConfigurationCategory(config, child, applyChildren, false);
             });
+        }
+        if (resetRootLogger && category.parent !== null) {
+            throw new Error("Cannot reset root logger, category " + category.name + " is not a root category");
         }
         if (resetRootLogger && this.rootCategoryExists(category)) {
             var tupleLogger = this._rootLoggers.get(category.name);
@@ -2003,7 +2007,7 @@ var CategoryServiceImpl = (function () {
             throw new Error("Root category CANNOT be null");
         }
         var parent = rootCategory.parent;
-        if (parent != null) {
+        if (parent !== null) {
             throw new Error("Parent must be null for a root category");
         }
         return this._rootCategories.indexOf(rootCategory) !== -1;
@@ -2958,10 +2962,7 @@ var CategoryConsoleLoggerImpl = (function (_super) {
                     // Don't try trace we don't want stacks
                     break;
                 case LoggerOptions_1.LogLevel.Debug:
-                    if (console.debug) {
-                        console.debug(fullMsg);
-                        logged = true;
-                    }
+                    // Don't try, too much differences of consoles.
                     break;
                 case LoggerOptions_1.LogLevel.Info:
                     if (console.info) {
@@ -3241,10 +3242,7 @@ var ConsoleLoggerImpl = (function (_super) {
                     // Do not try trace we don't want a stack
                     break;
                 case LoggerOptions_1.LogLevel.Debug:
-                    if (console.debug) {
-                        console.debug(msg);
-                        logged = true;
-                    }
+                    // Don't try, too much differences of consoles.
                     break;
                 case LoggerOptions_1.LogLevel.Info:
                     if (console.info) {
@@ -4522,7 +4520,7 @@ var Category = (function () {
         this._id = Category.nextId();
         this._name = name;
         this._parent = parent;
-        if (this._parent != null) {
+        if (this._parent !== null) {
             this._parent._children.push(this);
         }
         CategoryService_1.CategoryServiceImpl.getInstance().registerCategory(this);
@@ -7163,7 +7161,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
     }
 
     function _capitalize(str) {
-        return str[0].toUpperCase() + str.substring(1);
+        return str.charAt(0).toUpperCase() + str.substring(1);
     }
 
     function _getter(p) {

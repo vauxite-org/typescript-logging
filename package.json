@@ -37,6 +37,7 @@
   },
   "homepage": "https://github.com/mreuvers/typescript-logging#readme",
   "devDependencies": {
+    "@types/handlebars": "4.0.33",
     "@types/jasmine-node": "1.14.31",
     "@types/node": "6.0.58",
     "@types/stacktrace-js": "0.0.30",
@@ -50,7 +51,7 @@
     "ts-loader": "2.0.3",
     "tslint": "4.4.2",
     "typedoc": "0.5.1",
-    "typescript": "2.1.5",
+    "typescript": "2.1.6",
     "webpack": "2.2.1"
   },
   "typings": "./dist/commonjs/typescript-logging.d.ts",
