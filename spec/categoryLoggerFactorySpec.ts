@@ -277,6 +277,14 @@ describe("CategoryServiceFactory", () => {
     expect(getBufferedMessages(rootLogger2)).toEqual(["Hello root2!_postFix"]);
   });
 
+  it("Does not fail reset of category settings", () => {
+    const catRoot = new Category("jmod2ts");
+    const catRuntime = new Category("runtime", catRoot);
+
+    // Should just succeed (this was a bug) due to resetRootLogger=true flag. Fixed in 0.4.1
+    CategoryServiceFactory.setConfigurationCategory(new CategoryDefaultConfiguration(LogLevel.Info), catRoot, true, true);
+  });
+
   class CustomLogger extends AbstractCategoryLogger {
 
     private messages: Array<string | LogData> = [];

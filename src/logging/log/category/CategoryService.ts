@@ -322,8 +322,13 @@ export class CategoryServiceImpl implements RuntimeSettings {
     // Apply the settings to children recursive if requested
     if (applyChildren) {
       category.children.forEach((child) => {
-        this.setConfigurationCategory(config, child, applyChildren, resetRootLogger);
+        // False flag, a child cannot reset a rootlogger
+        this.setConfigurationCategory(config, child, applyChildren, false);
       });
+    }
+
+    if (resetRootLogger && category.parent !== null) {
+      throw new Error("Cannot reset root logger, category " + category.name + " is not a root category");
     }
 
     if (resetRootLogger && this.rootCategoryExists(category)) {
@@ -415,7 +420,7 @@ export class CategoryServiceImpl implements RuntimeSettings {
     }
 
     const parent = rootCategory.parent;
-    if (parent != null) {
+    if (parent !== null) {
       throw new Error("Parent must be null for a root category");
     }
 

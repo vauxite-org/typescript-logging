@@ -27,7 +27,7 @@ export class Category {
     this._id = Category.nextId();
     this._name = name;
     this._parent = parent;
-    if (this._parent != null) {
+    if (this._parent !== null) {
       this._parent._children.push(this);
     }
     CategoryServiceImpl.getInstance().registerCategory(this);
