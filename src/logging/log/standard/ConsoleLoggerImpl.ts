@@ -31,10 +31,7 @@ export class ConsoleLoggerImpl extends AbstractLogger {
           // Do not try trace we don't want a stack
           break;
         case LogLevel.Debug:
-          if (console.debug) {
-            console.debug(msg);
-            logged = true;
-          }
+          // Don't try, too much differences of consoles.
           break;
         case LogLevel.Info:
           if (console.info) {

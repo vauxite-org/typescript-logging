@@ -1,6 +1,6 @@
 {
   "name": "typescript-logging",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Library for logging, written in typescript, can be used by normal es5+ javascript as well.",
   "main": "dist/commonjs/typescript-logging",
   "scripts": {

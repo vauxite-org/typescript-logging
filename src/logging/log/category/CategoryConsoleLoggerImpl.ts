@@ -31,10 +31,7 @@ export class CategoryConsoleLoggerImpl extends AbstractCategoryLogger {
           // Don't try trace we don't want stacks
           break;
         case LogLevel.Debug:
-          if (console.debug) {
-            console.debug(fullMsg);
-            logged = true;
-          }
+          // Don't try, too much differences of consoles.
           break;
         case LogLevel.Info:
           if (console.info) {
