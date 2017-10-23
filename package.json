@@ -1,6 +1,6 @@
 {
   "name": "typescript-logging",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Library for logging, written in typescript, can be used by normal es5+ javascript as well.",
   "main": "dist/commonjs/typescript-logging",
   "scripts": {
@@ -51,7 +51,7 @@
     "ts-loader": "2.0.3",
     "tslint": "4.4.2",
     "typedoc": "0.5.1",
-    "typescript": "2.1.6",
+    "typescript": "2.1.5",
     "webpack": "2.2.1"
   },
   "typings": "./dist/commonjs/typescript-logging.d.ts",

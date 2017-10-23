@@ -1,10 +1,12 @@
 # Changelog
 
 This page describes the relevant changes per version.
-
+* 0.4.2
+  * [Issue 22](https://github.com/mreuvers/typescript-logging/issues/22) has been fixed (Distributed release 0.4.1 broken).
 * 0.4.1
   * [Issue 19](https://github.com/mreuvers/typescript-logging/issues/19) has been fixed (log.debug text not displayed in node 8 console).
   * [Issue 21](https://github.com/mreuvers/typescript-logging/issues/21) has been fixed (CategoryServiceFactory.setConfigurationCategory if category is a child must not attempt to reset root logger).
+  * ** Distribution package is broken, please do not use. **
 * 0.4.0
   * Added new feature to to both log4j and category style, to specify a formatterLogMessage function instead of custom logger, which allows you to override the formatting of the log message without having to create a custom logger. Please see the docs for more details.
   * **Potentially breaking change** Both Logger and CategoryLogger message (LogMessage and CategoryLogMessage) now allow to log their message as: string | LogData (this was only string), LogData is an interface which allows you to also set a message (msg) and additional data if needed. Please see the docs for more details. Potentially breaks custom loggers, instead use properties and one of these to help you out: messageAsString, isMessageLogData and logData properties.
