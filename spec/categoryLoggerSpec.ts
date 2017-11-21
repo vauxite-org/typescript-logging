@@ -18,6 +18,12 @@ const getMessages = (logger: CategoryLogger): string[] => {
   return (<CategoryMessageBufferLoggerImpl> actualLogger).getMessages();
 };
 
+function testAsync(runAsync: any) {
+  return (done: any) => {
+    runAsync().then(done, (e: any) => { fail(e); done(); });
+  };
+}
+
 describe("CategoryLogger...", () => {
 
   let catRoot: Category;
@@ -135,5 +141,148 @@ describe("CategoryLogger...", () => {
       expect(messages.length).toEqual(1);
       expect(messages[0]).toContain(msg);
     });
+  });
+
+  describe("Normal log methods support normal parameters and lambdas", () => {
+
+    let logger: CategoryLogger;
+
+    beforeEach(() => {
+      // Need to switch to messagebuffer for testing, by default or it will go to console.
+      CategoryServiceFactory.setDefaultConfiguration(new CategoryDefaultConfiguration(LogLevel.Trace, LoggerType.MessageBuffer));
+
+      logger = CategoryServiceFactory.getLogger(catRoot);
+    });
+
+    it("Tests all log levels", testAsync(async function() {
+      logger.trace("trace1");
+      logger.trace({ msg: "trace2" });
+      logger.trace(() => "trace3");
+      logger.trace(() => ({msg: "trace4" }) );
+      logger.trace(() => { return { msg: "trace5" }; });
+
+      logger.debug("debug1");
+      logger.debug({ msg: "debug2" });
+      logger.debug(() => "debug3");
+      logger.debug(() => ({msg: "debug4" }) );
+      logger.debug(() => { return { msg: "debug5" }; });
+
+      logger.info("info1");
+      logger.info({ msg: "info2" });
+      logger.info(() => "info3");
+      logger.info(() => ({msg: "info4" }) );
+      logger.info(() => { return { msg: "info5" }; });
+
+      logger.warn("warn1");
+      logger.warn({ msg: "warn2" });
+      logger.warn(() => "warn3");
+      logger.warn(() => ({msg: "warn4" }) );
+      logger.warn(() => { return { msg: "warn5" }; });
+
+      logger.error("error1", new Error("errorex1"));
+      logger.error({msg: "error2"}, new Error("errorex2"));
+      logger.error(() => "error3", () => new Error("errorex3"));
+      logger.error(() => ({msg : "error4"}), () => new Error("errorex4"));
+      logger.error(() => { return { msg: "error5" }; }, () => new Error("errorex5"));
+
+      logger.resolved("resolved1", new Error("resolvedex1"));
+      logger.resolved({msg: "resolved2"}, new Error("resolvedex2"));
+      logger.resolved(() => "resolved3", () => new Error("resolvedex3"));
+      logger.resolved(() => ({msg : "resolved4"}), () => new Error("resolvedex4"));
+      logger.resolved(() => { return { msg: "resolved5" }; }, () => new Error("resolvedex5"));
+
+      logger.fatal("fatal1", new Error("fatalex1"));
+      logger.fatal({msg: "fatal2"}, new Error("fatalex2"));
+      logger.fatal(() => "fatal3", () => new Error("fatalex3"));
+      logger.fatal(() => ({msg : "fatal4"}), () => new Error("fatalex4"));
+      logger.fatal(() => { return { msg: "fatal5" }; }, () => new Error("fatalex5"));
+
+      logger.log(LogLevel.Fatal, "random1", new Error("randomex1"));
+      logger.log(LogLevel.Fatal, { msg: "random2" }, new Error("randomex2"));
+      logger.log(LogLevel.Fatal, () => "random3", () => new Error("randomex3"));
+      logger.log(LogLevel.Fatal, () => ({msg : "random4"}), () => new Error("randomex4"));
+      logger.log(LogLevel.Fatal, () => { return { msg: "random5" }; }, () => new Error("randomex5"));
+
+      // Delay in an ugly way, so that the errors are resolved internally.
+      const promise = new Promise((resolve) => {
+        setTimeout(() => {
+          resolve();
+        }, 2000);
+      });
+
+      await promise;
+
+      const result = getMessagesAsString(logger);
+
+      console.log("GOT: " + result);
+
+      expect(result).toContain("trace1");
+      expect(result).toContain("trace2");
+      expect(result).toContain("trace3");
+      expect(result).toContain("trace4");
+      expect(result).toContain("trace5");
+
+      expect(result).toContain("debug1");
+      expect(result).toContain("debug2");
+      expect(result).toContain("debug3");
+      expect(result).toContain("debug4");
+      expect(result).toContain("debug5");
+
+      expect(result).toContain("info1");
+      expect(result).toContain("info2");
+      expect(result).toContain("info3");
+      expect(result).toContain("info4");
+      expect(result).toContain("info5");
+
+      expect(result).toContain("warn1");
+      expect(result).toContain("warn2");
+      expect(result).toContain("warn3");
+      expect(result).toContain("warn4");
+      expect(result).toContain("warn5");
+
+      expect(result).toContain("error1");
+      expect(result).toContain("errorex1");
+      expect(result).toContain("error2");
+      expect(result).toContain("errorex2");
+      expect(result).toContain("error3");
+      expect(result).toContain("errorex3");
+      expect(result).toContain("error4");
+      expect(result).toContain("errorex4");
+      expect(result).toContain("error5");
+      expect(result).toContain("errorex5");
+
+      expect(result).toContain("resolved1");
+      expect(result).toContain("resolvedex1");
+      expect(result).toContain("resolved2");
+      expect(result).toContain("resolvedex2");
+      expect(result).toContain("resolved3");
+      expect(result).toContain("resolvedex3");
+      expect(result).toContain("resolved4");
+      expect(result).toContain("resolvedex4");
+      expect(result).toContain("resolved5");
+      expect(result).toContain("resolvedex5");
+
+      expect(result).toContain("fatal1");
+      expect(result).toContain("fatalex1");
+      expect(result).toContain("fatal2");
+      expect(result).toContain("fatalex2");
+      expect(result).toContain("fatal3");
+      expect(result).toContain("fatalex3");
+      expect(result).toContain("fatal4");
+      expect(result).toContain("fatalex4");
+      expect(result).toContain("fatal5");
+      expect(result).toContain("fatalex5");
+
+      expect(result).toContain("random1");
+      expect(result).toContain("randomex1");
+      expect(result).toContain("random2");
+      expect(result).toContain("randomex2");
+      expect(result).toContain("random3");
+      expect(result).toContain("randomex3");
+      expect(result).toContain("random4");
+      expect(result).toContain("randomex4");
+      expect(result).toContain("random5");
+      expect(result).toContain("randomex5");
+    }));
   });
 });

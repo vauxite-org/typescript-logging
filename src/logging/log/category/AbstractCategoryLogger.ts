@@ -158,40 +158,40 @@ export abstract class AbstractCategoryLogger implements CategoryLogger {
 
   private allMessages: LinkedList<CategoryLogMessageImpl> = new LinkedList<CategoryLogMessageImpl>();
 
-  constructor(rootCategory: Category, runtimeSettings: RuntimeSettings) {
+  constructor(rootCategory: Category, runtimeSettings: RuntimeSettings, categories: Category[] = []) {
     this.rootCategory = rootCategory;
     this.runtimeSettings = runtimeSettings;
   }
 
-  public trace(msg: string | LogData, ...categories: Category[]): void {
+  public trace(msg: string | LogData | (() => string | LogData), ...categories: Category[]): void {
     this._log(LogLevel.Trace, msg, null, false, ...categories);
   }
 
-  public debug(msg: string | LogData, ...categories: Category[]): void {
+  public debug(msg: string | LogData | (() => string | LogData), ...categories: Category[]): void {
     this._log(LogLevel.Debug, msg, null, false, ...categories);
   }
 
-  public info(msg: string | LogData, ...categories: Category[]): void {
+  public info(msg: string | LogData | (() => string | LogData), ...categories: Category[]): void {
     this._log(LogLevel.Info, msg, null, false, ...categories);
   }
 
-  public warn(msg: string | LogData, ...categories: Category[]): void {
+  public warn(msg: string | LogData | (() => string | LogData), ...categories: Category[]): void {
     this._log(LogLevel.Warn, msg, null, false, ...categories);
   }
 
-  public error(msg: string | LogData, error: Error, ...categories: Category[]): void {
+  public error(msg: string | LogData | (() => string | LogData), error: Error | (() => Error | null), ...categories: Category[]): void {
     this._log(LogLevel.Error, msg, error, false, ...categories);
   }
 
-  public fatal(msg: string | LogData, error: Error, ...categories: Category[]): void {
+  public fatal(msg: string | LogData | (() => string | LogData), error: Error | (() => Error | null), ...categories: Category[]): void {
     this._log(LogLevel.Fatal, msg, error, false, ...categories);
   }
 
-  public resolved(msg: string | LogData, error: Error, ...categories: Category[]): void {
+  public resolved(msg: string | LogData | (() => string | LogData), error: Error | (() => Error | null), ...categories: Category[]): void {
     this._log(LogLevel.Error, msg, error, true, ...categories);
   }
 
-  public log(level: LogLevel, msg: string | LogData, error: Error, ...categories: Category[]): void {
+  public log(level: LogLevel, msg: string | (() => string | LogData) | LogData, error: Error | (() => Error | null), ...categories: Category[]): void {
     this._log(level, msg, error, false, ...categories);
   }
 
@@ -255,8 +255,21 @@ export abstract class AbstractCategoryLogger implements CategoryLogger {
     return categorySettings.formatterLogMessage;
   }
 
-  private _log(level: LogLevel, msg: string | LogData, error: Error | null = null, resolved: boolean = false, ...categories: Category[]): void {
-    this._logInternal(level, () => msg, () => error, resolved, ...categories);
+  private _log(level: LogLevel, msg: string | LogData | (() => string | LogData), error: Error | null | (() => Error | null) = null, resolved: boolean = false, ...categories: Category[]): void {
+    // this._logInternal(level, () => msg, () => error, resolved, ...categories);
+    const functionMessage = (): string | LogData => {
+      if (typeof msg === "function") {
+        return msg();
+      }
+      return msg;
+    };
+    const functionError = (): Error | null => {
+      if (typeof error === "function") {
+        return error();
+      }
+      return error;
+    };
+    this._logInternal(level, functionMessage, functionError, resolved, ...categories);
   }
 
   private _logc(level: LogLevel, msg: () => string | LogData, error: () => Error | null, resolved: boolean = false, ...categories: Category[]): void {

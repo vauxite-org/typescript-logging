@@ -82,17 +82,17 @@ export class Category {
  */
 export interface CategoryLogger {
 
-  trace(msg: string | LogData, ...categories: Category[]): void;
+  trace(msg: string | LogData | (() => string | LogData), ...categories: Category[]): void;
 
-  debug(msg: string | LogData, ...categories: Category[]): void;
+  debug(msg: string | LogData | (() => string | LogData), ...categories: Category[]): void;
 
-  info(msg: string | LogData, ...categories: Category[]): void;
+  info(msg: string | LogData | (() => string | LogData), ...categories: Category[]): void;
 
-  warn(msg: string | LogData, ...categories: Category[]): void;
+  warn(msg: string | LogData | (() => string | LogData), ...categories: Category[]): void;
 
-  error(msg: string | LogData, error: Error | null, ...categories: Category[]): void;
+  error(msg: string | LogData | (() => string | LogData), error: Error | null | (() => Error | null), ...categories: Category[]): void;
 
-  fatal(msg: string | LogData, error: Error | null, ...categories: Category[]): void;
+  fatal(msg: string | LogData | (() => string | LogData), error: Error | null | (() => Error | null), ...categories: Category[]): void;
 
   /**
    * This is a special opinionated way to log, that an exception (Error)
@@ -103,9 +103,9 @@ export interface CategoryLogger {
    * @param error Error
    * @param categories Categories to log for
    */
-  resolved(msg: string | LogData, error: Error | null, ...categories: Category[]): void;
+  resolved(msg: string | LogData | (() => string | LogData), error: Error | null | (() => Error | null), ...categories: Category[]): void;
 
-  log(level: LogLevel, msg: string | LogData, error: Error | null, ...categories: Category[]): void;
+  log(level: LogLevel, msg: string | LogData | (() => string | LogData), error: Error | null | (() => Error | null), ...categories: Category[]): void;
 
   tracec(msg: () => string | LogData, ...categories: Category[]): void;
 
