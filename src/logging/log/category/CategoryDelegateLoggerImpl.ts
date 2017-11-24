@@ -1,5 +1,6 @@
 import {LogLevel} from "../LoggerOptions";
 import {Category, CategoryLogger} from "./CategoryLogger";
+import {MessageType} from "../standard/Logger";
 
 /**
  * Delegate logger, delegates logging to given logger (constructor).
@@ -20,35 +21,35 @@ export class CategoryDelegateLoggerImpl implements CategoryLogger {
     this._delegate = value;
   }
 
-  public trace(msg: string, ...categories: Category[]): void {
+  public trace(msg: MessageType, ...categories: Category[]): void {
     this._delegate.trace(msg, ...categories);
   }
 
-  public debug(msg: string, ...categories: Category[]): void {
+  public debug(msg: MessageType, ...categories: Category[]): void {
     this._delegate.debug(msg, ...categories);
   }
 
-  public info(msg: string, ...categories: Category[]): void {
+  public info(msg: MessageType, ...categories: Category[]): void {
     this._delegate.info(msg, ...categories);
   }
 
-  public warn(msg: string, ...categories: Category[]): void {
+  public warn(msg: MessageType, ...categories: Category[]): void {
     this._delegate.warn(msg, ...categories);
   }
 
-  public error(msg: string, error: Error, ...categories: Category[]): void {
+  public error(msg: MessageType, error: Error, ...categories: Category[]): void {
     this._delegate.error(msg, error, ...categories);
   }
 
-  public fatal(msg: string, error: Error, ...categories: Category[]): void {
+  public fatal(msg: MessageType, error: Error, ...categories: Category[]): void {
     this._delegate.fatal(msg, error, ...categories);
   }
 
-  public resolved(msg: string, error: Error, ...categories: Category[]): void {
+  public resolved(msg: MessageType, error: Error, ...categories: Category[]): void {
     this._delegate.resolved(msg, error, ...categories);
   }
 
-  public log(level: LogLevel, msg: string, error: Error, ...categories: Category[]): void {
+  public log(level: LogLevel, msg: MessageType, error: Error, ...categories: Category[]): void {
     this._delegate.log(level, msg, error, ...categories);
   }
 

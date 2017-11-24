@@ -222,7 +222,7 @@ export class CategoryServiceImpl implements RuntimeSettings {
       throw new Error("Given category " + root.name + " is not registered as a root category. You must use the root category to retrieve a logger.");
     }
 
-    let pair = this._rootLoggers.get(root.name);
+    const pair = this._rootLoggers.get(root.name);
     if (pair != null) {
       return pair.y;
     }
@@ -295,7 +295,7 @@ export class CategoryServiceImpl implements RuntimeSettings {
       // are guaranteed to be wrapped inside the delegate logger.
       this._rootLoggers.values().forEach((pair: TuplePair<Category, CategoryLogger>) => {
         // Set the new logger type
-        (<CategoryDelegateLoggerImpl> pair.y).delegate = this.createRootLogger(pair.x);
+        (pair.y as CategoryDelegateLoggerImpl).delegate = this.createRootLogger(pair.x);
       });
     }
   }
@@ -334,7 +334,7 @@ export class CategoryServiceImpl implements RuntimeSettings {
     if (resetRootLogger && this.rootCategoryExists(category)) {
       const tupleLogger = this._rootLoggers.get(category.name);
       if (tupleLogger !== null) {
-        (<CategoryDelegateLoggerImpl> tupleLogger.y).delegate = this.createRootLogger(tupleLogger.x);
+        (tupleLogger.y as CategoryDelegateLoggerImpl).delegate = this.createRootLogger(tupleLogger.x);
       }
     }
   }
@@ -363,12 +363,12 @@ export class CategoryServiceImpl implements RuntimeSettings {
   public enableExtensionIntegration(): void {
     this._rootLoggers.values().forEach((pair: TuplePair<Category, CategoryLogger>) => {
       // Set the new logger type if needed.
-      const delegateLogger = <CategoryDelegateLoggerImpl> pair.y;
+      const delegateLogger = pair.y as CategoryDelegateLoggerImpl;
       if (!(delegateLogger instanceof CategoryExtensionLoggerImpl)) {
         /* tslint:disable:no-console */
         console.log("Reconfiguring root logger for root category: " + pair.x.name);
         /* tslint:enable:no-console */
-        (<CategoryDelegateLoggerImpl> pair.y).delegate = new CategoryExtensionLoggerImpl(pair.x, this);
+        (pair.y as CategoryDelegateLoggerImpl).delegate = new CategoryExtensionLoggerImpl(pair.x, this);
       }
     });
   }

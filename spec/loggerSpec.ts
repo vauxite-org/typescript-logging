@@ -6,6 +6,7 @@ import {MessageBufferLoggerImpl} from "../src/logging/log/standard/MessageBuffer
 import {LogLevel, LogFormat, LoggerType} from "../src/logging/log/LoggerOptions";
 import {AbstractLogger, LogMessage} from "../src/logging/log/standard/AbstractLogger";
 import {LoggerFactory} from "../src/logging/log/standard/LoggerFactory";
+import {Logger} from "../src/logging/log/standard/Logger";
 
 /**
  * Custom logger for testing, only logs the last message.
@@ -26,6 +27,22 @@ class CustomLoggerImpl extends AbstractLogger {
     return this._message;
   }
 }
+
+const getMessagesAsString = (logger: Logger): string => {
+  if (logger instanceof MessageBufferLoggerImpl) {
+    const actualLogger = logger as MessageBufferLoggerImpl;
+    return actualLogger.toString();
+  }
+  throw new Error("Not a MessageBufferLogger");
+};
+
+const getMessages = (logger: Logger): string[] => {
+  if (logger instanceof MessageBufferLoggerImpl) {
+    const actualLogger = logger as MessageBufferLoggerImpl;
+    return actualLogger.getMessages();
+  }
+  throw new Error("Not a MessageBufferLogger");
+};
 
 describe("Loggers", () => {
 
@@ -166,6 +183,111 @@ describe("Loggers", () => {
       let messages: string[] = logger.getMessages();
       expect(messages.length).toEqual(1);
       expect(messages[0]).toContain(msg);
+    });
+  });
+
+  it("Tests all log levels", () => {
+    const loggerFactory = LFService.createLoggerFactory(new LoggerFactoryOptions().addLogGroupRule(new LogGroupRule(new RegExp(".+"), LogLevel.Trace, new LogFormat(), LoggerType.MessageBuffer)));
+    const logger = loggerFactory.getLogger("ABC");
+
+    logger.trace("trace1");
+    logger.trace({msg: "trace2"});
+    logger.trace(() => "trace3");
+    logger.trace(() => ({msg: "trace4"}));
+    logger.trace(() => {
+      return {msg: "trace5"};
+    });
+
+    logger.debug("debug1");
+    logger.debug({msg: "debug2"});
+    logger.debug(() => "debug3");
+    logger.debug(() => ({msg: "debug4"}));
+    logger.debug(() => {
+      return {msg: "debug5"};
+    });
+
+    logger.info("info1");
+    logger.info({msg: "info2"});
+    logger.info(() => "info3");
+    logger.info(() => ({msg: "info4"}));
+    logger.info(() => {
+      return {msg: "info5"};
+    });
+
+    logger.warn("warn1");
+    logger.warn({msg: "warn2"});
+    logger.warn(() => "warn3");
+    logger.warn(() => ({msg: "warn4"}));
+    logger.warn(() => {
+      return {msg: "warn5"};
+    });
+
+    logger.error("error1", new Error("errorex1"));
+    logger.error({msg: "error2"}, new Error("errorex2"));
+    logger.errorc(() => "error3", () => new Error("errorex3"));
+    logger.error(() => ({msg: "error4"}), () => new Error("errorex4"));
+    logger.error(() => {
+      return {msg: "error5"};
+    }, () => new Error("errorex5"));
+
+    logger.fatal("fatal1", new Error("fatalex1"));
+    logger.fatal({msg: "fatal2"}, new Error("fatalex2"));
+    logger.fatal(() => "fatal3", () => new Error("fatalex3"));
+    logger.fatal(() => ({msg: "fatal4"}), () => new Error("fatalex4"));
+    logger.fatal(() => {
+      return {msg: "fatal5"};
+    }, () => new Error("fatalex5"));
+
+    const messages = getMessages(logger);
+    waitsFor(() =>   messages.length === 30, "Expected 30 messages in log", 5000);
+    runs(() => {
+      const result = getMessagesAsString(logger);
+
+      expect(result).toContain("trace1");
+      expect(result).toContain("trace2");
+      expect(result).toContain("trace3");
+      expect(result).toContain("trace4");
+      expect(result).toContain("trace5");
+
+      expect(result).toContain("debug1");
+      expect(result).toContain("debug2");
+      expect(result).toContain("debug3");
+      expect(result).toContain("debug4");
+      expect(result).toContain("debug5");
+
+      expect(result).toContain("info1");
+      expect(result).toContain("info2");
+      expect(result).toContain("info3");
+      expect(result).toContain("info4");
+      expect(result).toContain("info5");
+
+      expect(result).toContain("warn1");
+      expect(result).toContain("warn2");
+      expect(result).toContain("warn3");
+      expect(result).toContain("warn4");
+      expect(result).toContain("warn5");
+
+      expect(result).toContain("error1");
+      expect(result).toContain("errorex1");
+      expect(result).toContain("error2");
+      expect(result).toContain("errorex2");
+      expect(result).toContain("error3");
+      expect(result).toContain("errorex3");
+      expect(result).toContain("error4");
+      expect(result).toContain("errorex4");
+      expect(result).toContain("error5");
+      expect(result).toContain("errorex5");
+
+      expect(result).toContain("fatal1");
+      expect(result).toContain("fatalex1");
+      expect(result).toContain("fatal2");
+      expect(result).toContain("fatalex2");
+      expect(result).toContain("fatal3");
+      expect(result).toContain("fatalex3");
+      expect(result).toContain("fatal4");
+      expect(result).toContain("fatalex4");
+      expect(result).toContain("fatal5");
+      expect(result).toContain("fatalex5");
     });
   });
 });

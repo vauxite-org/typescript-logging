@@ -9,10 +9,3 @@ export interface ExtensionRequestChangeLogLevelJSON {
 
   recursive: boolean;
 }
-
-/**
- * Enable integration between logger and extension.
- */
-export interface ExtensionEnableExtensionIntegration {
-
-}

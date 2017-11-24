@@ -139,9 +139,9 @@ export class LinkedList<T> {
     };
 
     const result: T[] = [];
-    const node = this.head;
-    if (node != null) {
-      recurse(f, node, result);
+    const currentNode = this.head;
+    if (currentNode != null) {
+      recurse(f, currentNode, result);
     }
     return result;
   }
@@ -207,7 +207,7 @@ export class SimpleMap<V> {
 
   public keys(): string[] {
     const keys: string[] = [];
-    for (let key in this.array) {
+    for (const key in this.array) {
       // To prevent random stuff to appear
       if (this.array.hasOwnProperty(key)) {
         keys.push(key);
@@ -218,7 +218,7 @@ export class SimpleMap<V> {
 
   public values(): Array<V | null> {
     const values: Array<V | null> = [];
-    for (let key in this.array) {
+    for (const key in this.array) {
       // To prevent random stuff to appear
       if (this.array.hasOwnProperty(key)) {
         values.push(this.get(key));
@@ -240,7 +240,7 @@ export class SimpleMap<V> {
   }
 
   public forEach(cbFunction: (value: V | null, index: string, map: SimpleMap<V>) => void): void {
-    for (let key in this.array) {
+    for (const key in this.array) {
       // To prevent random stuff to appear
       if (this.array.hasOwnProperty(key)) {
         const value = this.array[key];

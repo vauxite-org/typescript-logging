@@ -138,12 +138,12 @@ export class DateFormat {
     return this._formatEnum;
   }
 
-  get dateSeparator(): string {
-    return this._dateSeparator;
-  }
-
   set formatEnum(value: DateFormatEnum) {
     this._formatEnum = value;
+  }
+
+  get dateSeparator(): string {
+    return this._dateSeparator;
   }
 
   set dateSeparator(value: string) {
@@ -184,12 +184,12 @@ export class LogFormat {
     return this._showTimeStamp;
   }
 
-  get showLoggerName(): boolean {
-    return this._showLoggerName;
-  }
-
   set showTimeStamp(value: boolean) {
     this._showTimeStamp = value;
+  }
+
+  get showLoggerName(): boolean {
+    return this._showLoggerName;
   }
 
   set showLoggerName(value: boolean) {

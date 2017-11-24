@@ -1,7 +1,7 @@
-import {StringBuilder} from "../utils/DataStructures";
-import {CategoryServiceFactory, CategoryServiceImpl} from "../log/category/CategoryService";
-import {LogLevel, LoggerType, DateFormatEnum} from "../log/LoggerOptions";
 import {Category} from "../log/category/CategoryLogger";
+import {CategoryServiceFactory, CategoryServiceImpl} from "../log/category/CategoryService";
+import {DateFormatEnum, LoggerType, LogLevel} from "../log/LoggerOptions";
+import {StringBuilder} from "../utils/DataStructures";
 
 /**
  * Allows to change the settings for one or all Categories.
@@ -84,41 +84,41 @@ export class CategoryServiceControlImpl implements CategoryServiceControl {
     `
   help(): void
     ** Shows this help.
-    
+
   example(): void
     ** Shows an example on how to use this.
-    
+
   showSettings(id: number | "all" = "all"): void
     ** Shows settings for a specific category, or for all. The id of categories can be found by calling this method without parameter.
-    
+
   change(settings: CategoryServiceControlSettings): void
-    ** Changes the current settings for one or all categories. 
-    ** 
+    ** Changes the current settings for one or all categories.
+    **
        CategoryServiceControlSettings, properties of object:
          category: number | "all"
            ** Apply to specific category, or "all".
-           ** Required        
-        
+           ** Required
+
          recursive: boolean
            ** Apply to child categories (true) or not.
            ** Required
-           
+
          logLevel: "Fatal" | "Error" | "Warn" | "Info" | "Debug" | "Trace" | undefined
            ** Set log level, undefined will not change the setting.
            ** Optional
-         
+
          logFormat: "Default" | "YearMonthDayTime" | "YearDayMonthWithFullTime" | "YearDayMonthTime" | undefined
            ** Set the log format, undefined will not change the setting.
            ** Optional
-         
-         showTimestamp: boolean | undefined  
+
+         showTimestamp: boolean | undefined
            ** Whether to show timestamp, undefined will not change the setting.
            ** Optional
-         
+
          showCategoryName: boolean | undefined
            ** Whether to show the category name, undefined will not change the setting.
            ** Optional
-           
+
    reset(id: number | "all"): void
      ** Resets everything to original values, for one specific or for all categories.
 `;
@@ -126,15 +126,15 @@ export class CategoryServiceControlImpl implements CategoryServiceControl {
   private static _example: string =
 `
   Examples:
-    change({category: "all", recursive:true, logLevel: "Info"}) 
+    change({category: "all", recursive:true, logLevel: "Info"})
       ** Change loglevel to Info for all categories, apply to child categories as well.
-     
+
     change({category: 1, recursive:false, logLevel: "Warn"})
       ** Change logLevel for category 1, do not recurse.
-      
-    change({category: "all", recursive:true, logLevel: "Debug", logFormat: "YearDayMonthTime", showTimestamp:false, showCategoryName:false})    
-      ** Change loglevel to Debug for all categories, apply format, do not show timestamp and category names - recursively to child categories.    
-      
+
+    change({category: "all", recursive:true, logLevel: "Debug", logFormat: "YearDayMonthTime", showTimestamp:false, showCategoryName:false})
+      ** Change loglevel to Debug for all categories, apply format, do not show timestamp and category names - recursively to child categories.
+
 `;
 
   public help(): void {

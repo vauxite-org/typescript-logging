@@ -1,4 +1,4 @@
-var webpack = require("webpack");
+const path = require("path");
 
 module.exports = {
 
@@ -7,9 +7,8 @@ module.exports = {
   output: {
     libraryTarget: "commonjs",
     library: "TSL",
-    path: "./dist-test/bundle",
+    path: path.resolve(__dirname, "dist-test/bundle"),
     filename: "typescript-logging-bundle.js",
-
   },
   target: "node",
   plugins: []

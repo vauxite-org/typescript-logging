@@ -111,18 +111,18 @@ export class LoggerControlImpl implements LoggerControl {
 `
   help(): void
     ** Shows this help.
-    
+
   listFactories(): void
     ** List all registered LoggerFactories with associated log groups with respective ids (ids can be used to target a factory and/or group).
-    
+
   showSettings(idFactory: number | "all"): void
-    ** Show log group settings for idFactory (use listFactories to find id for a LoggerFactory). If idFactory is "all" shows all factories. 
-  
+    ** Show log group settings for idFactory (use listFactories to find id for a LoggerFactory). If idFactory is "all" shows all factories.
+
   getLoggerFactoryControl(idFactory: number): LoggerFactoryControl
     ** Return LoggerFactoryControl when found for given idFactory or throws Error if invalid or null, get the id by using listFactories()
-    
+
   reset(idFactory: number | "all"): void
-    ** Resets given factory or all factories back to original values. 
+    ** Resets given factory or all factories back to original values.
 `;
 
   public help(): void {
@@ -222,7 +222,7 @@ class LoggerFactoryControlImpl implements LoggerFactoryControl {
     `
   help(): void
     ** Shows this help.
-    
+
   example(): void
     ** Shows an example of usage.
 
@@ -230,32 +230,32 @@ class LoggerFactoryControlImpl implements LoggerFactoryControl {
     ** Prints settings for given group id, "all" for all group.
 
   change(settings: LogGroupControlSettings): void
-    ** Changes the current settings for one or all log groups. 
-    ** 
+    ** Changes the current settings for one or all log groups.
+    **
        LogGroupControlSettings, properties of object:
          group: number | "all"
            ** Apply to specific group, or "all".
-           ** Required        
-           
+           ** Required
+
          logLevel: "Fatal" | "Error" | "Warn" | "Info" | "Debug" | "Trace" | undefined
            ** Set log level, undefined will not change the setting.
            ** Optional
-         
+
          logFormat: "Default" | "YearMonthDayTime" | "YearDayMonthWithFullTime" | "YearDayMonthTime" | undefined
            ** Set the log format, undefined will not change the setting.
            ** Optional
-         
-         showTimestamp: boolean | undefined  
+
+         showTimestamp: boolean | undefined
            ** Whether to show timestamp, undefined will not change the setting.
            ** Optional
-         
+
          showLoggerName: boolean | undefined
            ** Whether to show the logger name, undefined will not change the setting.
-           ** Optional  
-           
+           ** Optional
+
   reset(id: number | "all"): void
     ** Resets everything to original values, for one specific or for all groups.
-    
+
   help():
     ** Shows this help.
 `;
@@ -263,14 +263,14 @@ class LoggerFactoryControlImpl implements LoggerFactoryControl {
   private static _example: string =
     `
   Examples:
-    change({group: "all", logLevel: "Info"}) 
+    change({group: "all", logLevel: "Info"})
       ** Change loglevel to Info for all groups.
-     
+
     change({group: 1, recursive:false, logLevel: "Warn"})
       ** Change logLevel for group 1 to Warn.
-      
-    change({group: "all", logLevel: "Debug", logFormat: "YearDayMonthTime", showTimestamp:false, showLoggerName:false})    
-      ** Change loglevel to Debug for all groups, apply format, do not show timestamp and logger names.      
+
+    change({group: "all", logLevel: "Debug", logFormat: "YearDayMonthTime", showTimestamp:false, showLoggerName:false})
+      ** Change loglevel to Debug for all groups, apply format, do not show timestamp and logger names.
 `;
 
   private _settings: LoggerFactoryRuntimeSettings;
@@ -370,7 +370,7 @@ class LoggerFactoryControlImpl implements LoggerFactoryControl {
 
   public reset(idGroup: number | "all" = "all"): void {
     const settings = this._getLogGroupRunTimeSettingsFor(idGroup);
-    for (let setting of settings) {
+    for (const setting of settings) {
       setting.level = setting.logGroupRule.level;
       setting.logFormat.showTimeStamp = setting.logGroupRule.logFormat.showTimeStamp;
       setting.logFormat.showLoggerName = setting.logGroupRule.logFormat.showLoggerName;

@@ -22,7 +22,7 @@ export {
 } from "./log/category/CategoryService";
 
 // LoggerFactory related.
-export {Logger} from "./log/standard/Logger";
+export {Logger, MessageType, ErrorType} from "./log/standard/Logger";
 export {LoggerFactory} from "./log/standard/LoggerFactory";
 export {LoggerFactoryOptions, LFService, LogGroupRule} from "./log/standard/LoggerFactoryService";
 export {AbstractLogger, LogMessage} from "./log/standard/AbstractLogger";
@@ -49,14 +49,14 @@ export function help(): void {
   console.log(
 `help()
    ** Shows this help
-   
+
  getLogControl(): LoggerControl
    ** Returns LoggerControl Object, use to dynamically change loglevels for log4j logging.
    ** Call .help() on LoggerControl object for available options.
-   
+
  getCategoryControl(): CategoryServiceControl
    ** Returns CategoryServiceControl Object, use to dynamically change loglevels for category logging.
-   ** Call .help() on CategoryServiceControl object for available options.   
+   ** Call .help() on CategoryServiceControl object for available options.
 `
   );
   /* tslint:enable:no-console */

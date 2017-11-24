@@ -2,6 +2,16 @@ import {LogLevel} from "../LoggerOptions";
 import {LogData} from "../LogData";
 
 /**
+ * The message that can be passed into a logger. A string, LogData or a lambda returning one of these.
+ */
+export type MessageType = string | LogData | (() => string | LogData);
+
+/**
+ * The error that can be passed into a logger. An Error, null or a lambda returning one of these.
+ */
+export type ErrorType = Error | null | (() => Error | null);
+
+/**
  * The Logger interface used for logging.
  * You can get a Logger from LoggerFactory.
  * LoggerFactory itself you create and configure through LFService.
@@ -36,28 +46,46 @@ export interface Logger {
    */
   readonly name: string;
 
-  trace(msg: string | LogData, error?: Error | null): void;
+  trace(msg: MessageType, error?: ErrorType): void;
 
-  debug(msg: string | LogData, error?: Error | null): void;
+  debug(msg: MessageType, error?: ErrorType): void;
 
-  info(msg: string | LogData, error?: Error | null): void;
+  info(msg: MessageType, error?: ErrorType): void;
 
-  warn(msg: string | LogData, error?: Error | null): void;
+  warn(msg: MessageType, error?: ErrorType): void;
 
-  error(msg: string | LogData, error?: Error | null): void;
+  error(msg: MessageType, error?: ErrorType): void;
 
-  fatal(msg: string | LogData, error?: Error | null): void;
+  fatal(msg: MessageType, error?: ErrorType): void;
 
+  /**
+   * @deprecated Since 0.5.0, will be removed in 0.6.0, use trace instead.
+   */
   tracec(msg: () => string | LogData, error?: () => Error | null): void;
 
+  /**
+   * @deprecated Since 0.5.0, will be removed in 0.6.0, use debug instead.
+   */
   debugc(msg: () => string | LogData, error?: () => Error | null): void;
 
+  /**
+   * @deprecated Since 0.5.0, will be removed in 0.6.0, use info instead.
+   */
   infoc(msg: () => string | LogData, error?: () => Error | null): void;
 
+  /**
+   * @deprecated Since 0.5.0, will be removed in 0.6.0, use warn instead.
+   */
   warnc(msg: () => string | LogData, error?: () => Error | null): void;
 
+  /**
+   * @deprecated Since 0.5.0, will be removed in 0.6.0, use error instead.
+   */
   errorc(msg: () => string | LogData, error?: () => Error | null): void;
 
+  /**
+   * @deprecated Since 0.5.0, will be removed in 0.6.0, use fatal instead.
+   */
   fatalc(msg: () => string | LogData, error?: () => Error | null): void;
 
   isTraceEnabled(): boolean;
