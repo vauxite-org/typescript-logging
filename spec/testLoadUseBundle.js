@@ -27,8 +27,8 @@ logger.error("Error in normal console", new Error("fail"), catRoot1);
 logger.debug("This is on debug");
 
 const logger2 = tsl.CategoryServiceFactory.getLogger(catRoot2);
-logger2.errorc(function() { return "failed"; }, function() { return new Error("oops"); });
-logger2.debugc(function() { return "category on debug"; });
+logger2.error(function() { return "failed"; }, function() { return new Error("oops"); });
+logger2.debug(function() { return "category on debug"; });
 
 /*
 CategoryServiceFactory.setDefaultConfiguration(new CategoryDefaultConfiguration(LogLevel.Debug));

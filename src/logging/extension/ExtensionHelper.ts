@@ -1,5 +1,4 @@
 import {CategoryLogMessage} from "../log/category/AbstractCategoryLogger";
-import {Category} from "../log/category/CategoryLogger";
 import {CategoryServiceImpl} from "../log/category/CategoryService";
 import {LogLevel} from "../log/LoggerOptions";
 import {MessageFormatUtils} from "../utils/MessageUtils";
@@ -10,6 +9,7 @@ import {
   ExtensionCategoryJSON,
   ExtensionCategoryLogMessageJSON,
 } from "./MessagesToExtensionJSON";
+import {Category} from "../log/category/Category";
 
 export class ExtensionHelper {
 

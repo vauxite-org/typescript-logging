@@ -3,8 +3,9 @@ import {MessageFormatUtils} from "../../utils/MessageUtils";
 import {LogData} from "../LogData";
 import {CategoryLogFormat, LogLevel} from "../LoggerOptions";
 import {ErrorType, MessageType} from "../standard/Logger";
-import {Category, CategoryLogger} from "./CategoryLogger";
-import {RuntimeSettings} from "./CategoryService";
+import {CategoryLogger} from "./CategoryLogger";
+import {Category} from "./Category";
+import {RuntimeSettings} from "./RuntimeSettings";
 
 /**
  * Contains information about a single log message.
@@ -281,30 +282,29 @@ export abstract class AbstractCategoryLogger implements CategoryLogger {
     let logCategories: Category[];
 
     // Log root category by default if none present
-    if (categories !== undefined && categories.length > 0) {
+    if (typeof categories !== "undefined" && categories.length > 0) {
       logCategories = categories;
     }
     else {
-      logCategories = [];
-      logCategories.push(this.rootCategory);
+      logCategories = [this.rootCategory];
     }
 
     // Get the runtime levels for given categories. If their level is lower than given level, we log.
     // In addition we pass along which category/categories we log this statement for.
     for (let i = 0; i < logCategories.length; i++) {
       const category = logCategories[i];
-      if (category == null) {
+      if (category === null) {
         throw new Error("Cannot have a null element within categories, at index=" + i);
       }
       const settings = this.runtimeSettings.getCategorySettings(category);
-      if (settings == null) {
+      if (settings === null) {
         throw new Error("Category with path: " + category.getCategoryPath() + " is not registered with this logger, maybe " +
           "you registered it with a different root logger?");
       }
 
       if (settings.logLevel <= level) {
-        const actualError = error != null ? error() : null;
-        if (actualError == null) {
+        const actualError = error !== null ? error() : null;
+        if (actualError === null) {
           const logMessage = new CategoryLogMessageImpl(msg(), actualError, logCategories, new Date(), level, settings.logFormat, true);
           logMessage.resolvedErrorMessage = resolved;
           this.allMessages.addTail(logMessage);

@@ -1,21 +1,23 @@
-import {Category, CategoryLogger} from "../src/logging/log/category/CategoryLogger";
-import {CategoryServiceFactory, CategoryDefaultConfiguration} from "../src/logging/log/category/CategoryService";
+import {CategoryLogger} from "../src/logging/log/category/CategoryLogger";
 import {LogLevel, LoggerType} from "../src/logging/log/LoggerOptions";
 import {CategoryDelegateLoggerImpl} from "../src/logging/log/category/CategoryDelegateLoggerImpl";
 import {CategoryMessageBufferLoggerImpl} from "../src/logging/log/category/CategoryMessageBufferImpl";
+import {Category} from "../src/logging/log/category/Category";
+import {CategoryDefaultConfiguration} from "../src/logging/log/category/CategoryConfiguration";
+import {CategoryServiceFactory} from "../src/logging/log/category/CategoryServiceFactory";
 
 const getMessagesAsString = (logger: CategoryLogger): string => {
   expect(logger instanceof CategoryDelegateLoggerImpl).toBeTruthy();
-  const actualLogger = (<CategoryDelegateLoggerImpl> logger).delegate;
+  const actualLogger = (logger as CategoryDelegateLoggerImpl).delegate;
   expect(actualLogger instanceof CategoryMessageBufferLoggerImpl).toBeTruthy();
-  return (<CategoryMessageBufferLoggerImpl> actualLogger).toString();
+  return (actualLogger as CategoryMessageBufferLoggerImpl).toString();
 };
 
 const getMessages = (logger: CategoryLogger): string[] => {
   expect(logger instanceof CategoryDelegateLoggerImpl).toBeTruthy();
-  const actualLogger = (<CategoryDelegateLoggerImpl> logger).delegate;
+  const actualLogger = (logger as CategoryDelegateLoggerImpl).delegate;
   expect(actualLogger instanceof CategoryMessageBufferLoggerImpl).toBeTruthy();
-  return (<CategoryMessageBufferLoggerImpl> actualLogger).getMessages();
+  return (actualLogger as CategoryMessageBufferLoggerImpl).getMessages();
 };
 
 describe("CategoryLogger...", () => {
@@ -115,7 +117,7 @@ describe("CategoryLogger...", () => {
     it("Can handle LogData with custom ds", () => {
       logger.info({msg, data, ds: (d: any) => "hello " + d.key}, catRoot);
 
-      let messages: string[] = getMessages(logger);
+      const messages: string[] = getMessages(logger);
       expect(messages.length).toEqual(1);
       expect(messages[0]).toContain(msg + " [data]: hello " + data.key, "Failed message was: " + messages[0]);
     });
@@ -123,7 +125,7 @@ describe("CategoryLogger...", () => {
     it("Can handle LogData without custom ds", () => {
       logger.info({msg, data}, catRoot);
 
-      let messages: string[] = getMessages(logger);
+      const messages: string[] = getMessages(logger);
       expect(messages.length).toEqual(1);
       expect(messages[0]).toContain(msg + " [data]: " + JSON.stringify(data));
     });
@@ -131,7 +133,7 @@ describe("CategoryLogger...", () => {
     it("Can handle LogData without custom ds and only message", () => {
       logger.info({msg}, catRoot);
 
-      let messages: string[] = getMessages(logger);
+      const messages: string[] = getMessages(logger);
       expect(messages.length).toEqual(1);
       expect(messages[0]).toContain(msg);
     });
@@ -153,49 +155,49 @@ describe("CategoryLogger...", () => {
       logger.trace({ msg: "trace2" });
       logger.trace(() => "trace3");
       logger.trace(() => ({msg: "trace4" }) );
-      logger.trace(() => { return { msg: "trace5" }; });
+      logger.trace(() => ({ msg: "trace5", data: "x" }));
 
       logger.debug("debug1");
       logger.debug({ msg: "debug2" });
       logger.debug(() => "debug3");
       logger.debug(() => ({msg: "debug4" }) );
-      logger.debug(() => { return { msg: "debug5" }; });
+      logger.debug(() => ({ msg: "debug5" }));
 
       logger.info("info1");
       logger.info({ msg: "info2" });
       logger.info(() => "info3");
       logger.info(() => ({msg: "info4" }) );
-      logger.info(() => { return { msg: "info5" }; });
+      logger.info(() => ({ msg: "info5" }));
 
       logger.warn("warn1");
       logger.warn({ msg: "warn2" });
       logger.warn(() => "warn3");
       logger.warn(() => ({msg: "warn4" }) );
-      logger.warn(() => { return { msg: "warn5" }; });
+      logger.warn(() => ({ msg: "warn5" }));
 
       logger.error("error1", new Error("errorex1"));
       logger.error({msg: "error2"}, new Error("errorex2"));
       logger.errorc(() => "error3", () => new Error("errorex3"));
       logger.error(() => ({msg : "error4"}), () => new Error("errorex4"));
-      logger.error(() => { return { msg: "error5" }; }, () => new Error("errorex5"));
+      logger.error(() => ({ msg: "error5" }), () => new Error("errorex5"));
 
       logger.resolved("resolved1", new Error("resolvedex1"));
       logger.resolved({msg: "resolved2"}, new Error("resolvedex2"));
       logger.resolved(() => "resolved3", () => new Error("resolvedex3"));
       logger.resolved(() => ({msg : "resolved4"}), () => new Error("resolvedex4"));
-      logger.resolved(() => { return { msg: "resolved5" }; }, () => new Error("resolvedex5"));
+      logger.resolved(() => ({ msg: "resolved5" }), () => new Error("resolvedex5"));
 
       logger.fatal("fatal1", new Error("fatalex1"));
       logger.fatal({msg: "fatal2"}, new Error("fatalex2"));
       logger.fatal(() => "fatal3", () => new Error("fatalex3"));
       logger.fatal(() => ({msg : "fatal4"}), () => new Error("fatalex4"));
-      logger.fatal(() => { return { msg: "fatal5" }; }, () => new Error("fatalex5"));
+      logger.fatal(() => ({ msg: "fatal5" }), () => new Error("fatalex5"));
 
       logger.log(LogLevel.Fatal, "random1", new Error("randomex1"));
       logger.log(LogLevel.Fatal, { msg: "random2" }, new Error("randomex2"));
       logger.log(LogLevel.Fatal, () => "random3", () => new Error("randomex3"));
       logger.log(LogLevel.Fatal, () => ({msg : "random4"}), () => new Error("randomex4"));
-      logger.log(LogLevel.Fatal, () => { return { msg: "random5" }; }, () => new Error("randomex5"));
+      logger.log(LogLevel.Fatal, () => ({ msg: "random5" }), () => new Error("randomex5"));
 
       const messages = getMessages(logger);
       waitsFor(() => messages.length === 40, "Expected 40 messages in log", 5000);

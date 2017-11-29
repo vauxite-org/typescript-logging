@@ -1,7 +1,7 @@
 import {LogLevel} from "../LoggerOptions";
 import {AbstractCategoryLogger, CategoryLogMessage} from "./AbstractCategoryLogger";
-import {Category} from "./CategoryLogger";
-import {RuntimeSettings} from "./CategoryService";
+import {Category} from "./Category";
+import {RuntimeSettings} from "./RuntimeSettings";
 
 /**
  * Simple logger, that logs to the console. If the console is unavailable will throw an exception.

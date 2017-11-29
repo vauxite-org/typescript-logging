@@ -42,7 +42,7 @@ describe("LoggerFactory configuration", () => {
   });
 
   it("Testing named logger", () => {
-    let factory: LoggerFactory = LFService.createNamedLoggerFactory("helloworld");
+    const factory: LoggerFactory = LFService.createNamedLoggerFactory("helloworld");
     expect(factory.getName()).toMatch("helloworld");
     expect(() => LFService.createNamedLoggerFactory("helloworld")).toThrow(new Error("LoggerFactory with name helloworld already exists."));
   });

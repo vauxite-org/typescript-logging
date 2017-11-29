@@ -12,14 +12,13 @@ export {ExtensionHelper} from "./extension/ExtensionHelper";
 export {AbstractCategoryLogger, CategoryLogMessage} from "./log/category/AbstractCategoryLogger";
 export {CategoryConsoleLoggerImpl} from "./log/category/CategoryConsoleLoggerImpl";
 export {CategoryDelegateLoggerImpl} from "./log/category/CategoryDelegateLoggerImpl";
-export {Category, CategoryLogger} from "./log/category/CategoryLogger";
+export {Category} from "./log/category/Category";
+export {CategoryLogger} from "./log/category/CategoryLogger";
+export {CategoryRuntimeSettings} from "./log/category/CategoryRuntimeSettings";
+export {CategoryConfiguration, CategoryDefaultConfiguration} from "./log/category/CategoryConfiguration";
+export {RuntimeSettings} from "./log/category/RuntimeSettings";
 export {CategoryMessageBufferLoggerImpl} from "./log/category/CategoryMessageBufferImpl";
-export {
-  CategoryDefaultConfiguration,
-  CategoryRuntimeSettings,
-  CategoryServiceFactory,
-  RuntimeSettings
-} from "./log/category/CategoryService";
+export {CategoryServiceFactory} from "./log/category/CategoryServiceFactory";
 
 // LoggerFactory related.
 export {Logger, MessageType, ErrorType} from "./log/standard/Logger";

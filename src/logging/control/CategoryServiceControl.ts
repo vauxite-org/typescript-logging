@@ -1,7 +1,7 @@
-import {Category} from "../log/category/CategoryLogger";
-import {CategoryServiceFactory, CategoryServiceImpl} from "../log/category/CategoryService";
+import {CategoryServiceImpl} from "../log/category/CategoryService";
 import {DateFormatEnum, LoggerType, LogLevel} from "../log/LoggerOptions";
 import {StringBuilder} from "../utils/DataStructures";
+import {Category} from "../log/category/Category";
 
 /**
  * Allows to change the settings for one or all Categories.
@@ -283,7 +283,7 @@ export class CategoryServiceControlImpl implements CategoryServiceControl {
   }
 
   private static _getCategoryService(): CategoryServiceImpl {
-    return CategoryServiceFactory.getRuntimeSettings() as CategoryServiceImpl;
+    return CategoryServiceImpl.getInstance();
   }
 
   private static _getCategories(idCategory: number | "all"): Category[] {

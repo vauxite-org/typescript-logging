@@ -1,6 +1,7 @@
 import {LogLevel} from "../LoggerOptions";
-import {Category, CategoryLogger} from "./CategoryLogger";
 import {MessageType} from "../standard/Logger";
+import {CategoryLogger} from "./CategoryLogger";
+import {Category} from "./Category";
 
 /**
  * Delegate logger, delegates logging to given logger (constructor).
