@@ -1,5 +1,4 @@
 import {LogLevel} from "../LoggerOptions";
-import {CategoryServiceImpl} from "./CategoryService";
 import {LogData} from "../LogData";
 import {ErrorType, MessageType} from "../standard/Logger";
 import {Category} from "./Category";

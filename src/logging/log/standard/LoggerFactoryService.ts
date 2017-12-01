@@ -296,25 +296,24 @@ class LFServiceImpl implements LFServiceRuntimeSettings {
 
   public getRuntimeSettingsForLoggerFactories(): LoggerFactoryRuntimeSettings[] {
     const result: LoggerFactoryRuntimeSettings[] = [];
-    this._mapFactories.forEach((factory) => {
-      // Won't be null, but hey tslint ...
-      if (factory != null) {
-        result.push(factory);
-      }
-    });
+    this._mapFactories.forEachValue((factory) => result.push(factory));
     return result;
   }
 
   public getLogGroupSettings(nameLoggerFactory: string, idLogGroupRule: number): LogGroupRuntimeSettings | null {
     const factory = this._mapFactories.get(nameLoggerFactory);
-    if (factory === null) {
+    if (typeof factory === "undefined") {
       return null;
     }
     return factory.getLogGroupRuntimeSettingsByIndex(idLogGroupRule);
   }
 
   public getLoggerFactoryRuntimeSettingsByName(nameLoggerFactory: string): LoggerFactoryRuntimeSettings | null {
-    return this._mapFactories.get(nameLoggerFactory);
+    const result = this._mapFactories.get(nameLoggerFactory);
+    if (typeof result === "undefined") {
+      return null;
+    }
+    return result;
   }
 
   private static createDefaultOptions(): LoggerFactoryOptions {

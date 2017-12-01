@@ -44,7 +44,7 @@ export class LoggerFactoryImpl implements LoggerFactory, LoggerFactoryRuntimeSet
     }
 
     let logger = this._loggers.get(named);
-    if (logger !== null) {
+    if (typeof logger !== "undefined") {
       return logger;
     }
 
@@ -59,9 +59,9 @@ export class LoggerFactoryImpl implements LoggerFactory, LoggerFactoryRuntimeSet
   }
 
   public closeLoggers(): void {
-    this._loggers.forEach((logger) => {
+    this._loggers.forEachValue((logger) => {
       // We can only close if AbstractLogger is used (our loggers, but user loggers may not extend it, even though unlikely).
-      if (logger != null && logger instanceof AbstractLogger) {
+      if (logger instanceof AbstractLogger) {
         logger.close();
       }
     });
@@ -80,7 +80,11 @@ export class LoggerFactoryImpl implements LoggerFactory, LoggerFactoryRuntimeSet
   }
 
   public getLogGroupRuntimeSettingsByLoggerName(nameLogger: string): LogGroupRuntimeSettings | null {
-    return this._loggerToLogGroupSettings.get(nameLogger);
+    const result = this._loggerToLogGroupSettings.get(nameLogger);
+    if (typeof result === "undefined") {
+      return null;
+    }
+    return result;
   }
 
   public getLogGroupRuntimeSettings(): LogGroupRuntimeSettings[] {

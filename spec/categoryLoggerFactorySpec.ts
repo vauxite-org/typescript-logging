@@ -8,7 +8,7 @@ import {CategoryMessageBufferLoggerImpl} from "../src/logging/log/category/Categ
 import {Category} from "../src/logging/log/category/Category";
 import {RuntimeSettings} from "../src/logging/log/category/RuntimeSettings";
 import {CategoryRuntimeSettings} from "../src/logging/log/category/CategoryRuntimeSettings";
-import {CategoryDefaultConfiguration} from "../src/logging/log/category/CategoryConfiguration";
+import {CategoryConfiguration, CategoryDefaultConfiguration} from "../src/logging/log/category/CategoryConfiguration";
 import {CategoryServiceFactory} from "../src/logging/log/category/CategoryServiceFactory";
 
 const getBufferedMessages = (logger: CategoryLogger): string[] => {
@@ -90,10 +90,10 @@ describe("CategoryServiceFactory", () => {
     expect(service.getCategorySettings(child12)).not.toBeNull();
   });
 
-  it("Only allows to fetch by root loggers", () => {
-    expect(() => CategoryServiceFactory.getLogger(child1)).toThrow();
-    expect(() => CategoryServiceFactory.getLogger(child11)).toThrow();
-    expect(() => CategoryServiceFactory.getLogger(child12)).toThrow();
+  it("Allows to fetch by all categories", () => {
+    expect(() => CategoryServiceFactory.getLogger(child1)).toBeDefined();
+    expect(() => CategoryServiceFactory.getLogger(child11)).toBeDefined();
+    expect(() => CategoryServiceFactory.getLogger(child12)).toBeDefined();
   });
 
   it("Allows adding root category dynamically", () => {
@@ -201,7 +201,7 @@ describe("CategoryServiceFactory", () => {
     checkDefaultConfig(root1, CategoryServiceImpl.getInstance().getCategorySettings(root1));
 
     const messages: string[] = [];
-    const configChanged = new CategoryDefaultConfiguration(
+    const configChanged = new CategoryConfiguration(
        LogLevel.Info, LoggerType.Custom, new CategoryLogFormat(),
       (rootCategory: Category, runtimeSettings: RuntimeSettings) => new CustomLogger(rootCategory, runtimeSettings, messages)
     );
@@ -250,7 +250,7 @@ describe("CategoryServiceFactory", () => {
   it("Can set different custom formatter on category than default", () => {
     checkDefaultConfig(root1, CategoryServiceImpl.getInstance().getCategorySettings(root1));
 
-    const defaultConfig = new CategoryDefaultConfiguration(LogLevel.Info, LoggerType.MessageBuffer);
+    const defaultConfig = new CategoryConfiguration(LogLevel.Info, LoggerType.MessageBuffer);
     defaultConfig.formatterLogMessage = (msg: CategoryLogMessage): string => {
       // Just shorten the message, will only have literal text.
       const message = msg.messageAsString;
@@ -261,7 +261,7 @@ describe("CategoryServiceFactory", () => {
       return msg.messageAsString + "_postFix";
     };
 
-    const configRoot2 = new CategoryDefaultConfiguration(LogLevel.Debug, LoggerType.MessageBuffer);
+    const configRoot2 = new CategoryConfiguration(LogLevel.Debug, LoggerType.MessageBuffer);
     configRoot2.formatterLogMessage = formatterRoot2;
 
     const root2 = new Category("root2");

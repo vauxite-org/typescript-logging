@@ -169,37 +169,29 @@ export class LinkedList<T> {
 }
 
 /**
- * Map implementation keyed by string (always). Note that the get/remove return either value or null.
- * This map does not support undefined in any fasion (on purpose).
+ * Map implementation keyed by string (always).
  */
 export class SimpleMap<V> {
 
-  private array: {[key: string]: V | null} = {};
+  private array: {[key: string]: V} = {};
 
-  public put(key: string, value: V | null): void {
-    if (value === undefined) {
-      throw new Error("Undefined value is not allowed, null is.");
-    }
+  public put(key: string, value: V): void {
     this.array[key] = value;
   }
 
-  public get(key: string): V | null {
-    const result = this.array[key];
-    if (result !== undefined) {
-      return result;
-    }
-    return null;
+  public get(key: string): V | undefined {
+    return this.array[key];
   }
 
   public exists(key: string): boolean {
     const value = this.array[key];
-    return value !== undefined;
+    return (typeof value !== "undefined");
 
   }
 
-  public remove(key: string): V | null {
+  public remove(key: string): V | undefined {
     const value = this.array[key];
-    if (value !== undefined) {
+    if (typeof value !== "undefined") {
       delete this.array[key];
     }
     return value;
@@ -216,12 +208,12 @@ export class SimpleMap<V> {
     return keys;
   }
 
-  public values(): Array<V | null> {
-    const values: Array<V | null> = [];
+  public values(): V[] {
+    const values: V[] = [];
     for (const key in this.array) {
       // To prevent random stuff to appear
       if (this.array.hasOwnProperty(key)) {
-        values.push(this.get(key));
+        values.push(this.get(key) as V);
       }
     }
     return values;
@@ -239,15 +231,30 @@ export class SimpleMap<V> {
     this.array = {};
   }
 
-  public forEach(cbFunction: (value: V | null, index: string, map: SimpleMap<V>) => void): void {
+  public forEach(cbFunction: (key: string, value: V, index: number) => void): void {
+    let count = 0;
     for (const key in this.array) {
       // To prevent random stuff to appear
       if (this.array.hasOwnProperty(key)) {
         const value = this.array[key];
-        cbFunction(value, key, this);
+        cbFunction(key, value, count);
+        count++;
       }
     }
   }
+
+  public forEachValue(cbFunction: (value: V, index: number) => void): void {
+    let count = 0;
+    for (const key in this.array) {
+      // To prevent random stuff to appear
+      if (this.array.hasOwnProperty(key)) {
+        const value = this.array[key];
+        cbFunction(value, count);
+        count++;
+      }
+    }
+  }
+
 }
 
 /**
