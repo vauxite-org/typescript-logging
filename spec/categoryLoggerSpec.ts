@@ -3,21 +3,161 @@ import {LogLevel, LoggerType} from "../src/logging/log/LoggerOptions";
 import {CategoryDelegateLoggerImpl} from "../src/logging/log/category/CategoryDelegateLoggerImpl";
 import {CategoryMessageBufferLoggerImpl} from "../src/logging/log/category/CategoryMessageBufferImpl";
 import {Category} from "../src/logging/log/category/Category";
-import {CategoryDefaultConfiguration} from "../src/logging/log/category/CategoryConfiguration";
+import {CategoryConfiguration, CategoryDefaultConfiguration} from "../src/logging/log/category/CategoryConfiguration";
 import {CategoryServiceFactory} from "../src/logging/log/category/CategoryServiceFactory";
 
-const getMessagesAsString = (logger: CategoryLogger): string => {
-  expect(logger instanceof CategoryDelegateLoggerImpl).toBeTruthy();
-  const actualLogger = (logger as CategoryDelegateLoggerImpl).delegate;
+const getMessagesAsString = (logger: CategoryLogger | Category): string => {
+  let delegate: CategoryDelegateLoggerImpl;
+  if (logger instanceof Category) {
+    delegate = (logger as any)._logger as CategoryDelegateLoggerImpl;
+  }
+  else {
+    delegate = logger as CategoryDelegateLoggerImpl;
+  }
+  expect(delegate).toBeDefined();
+
+  const actualLogger = delegate.delegate;
   expect(actualLogger instanceof CategoryMessageBufferLoggerImpl).toBeTruthy();
   return (actualLogger as CategoryMessageBufferLoggerImpl).toString();
 };
 
-const getMessages = (logger: CategoryLogger): string[] => {
-  expect(logger instanceof CategoryDelegateLoggerImpl).toBeTruthy();
-  const actualLogger = (logger as CategoryDelegateLoggerImpl).delegate;
+const getMessages = (logger: CategoryLogger | Category): string[] => {
+  let delegate: CategoryDelegateLoggerImpl;
+  if (logger instanceof Category) {
+    delegate = (logger as any)._logger as CategoryDelegateLoggerImpl;
+  }
+  else {
+    delegate = logger as CategoryDelegateLoggerImpl;
+  }
+  expect(delegate).toBeDefined();
+
+  const actualLogger = delegate.delegate;
   expect(actualLogger instanceof CategoryMessageBufferLoggerImpl).toBeTruthy();
   return (actualLogger as CategoryMessageBufferLoggerImpl).getMessages();
+};
+
+const logsAllLevels = (logger: CategoryLogger | Category): void => {
+  logger.trace("trace1");
+  logger.trace({ msg: "trace2" });
+  logger.trace(() => "trace3");
+  logger.trace(() => ({msg: "trace4" }) );
+  logger.trace(() => ({ msg: "trace5", data: "x" }));
+
+  logger.debug("debug1");
+  logger.debug({ msg: "debug2" });
+  logger.debug(() => "debug3");
+  logger.debug(() => ({msg: "debug4" }) );
+  logger.debug(() => ({ msg: "debug5" }));
+
+  logger.info("info1");
+  logger.info({ msg: "info2" });
+  logger.info(() => "info3");
+  logger.info(() => ({msg: "info4" }) );
+  logger.info(() => ({ msg: "info5" }));
+
+  logger.warn("warn1");
+  logger.warn({ msg: "warn2" });
+  logger.warn(() => "warn3");
+  logger.warn(() => ({msg: "warn4" }) );
+  logger.warn(() => ({ msg: "warn5" }));
+
+  logger.error("error1", new Error("errorex1"));
+  logger.error({msg: "error2"}, new Error("errorex2"));
+  logger.error(() => "error3", () => new Error("errorex3"));
+  logger.error(() => ({msg : "error4"}), () => new Error("errorex4"));
+  logger.error(() => ({ msg: "error5" }), () => new Error("errorex5"));
+
+  logger.resolved("resolved1", new Error("resolvedex1"));
+  logger.resolved({msg: "resolved2"}, new Error("resolvedex2"));
+  logger.resolved(() => "resolved3", () => new Error("resolvedex3"));
+  logger.resolved(() => ({msg : "resolved4"}), () => new Error("resolvedex4"));
+  logger.resolved(() => ({ msg: "resolved5" }), () => new Error("resolvedex5"));
+
+  logger.fatal("fatal1", new Error("fatalex1"));
+  logger.fatal({msg: "fatal2"}, new Error("fatalex2"));
+  logger.fatal(() => "fatal3", () => new Error("fatalex3"));
+  logger.fatal(() => ({msg : "fatal4"}), () => new Error("fatalex4"));
+  logger.fatal(() => ({ msg: "fatal5" }), () => new Error("fatalex5"));
+
+  logger.log(LogLevel.Fatal, "random1", new Error("randomex1"));
+  logger.log(LogLevel.Fatal, { msg: "random2" }, new Error("randomex2"));
+  logger.log(LogLevel.Fatal, () => "random3", () => new Error("randomex3"));
+  logger.log(LogLevel.Fatal, () => ({msg : "random4"}), () => new Error("randomex4"));
+  logger.log(LogLevel.Fatal, () => ({ msg: "random5" }), () => new Error("randomex5"));
+
+  const messages = getMessages(logger);
+  waitsFor(() => messages.length === 40, "Expected 40 messages in log", 5000);
+  runs(() => {
+    const result = getMessagesAsString(logger);
+
+    expect(result).toContain("trace1");
+    expect(result).toContain("trace2");
+    expect(result).toContain("trace3");
+    expect(result).toContain("trace4");
+    expect(result).toContain("trace5");
+
+    expect(result).toContain("debug1");
+    expect(result).toContain("debug2");
+    expect(result).toContain("debug3");
+    expect(result).toContain("debug4");
+    expect(result).toContain("debug5");
+
+    expect(result).toContain("info1");
+    expect(result).toContain("info2");
+    expect(result).toContain("info3");
+    expect(result).toContain("info4");
+    expect(result).toContain("info5");
+
+    expect(result).toContain("warn1");
+    expect(result).toContain("warn2");
+    expect(result).toContain("warn3");
+    expect(result).toContain("warn4");
+    expect(result).toContain("warn5");
+
+    expect(result).toContain("error1");
+    expect(result).toContain("errorex1");
+    expect(result).toContain("error2");
+    expect(result).toContain("errorex2");
+    expect(result).toContain("error3");
+    expect(result).toContain("errorex3");
+    expect(result).toContain("error4");
+    expect(result).toContain("errorex4");
+    expect(result).toContain("error5");
+    expect(result).toContain("errorex5");
+
+    expect(result).toContain("resolved1");
+    expect(result).toContain("resolvedex1");
+    expect(result).toContain("resolved2");
+    expect(result).toContain("resolvedex2");
+    expect(result).toContain("resolved3");
+    expect(result).toContain("resolvedex3");
+    expect(result).toContain("resolved4");
+    expect(result).toContain("resolvedex4");
+    expect(result).toContain("resolved5");
+    expect(result).toContain("resolvedex5");
+
+    expect(result).toContain("fatal1");
+    expect(result).toContain("fatalex1");
+    expect(result).toContain("fatal2");
+    expect(result).toContain("fatalex2");
+    expect(result).toContain("fatal3");
+    expect(result).toContain("fatalex3");
+    expect(result).toContain("fatal4");
+    expect(result).toContain("fatalex4");
+    expect(result).toContain("fatal5");
+    expect(result).toContain("fatalex5");
+
+    expect(result).toContain("random1");
+    expect(result).toContain("randomex1");
+    expect(result).toContain("random2");
+    expect(result).toContain("randomex2");
+    expect(result).toContain("random3");
+    expect(result).toContain("randomex3");
+    expect(result).toContain("random4");
+    expect(result).toContain("randomex4");
+    expect(result).toContain("random5");
+    expect(result).toContain("randomex5");
+  });
 };
 
 describe("CategoryLogger...", () => {
@@ -99,7 +239,40 @@ describe("CategoryLogger...", () => {
     const messages = getMessages(logger);
     expect(messages.length).toEqual(1);
     expect(messages[0]).toContain("[root] Dance");
+  });
 
+  it("Category log picks up changes", () => {
+    CategoryServiceFactory.setDefaultConfiguration(new CategoryConfiguration(LogLevel.Info, LoggerType.MessageBuffer));
+    const catSome = new Category("catSome");
+    const catAnother = new Category("catAnother", catSome);
+
+    catSome.info("info");
+    catSome.trace("trace");
+    catAnother.info("info");
+    catAnother.trace("trace");
+
+    let messages = getMessages(catSome);
+    expect(messages.length).toEqual(1);
+    expect(messages[0]).toContain("info");
+
+    messages = getMessages(catAnother);
+    expect(messages.length).toEqual(1);
+    expect(messages[0]).toContain("info");
+
+    CategoryServiceFactory.setConfigurationCategory(new CategoryConfiguration(LogLevel.Trace, LoggerType.MessageBuffer), catSome, true);
+    catSome.info("info1");
+    catSome.trace("trace1");
+    messages = getMessages(catSome);
+    expect(messages.length).toEqual(2);
+    expect(messages[0]).toContain("info1");
+    expect(messages[1]).toContain("trace1");
+
+    catAnother.info("info1");
+    catAnother.info("trace1");
+    messages = getMessages(catSome);
+    expect(messages.length).toEqual(2);
+    expect(messages[0]).toContain("info1");
+    expect(messages[1]).toContain("trace1");
   });
 
   describe("LogData", () => {
@@ -145,133 +318,29 @@ describe("CategoryLogger...", () => {
 
     beforeEach(() => {
       // Need to switch to messagebuffer for testing, by default or it will go to console.
-      CategoryServiceFactory.setDefaultConfiguration(new CategoryDefaultConfiguration(LogLevel.Trace, LoggerType.MessageBuffer));
-
-      logger = CategoryServiceFactory.getLogger(catRoot);
+      CategoryServiceFactory.clear();
+      CategoryServiceFactory.setDefaultConfiguration(new CategoryConfiguration(LogLevel.Trace, LoggerType.MessageBuffer));
     });
 
     it("Tests all log levels", () => {
-      logger.trace("trace1");
-      logger.trace({ msg: "trace2" });
-      logger.trace(() => "trace3");
-      logger.trace(() => ({msg: "trace4" }) );
-      logger.trace(() => ({ msg: "trace5", data: "x" }));
+      logger = CategoryServiceFactory.getLogger(catRoot);
+      logsAllLevels(logger);
+    });
 
-      logger.debug("debug1");
-      logger.debug({ msg: "debug2" });
-      logger.debug(() => "debug3");
-      logger.debug(() => ({msg: "debug4" }) );
-      logger.debug(() => ({ msg: "debug5" }));
+    it("Tests all log levels when using category directly", () => {
+      logsAllLevels(catRoot);
+    });
 
-      logger.info("info1");
-      logger.info({ msg: "info2" });
-      logger.info(() => "info3");
-      logger.info(() => ({msg: "info4" }) );
-      logger.info(() => ({ msg: "info5" }));
+    it("Doesn't matter which one to use", () => {
+      catRoot.info("Bla1");
+      logger = CategoryServiceFactory.getLogger(catRoot);
+      logger.info("Bla2");
 
-      logger.warn("warn1");
-      logger.warn({ msg: "warn2" });
-      logger.warn(() => "warn3");
-      logger.warn(() => ({msg: "warn4" }) );
-      logger.warn(() => ({ msg: "warn5" }));
+      const fromLogger = getMessages(logger);
+      const fromCategory = getMessages(catRoot);
 
-      logger.error("error1", new Error("errorex1"));
-      logger.error({msg: "error2"}, new Error("errorex2"));
-      logger.errorc(() => "error3", () => new Error("errorex3"));
-      logger.error(() => ({msg : "error4"}), () => new Error("errorex4"));
-      logger.error(() => ({ msg: "error5" }), () => new Error("errorex5"));
-
-      logger.resolved("resolved1", new Error("resolvedex1"));
-      logger.resolved({msg: "resolved2"}, new Error("resolvedex2"));
-      logger.resolved(() => "resolved3", () => new Error("resolvedex3"));
-      logger.resolved(() => ({msg : "resolved4"}), () => new Error("resolvedex4"));
-      logger.resolved(() => ({ msg: "resolved5" }), () => new Error("resolvedex5"));
-
-      logger.fatal("fatal1", new Error("fatalex1"));
-      logger.fatal({msg: "fatal2"}, new Error("fatalex2"));
-      logger.fatal(() => "fatal3", () => new Error("fatalex3"));
-      logger.fatal(() => ({msg : "fatal4"}), () => new Error("fatalex4"));
-      logger.fatal(() => ({ msg: "fatal5" }), () => new Error("fatalex5"));
-
-      logger.log(LogLevel.Fatal, "random1", new Error("randomex1"));
-      logger.log(LogLevel.Fatal, { msg: "random2" }, new Error("randomex2"));
-      logger.log(LogLevel.Fatal, () => "random3", () => new Error("randomex3"));
-      logger.log(LogLevel.Fatal, () => ({msg : "random4"}), () => new Error("randomex4"));
-      logger.log(LogLevel.Fatal, () => ({ msg: "random5" }), () => new Error("randomex5"));
-
-      const messages = getMessages(logger);
-      waitsFor(() => messages.length === 40, "Expected 40 messages in log", 5000);
-      runs(() => {
-        const result = getMessagesAsString(logger);
-
-        expect(result).toContain("trace1");
-        expect(result).toContain("trace2");
-        expect(result).toContain("trace3");
-        expect(result).toContain("trace4");
-        expect(result).toContain("trace5");
-
-        expect(result).toContain("debug1");
-        expect(result).toContain("debug2");
-        expect(result).toContain("debug3");
-        expect(result).toContain("debug4");
-        expect(result).toContain("debug5");
-
-        expect(result).toContain("info1");
-        expect(result).toContain("info2");
-        expect(result).toContain("info3");
-        expect(result).toContain("info4");
-        expect(result).toContain("info5");
-
-        expect(result).toContain("warn1");
-        expect(result).toContain("warn2");
-        expect(result).toContain("warn3");
-        expect(result).toContain("warn4");
-        expect(result).toContain("warn5");
-
-        expect(result).toContain("error1");
-        expect(result).toContain("errorex1");
-        expect(result).toContain("error2");
-        expect(result).toContain("errorex2");
-        expect(result).toContain("error3");
-        expect(result).toContain("errorex3");
-        expect(result).toContain("error4");
-        expect(result).toContain("errorex4");
-        expect(result).toContain("error5");
-        expect(result).toContain("errorex5");
-
-        expect(result).toContain("resolved1");
-        expect(result).toContain("resolvedex1");
-        expect(result).toContain("resolved2");
-        expect(result).toContain("resolvedex2");
-        expect(result).toContain("resolved3");
-        expect(result).toContain("resolvedex3");
-        expect(result).toContain("resolved4");
-        expect(result).toContain("resolvedex4");
-        expect(result).toContain("resolved5");
-        expect(result).toContain("resolvedex5");
-
-        expect(result).toContain("fatal1");
-        expect(result).toContain("fatalex1");
-        expect(result).toContain("fatal2");
-        expect(result).toContain("fatalex2");
-        expect(result).toContain("fatal3");
-        expect(result).toContain("fatalex3");
-        expect(result).toContain("fatal4");
-        expect(result).toContain("fatalex4");
-        expect(result).toContain("fatal5");
-        expect(result).toContain("fatalex5");
-
-        expect(result).toContain("random1");
-        expect(result).toContain("randomex1");
-        expect(result).toContain("random2");
-        expect(result).toContain("randomex2");
-        expect(result).toContain("random3");
-        expect(result).toContain("randomex3");
-        expect(result).toContain("random4");
-        expect(result).toContain("randomex4");
-        expect(result).toContain("random5");
-        expect(result).toContain("randomex5");
-      });
+      expect(fromLogger.length).toEqual(2);
+      expect(fromCategory.length).toEqual(2);
     });
   });
 });

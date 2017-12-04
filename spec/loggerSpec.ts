@@ -224,7 +224,7 @@ describe("Loggers", () => {
 
     logger.error("error1", new Error("errorex1"));
     logger.error({msg: "error2"}, new Error("errorex2"));
-    logger.errorc(() => "error3", () => new Error("errorex3"));
+    logger.error(() => "error3", () => new Error("errorex3"));
     logger.error(() => ({msg: "error4"}), () => new Error("errorex4"));
     logger.error(() => {
       return {msg: "error5"};

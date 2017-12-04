@@ -97,7 +97,7 @@ export class CategoryServiceImpl implements RuntimeSettings {
     }
   }
 
-  public registerCategory(category: Category, updateLogger: (logger: CategoryLogger) => void): void {
+  public registerCategory(category: Category): void {
     if (category === null || typeof category === "undefined") {
       throw new Error("Category CANNOT be null/undefined");
     }

@@ -33,7 +33,7 @@ export class Category {
     if (this._parent !== null) {
       this._parent._children.push(this);
     }
-    CategoryServiceImpl.getInstance().registerCategory(this, this.updateLogger);
+    CategoryServiceImpl.getInstance().registerCategory(this);
   }
 
   public get name(): string {
@@ -121,10 +121,6 @@ export class Category {
     if (typeof this._logger === "undefined" || this._logger === null) {
       throw new Error("Failed to load a logger for category (should not happen): " + this.name);
     }
-  }
-
-  private updateLogger = (logger: CategoryLogger): void => {
-    this._logger = logger;
   }
 
   private static nextId(): number {
