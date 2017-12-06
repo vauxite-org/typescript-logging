@@ -148,7 +148,7 @@ import * as logging from "typescript-logging";
 
 // This exposes EVERYTHING typescript-logging exposes, which includes help etc but a lot more you don't need.
 // You could easily filter and only expose help, getLogControl and getCategoryControl
-(<any>window).LOGGING = logging;
+(window as any).LOGGING = logging;
 ```
 
 In the browser (usage):

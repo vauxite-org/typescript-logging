@@ -1,15 +1,32 @@
 # typescript-logging
 
-Typescript library for logging. Simple and flexible in usage.
+TypeScript library for logging. Simple and flexible in usage.
 
-* The library is written in typescript, so it will easily integrate with other Typescript projects.
-* Two logging styles supported (either can be used or both):
-  * Category style
-  * Log4j style
-* Api to control (console) logging at runtime through a browser's developer console.
+* The library is written in TypeScript, so it will easily integrate with other TypeScript projects.
+* Two styles are supported (either can be used or both):
+  * Category style of logging
+  * Log4j style of logging
+* Can run in both the browser and node
+* Api to control (console) logging at runtime through a (browser's) developer console.
 * Supports a separate chrome browser developer extension, which allows you to control logging at runtime through the chrome developer extension. For details please see: [Typescript Logging Developer Extension](#typescript-logging-developer-extension)
 
 The javascript bundle can be used for normal javascript projects if needed (es5 compatible).
+
+The following documentation sections are available:
+* [Installation](#installation)
+* [Usage](#usage)
+  * [Category style logging](#category-style-logging)
+  * [Log4j style logging](#log4j-style-logging)
+* [Console control API](#console-control-api)
+* [Documentation](#documentation)
+* [Typescript Logging Developer Extension](#typescript-logging-developer-extension)
+* [Build](#build)
+* [Tests](#tests)
+* [Bugs](#bugs)
+* [Contributing](#contributing)
+* [History and changelog](#history-and-changelog)
+
+`Note: Release 0.5.0 deprecated several methods e.a, please see the changelog to find out what - everything deprecated will be removed in 0.6.0.`
 
 ## Installation
 
@@ -20,7 +37,7 @@ npm install --save typescript-logging
 ```
 No additional typings are required, these are included.
 
-Requires typescript 2.1.5+ (tested).
+Requires typescript 2.4.2+ (tested).
 
 Or download the (minified) javascript bundle and documentation from [here](https://github.com/mreuvers/typescript-logging/tree/master/downloads/bundle/latest).
 
@@ -39,43 +56,42 @@ and a new more experimental way of logging.
 
 Which one to use, is a matter of preference, both have advantages and disadvantages.
 
-Note: Currently the chrome developer extension supports "category style logging" only, in the future it will support both (planned for a future 0.x release).
+Note: Currently the chrome developer extension supports "category style logging" only.
 
 ### Category style logging
 
-This provides a quick example (since 0.2.0+), please check the documentation section for full documentation.
+This provides a quick example, please check the documentation section for full documentation.
 
 Config.ts
 ```typescript
-import {Category,CategoryLogger,CategoryServiceFactory,CategoryDefaultConfiguration,LogLevel} from "typescript-logging";
+import {Category,CategoryLogger,CategoryServiceFactory,CategoryConfiguration,LogLevel} from "typescript-logging";
 
 // Optionally change default settings, in this example set default logging to Info.
 // Without changing configuration, categories will log to Error.
-CategoryServiceFactory.setDefaultConfiguration(new CategoryDefaultConfiguration(LogLevel.Info));
+CategoryServiceFactory.setDefaultConfiguration(new CategoryConfiguration(LogLevel.Info));
 
-// Create categories, they will autoregister themselves.
-// This creates one root logger, with 1 child sub category.
-export const catRoot = new Category("service");
-export const catProd = new Category("product", catRoot);
+// Create categories, they will autoregister themselves, one category without parent (root) and a child category.
+export const catService = new Category("service");
+export const catProd = new Category("product", catService);
 
-// Get a logger, this can be retrieved for root categories only (in the example above, the "service" category).
-export const log: CategoryLogger = CategoryServiceFactory.getLogger(catRoot);
+// Optionally get a logger for a category, since 0.5.0 this is not necessary anymore, you can use the category itself to log.
+  // export const log: CategoryLogger = CategoryServiceFactory.getLogger(cat);
 ```
 
 ElseWhere.ts
 ```typescript
-import {log,catProd} from "./Config"
+import {catService,catProd} from "./Config"
 
 export class ElseWhere {
 
   magic(name: string): void {
      // Normal log to category: catProd
-     log.info("Performing magic: " + name, catProd);
+     catProd.info("Performing magic: " + name);
 
      // Lambda log to catProd (cheaper)
-     log.infoc(() => "Performing magic once more: " + name, catProd);
+     catProd.info(() => "Performing magic once more: " + name);
 
-     log.infoc(() => `With template script: ${name}`, catProd);
+     catService.infoc(() => `With template script: ${name}`);
   }
 }
 ```
@@ -84,12 +100,12 @@ With the above example if magic("spell") is executed it will log:
 ```
 2016-01-07 11:14:26,273 INFO [product] Performing magic: spell
 2016-01-07 11:14:26,274 INFO [product] Performing magic once more: spell
-2016-01-07 11:14:26,275 INFO [product] With template script: spell
+2016-01-07 11:14:26,275 INFO [service] With template script: spell
 ```
 
 ### Log4j style logging
 
-This provides a quick example (since 0.1.x), please check the documentation section for full documentation.
+This provides a quick example, please check the documentation section for full documentation.
 
 ConfigLog4j.ts
 ```typescript
@@ -126,11 +142,11 @@ export class ElseWhere {
     logOther.info("Casting info magic spell: " + name);
 
     // Lamda logging, cheaper as its only executed when needed.
-    log.debugc(() => "Casting lambda debug magic spell: " + name);
-    logOther.infoc(() => "Casting lambda info magic spell: " + name);
+    log.debug(() => "Casting lambda debug magic spell: " + name);
+    logOther.info(() => "Casting lambda info magic spell: " + name);
 
     // Use template script
-    log.infoc(() => `Casting magic spell: ${name}`);
+    log.info(() => `Casting magic spell: ${name}`);
   }
 }
 ```
@@ -166,8 +182,8 @@ in addition to the normal documentation provided here.
 Since version 0.2.0 the documentation has been split off in several sections.
 
 ### Api and related
-* Latest log4j style logging: [Log4j documentation](docs/latest_log4j.md)
 * Latest category style logging: [Categorized documentation](docs/latest_categorized.md)
+* Latest log4j style logging: [Log4j documentation](docs/latest_log4j.md)
 * Console control api: [Console control documentation](docs/latest_console_control.md)
 
 ### Webpack with more than one project module (important)
@@ -211,7 +227,7 @@ Starting with version 0.2.0+ a chrome developer extension is available to easily
 
 Please visit: [typescript-logging-extension](https://github.com/mreuvers/typescript-logging-extension) on how to get this.
 
-Note: The extension currently only integrates with the category style of logging. Current plan is to add support for log4j like logging as well in a future 0.x release.
+Note: The extension currently only integrates with the category style of logging.
 
 ## Build
 
@@ -241,6 +257,6 @@ If you add/change new functionality and want it merged to master, please open a 
 
 Some things may not fit the library and could be rejected, so if you are unsure please ask first before wasting your valuable time!
 
-## History
+## History and changelog
 
-For history and changes please check the [changelog](docs/change_log.md)
+For history, changes and migration please check the [changelog](docs/change_log.md)

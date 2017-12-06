@@ -279,14 +279,11 @@ export abstract class AbstractCategoryLogger implements CategoryLogger {
   }
 
   private _logInternal(level: LogLevel, msg: () => string | LogData, error: () => Error | null, resolved: boolean, ...categories: Category[]): void {
-    let logCategories: Category[];
+    let logCategories: Category[] = [this.rootCategory];
 
     // Log root category by default if none present
     if (typeof categories !== "undefined" && categories.length > 0) {
-      logCategories = categories;
-    }
-    else {
-      logCategories = [this.rootCategory];
+      logCategories = logCategories.concat(categories.filter((c) => c !== this.rootCategory));
     }
 
     // Get the runtime levels for given categories. If their level is lower than given level, we log.

@@ -275,6 +275,20 @@ describe("CategoryLogger...", () => {
     expect(messages[1]).toContain("trace1");
   });
 
+  it("Category can log to multiple categories", () => {
+    CategoryServiceFactory.setDefaultConfiguration(new CategoryConfiguration(LogLevel.Info, LoggerType.MessageBuffer));
+    const catService = new Category("service");
+    const catSome = new Category("catSome");
+    const catAnother = new Category("catAnother", catSome);
+
+    catAnother.info("info", catService, catSome);
+
+    const messages = getMessages(catAnother);
+    expect(messages.length).toEqual(1);
+    expect(messages[0]).toContain("info");
+    expect(messages[0]).toContain("[catAnother, service, catSome]");
+  });
+
   describe("LogData", () => {
     const data = {key: "data"};
     const msg = "Message";

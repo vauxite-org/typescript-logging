@@ -1,6 +1,25 @@
 # Changelog
 
 This page describes the relevant changes per version.
+* 0.5.0
+  * Bumped TypeScript version to 2.4.2
+  * [Issue 25](https://github.com/mreuvers/typescript-logging/issues/25) Simplify usage Logger and CategoryLogger
+  * **Deprecated in CategoryLogger interface** (deprecated methods will be removed in 0.6.0):
+    * tracec -> use trace() instead
+    * debugc -> use debug() instead
+    * infoc  -> use info() instead
+    * warnc  -> use warn() instead
+    * errorc -> use error() instead
+    * fatalc -> use fatal() instead
+  * **Deprecated in Logger interface** (deprecated methods will be removed in 0.6.0):
+    * tracec -> use trace() instead
+    * debugc -> use debug() instead
+    * infoc  -> use info() instead
+    * warnc  -> use warn() instead
+    * errorc -> use error() instead
+    * fatalc -> use fatal() instead
+  * **Deprecated class CategoryDefaultConfiguration** -> use CategoryConfiguration instead.
+  * **Deprecated method CategoryServiceFactory.getRuntimeSettings()** -> No replacement.
 * 0.4.2
   * [Issue 22](https://github.com/mreuvers/typescript-logging/issues/22) has been fixed (Distributed release 0.4.1 broken).
 * 0.4.1
