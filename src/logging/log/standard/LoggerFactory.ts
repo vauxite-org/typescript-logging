@@ -1,11 +1,28 @@
 import {Logger} from "./Logger";
-import {LoggerFactoryOptions, LogGroupRuntimeSettings} from "./LoggerFactoryService";
+import {LoggerFactoryOptions} from "./LoggerFactoryService";
+import {LoggerFactoryImpl} from "./LoggerFactoryImpl";
 
 /**
  * LoggerFactory, which allows you to get a Logger. It also
  * allows you to reconfigure it, by configure() if needed.
  */
-export interface LoggerFactory {
+export abstract class LoggerFactory {
+
+  private static readonly default = new LoggerFactoryImpl("default", new LoggerFactoryOptions());
+
+  /**
+   * Configures the default logger factory
+   */
+  public static configureDefault(options: LoggerFactoryOptions): void {
+      LoggerFactory.default.configure(options);
+  }
+
+  /**
+   * Returns the requested logger from the default factory.
+   */
+  public static getLogger(named: string): void {
+      LoggerFactory.default.getLogger(named);
+  }
 
   /**
    * Can be used to reconfigure this logger.
@@ -14,7 +31,7 @@ export interface LoggerFactory {
    * can be made again.
    * @param options New options
    */
-  configure(options: LoggerFactoryOptions): void;
+  public abstract configure(options: LoggerFactoryOptions): void;
 
   /**
    * Retrieve a logger for given name. E.g. model.Person, the logging
@@ -22,17 +39,17 @@ export interface LoggerFactory {
    * was created with by {@link LFService#create}
    * @param named Name to fetch the logger with, calling with the same name repeatedly will return the same logger.
    */
-  getLogger(named: string): Logger;
+  public abstract getLogger(named: string): Logger;
 
   /**
    * Return true if enabled, false otherwise. If disabled, logging is not written in any form.
    */
-  isEnabled(): boolean;
+  public abstract isEnabled(): boolean;
 
   /**
    * Returns the name of this LoggerFactory, this is used for the console api.
    * If no name was specified the LoggerFactory has an auto-generated name.
    */
-  getName(): string;
+  public abstract getName(): string;
 
 }
