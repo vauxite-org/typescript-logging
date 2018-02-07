@@ -1,5 +1,5 @@
 import {Logger} from "./Logger";
-import {LoggerFactoryOptions, LogGroupRuntimeSettings} from "./LoggerFactoryService";
+import {LoggerFactoryOptions} from "./LoggerFactoryOptions";
 
 /**
  * LoggerFactory, which allows you to get a Logger. It also

@@ -3,10 +3,11 @@ import {LoggerType} from "../LoggerOptions";
 import {Logger} from "./Logger";
 import {LoggerFactory} from "./LoggerFactory";
 import {LoggerFactoryRuntimeSettings} from "./LoggerFactoryRuntimeSettings";
-import {LoggerFactoryOptions, LogGroupRuntimeSettings} from "./LoggerFactoryService";
 import {ConsoleLoggerImpl} from "./ConsoleLoggerImpl";
 import {MessageBufferLoggerImpl} from "./MessageBufferLoggerImpl";
 import {AbstractLogger} from "./AbstractLogger";
+import {LoggerFactoryOptions} from "./LoggerFactoryOptions";
+import {LogGroupRuntimeSettings} from "./LogGroupRuntimeSettings";
 
 export class LoggerFactoryImpl implements LoggerFactory, LoggerFactoryRuntimeSettings {
 

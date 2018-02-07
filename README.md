@@ -91,7 +91,7 @@ export class ElseWhere {
      // Lambda log to catProd (cheaper)
      catProd.info(() => "Performing magic once more: " + name);
 
-     catService.infoc(() => `With template script: ${name}`);
+     catService.info(() => `With template script: ${name}`);
   }
 }
 ```

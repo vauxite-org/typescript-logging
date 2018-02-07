@@ -2,7 +2,7 @@ import {LogFormat, LoggerType, LogLevel} from "../src/logging/log/LoggerOptions"
 import {Logger} from "../src/logging/log/standard/Logger";
 import {LoggerFactory} from "../src/logging/log/standard/LoggerFactory";
 import {LoggerFactoryImpl} from "../src/logging/log/standard/LoggerFactoryImpl";
-import {LFService, LoggerFactoryOptions, LogGroupRule} from "../src/logging/log/standard/LoggerFactoryService";
+import {LFService, LoggerFactoryOptions, LogGroupRule} from "../src/logging/log/standard/LFService";
 import {MessageBufferLoggerImpl} from "../src/logging/log/standard/MessageBufferLoggerImpl";
 import {AbstractLogger, LogMessage} from "../src/logging/log/standard/AbstractLogger";
 

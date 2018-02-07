@@ -23,7 +23,9 @@ export {CategoryServiceFactory} from "./log/category/CategoryServiceFactory";
 // LoggerFactory related.
 export {Logger, MessageType, ErrorType} from "./log/standard/Logger";
 export {LoggerFactory} from "./log/standard/LoggerFactory";
-export {LoggerFactoryOptions, LFService, LogGroupRule} from "./log/standard/LoggerFactoryService";
+export {LoggerFactoryOptions} from "./log/standard/LoggerFactoryOptions";
+export {LogGroupRule} from "./log/standard/LogGroupRule";
+export {LFService} from "./log/standard/LFService";
 export {AbstractLogger, LogMessage} from "./log/standard/AbstractLogger";
 export {ConsoleLoggerImpl} from "./log/standard/ConsoleLoggerImpl";
 export {MessageBufferLoggerImpl} from "./log/standard/MessageBufferLoggerImpl";

@@ -1,7 +1,7 @@
 import {
   LFService, LoggerFactoryOptions, LogGroupRule,
   LogGroupRuntimeSettings
-} from "../src/logging/log/standard/LoggerFactoryService";
+} from "../src/logging/log/standard/LFService";
 import {MessageBufferLoggerImpl} from "../src/logging/log/standard/MessageBufferLoggerImpl";
 import {LogLevel, LogFormat, LoggerType} from "../src/logging/log/LoggerOptions";
 import {AbstractLogger, LogMessage} from "../src/logging/log/standard/AbstractLogger";

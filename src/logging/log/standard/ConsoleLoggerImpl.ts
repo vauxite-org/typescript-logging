@@ -1,6 +1,6 @@
 import {AbstractLogger, LogMessage} from "./AbstractLogger";
-import {LogGroupRuntimeSettings} from "./LoggerFactoryService";
 import {LogLevel} from "../LoggerOptions";
+import {LogGroupRuntimeSettings} from "./LogGroupRuntimeSettings";
 
 /**
  * Simple logger, that logs to the console. If the console is unavailable will throw exception.

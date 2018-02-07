@@ -1,4 +1,4 @@
-import {LogGroupRuntimeSettings} from "./LoggerFactoryService";
+import {LogGroupRuntimeSettings} from "./LogGroupRuntimeSettings";
 
 /**
  * LoggerFactoryRuntimeSettings.

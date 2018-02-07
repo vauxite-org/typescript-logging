@@ -1,5 +1,5 @@
-import {LogGroupRuntimeSettings} from "./LoggerFactoryService";
 import {AbstractLogger, LogMessage} from "./AbstractLogger";
+import {LogGroupRuntimeSettings} from "./LogGroupRuntimeSettings";
 
 /**
  * Logger which buffers all messages, use with care due to possible high memory footprint.

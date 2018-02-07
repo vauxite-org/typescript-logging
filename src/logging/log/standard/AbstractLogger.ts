@@ -1,9 +1,10 @@
 import {LogLevel} from "../LoggerOptions";
-import {LogGroupRule, LogGroupRuntimeSettings} from "./LoggerFactoryService";
 import {ErrorType, Logger, MessageType} from "./Logger";
 import {LinkedList} from "../../utils/DataStructures";
 import {MessageFormatUtils} from "../../utils/MessageUtils";
 import {LogData} from "../LogData";
+import {LogGroupRule} from "./LogGroupRule";
+import {LogGroupRuntimeSettings} from "./LogGroupRuntimeSettings";
 
 /**
  * Log message, providing all data for a single message.
