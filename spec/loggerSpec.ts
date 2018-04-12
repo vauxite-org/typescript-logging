@@ -1,12 +1,14 @@
 import {
-  LFService, LoggerFactoryOptions, LogGroupRule,
-  LogGroupRuntimeSettings
+  LFService
 } from "../src/logging/log/standard/LFService";
 import {MessageBufferLoggerImpl} from "../src/logging/log/standard/MessageBufferLoggerImpl";
 import {LogLevel, LogFormat, LoggerType} from "../src/logging/log/LoggerOptions";
 import {AbstractLogger, LogMessage} from "../src/logging/log/standard/AbstractLogger";
 import {LoggerFactory} from "../src/logging/log/standard/LoggerFactory";
 import {Logger} from "../src/logging/log/standard/Logger";
+import {LogGroupRuntimeSettings} from "../src/logging/log/standard/LogGroupRuntimeSettings";
+import {LoggerFactoryOptions} from "../src/logging/log/standard/LoggerFactoryOptions";
+import {LogGroupRule} from "../src/logging/log/standard/LogGroupRule";
 
 /**
  * Custom logger for testing, only logs the last message.

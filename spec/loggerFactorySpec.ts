@@ -2,9 +2,12 @@ import {LogFormat, LoggerType, LogLevel} from "../src/logging/log/LoggerOptions"
 import {Logger} from "../src/logging/log/standard/Logger";
 import {LoggerFactory} from "../src/logging/log/standard/LoggerFactory";
 import {LoggerFactoryImpl} from "../src/logging/log/standard/LoggerFactoryImpl";
-import {LFService, LoggerFactoryOptions, LogGroupRule} from "../src/logging/log/standard/LFService";
+import {LFService} from "../src/logging/log/standard/LFService";
 import {MessageBufferLoggerImpl} from "../src/logging/log/standard/MessageBufferLoggerImpl";
 import {AbstractLogger, LogMessage} from "../src/logging/log/standard/AbstractLogger";
+import {LoggerFactoryOptions} from "../src/logging/log/standard/LoggerFactoryOptions";
+import {LogGroupRule} from "../src/logging/log/standard/LogGroupRule";
+import {LogGroupRuntimeSettings} from "../src/logging/log/standard/LogGroupRuntimeSettings";
 
 describe("LoggerFactory configuration", () => {
 
@@ -91,7 +94,8 @@ describe("LoggerFactory configuration", () => {
     const loggerHello = factory.getLogger("model.Hello");
     expect(loggerHello).not.toBeNull();
 
-    const rtSettings = factory.getLogGroupRuntimeSettingsByLoggerName(loggerHello.name);
+    const rtSettings = factory.getLogGroupRuntimeSettingsByLoggerName(loggerHello.name) as LogGroupRuntimeSettings;
+    expect(rtSettings).not.toBeNull("Settings should be present");
     expect(rtSettings).not.toBeNull();
     expect(rtSettings.level).toEqual(LogLevel.Warn);
 
@@ -122,6 +126,20 @@ describe("LoggerFactory configuration", () => {
     // This not allowed now.
     expect(() => rule.formatterLogMessage = (message) => typeof(message.message) === "string" ? message.message : "nope should not happen!")
       .toThrow("You cannot specify a formatter for log messages if your loggerType is Custom");
+  });
+
+  it("Default LoggerFactory is available", () => {
+    expect(LFService.DEFAULT).not.toBeNull("Default loggerfactory should not be null");
+    const factory = LFService.DEFAULT;
+    expect(factory === LFService.DEFAULT).toBeTruthy("Should be same instance");
+    factory.configure(new LoggerFactoryOptions().addLogGroupRule(new LogGroupRule(new RegExp(".+"), LogLevel.Warn, new LogFormat(), LoggerType.MessageBuffer)));
+    const logger = factory.getLogger("test") as MessageBufferLoggerImpl;
+    logger.warn("hello!");
+    expect(logger.toString()).toContain("hello!");
+  });
+
+  it("Default LoggerFactory name cannot be used by users", () => {
+    expect(() => LFService.createNamedLoggerFactory("DEFAULT")).toThrow(new Error("LoggerFactory name: DEFAULT is reserved and cannot be used."));
   });
 
   class CustomLogger extends AbstractLogger {

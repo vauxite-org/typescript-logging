@@ -19,6 +19,7 @@ class LFServiceImpl implements LFServiceRuntimeSettings {
 
   private constructor() {
     // Private constructor.
+
     ExtensionHelper.register();
   }
 
@@ -112,7 +113,10 @@ class LFServiceImpl implements LFServiceRuntimeSettings {
  */
 export class LFService {
 
+  private static DEFAULT_LOGGER_FACTORY_NAME = "DEFAULT";
+
   private static INSTANCE_SERVICE = LFServiceImpl.getInstance();
+  private static DEFAULT_LOGGER_FACTORY: LoggerFactory | null = null;
 
   /**
    * Create a new LoggerFactory with given options (if any). If no options
@@ -127,11 +131,15 @@ export class LFService {
 
   /**
    * Create a new LoggerFactory using given name (used for console api/extension).
-   * @param name Name Pick something short but distinguishable.
+   * @param name Name Pick something short but distinguishable. The word "DEFAULT" is reserved and cannot be taken, it is used
+   * for the default LoggerFactory.
    * @param options Options, optional
    * @return {LoggerFactory}
    */
   public static createNamedLoggerFactory(name: string, options: LoggerFactoryOptions | null = null): LoggerFactory {
+    if (name === LFService.DEFAULT_LOGGER_FACTORY_NAME) {
+      throw new Error("LoggerFactory name: " + LFService.DEFAULT_LOGGER_FACTORY_NAME + " is reserved and cannot be used.");
+    }
     return LFService.INSTANCE_SERVICE.createNamedLoggerFactory(name, options);
   }
 
@@ -151,5 +159,30 @@ export class LFService {
    */
   public static getRuntimeSettings(): LFServiceRuntimeSettings {
     return LFService.INSTANCE_SERVICE;
+  }
+
+  /**
+   * This property returns the default LoggerFactory (if not yet initialized it is initialized).
+   * This LoggerFactory can be used to share among multiple
+   * applications/libraries - that way you can enable/change logging over everything from
+   * your own application when required.
+   * It is recommended to be used by library developers to make logging easily available for the
+   * consumers of their libraries.
+   * It is highly recommended to use Loggers from the LoggerFactory with unique grouping/names to prevent
+   * clashes of Loggers between multiple projects.
+   * @returns {LoggerFactory} Returns the default LoggerFactory
+   */
+  public static get DEFAULT(): LoggerFactory {
+    return LFService.getDefault();
+  }
+
+  private static getDefault(): LoggerFactory {
+    if (LFService.DEFAULT_LOGGER_FACTORY === null) {
+      LFService.DEFAULT_LOGGER_FACTORY = LFService.DEFAULT_LOGGER_FACTORY = LFService.INSTANCE_SERVICE.createNamedLoggerFactory(
+        LFService.DEFAULT_LOGGER_FACTORY_NAME,
+        new LoggerFactoryOptions().addLogGroupRule(new LogGroupRule(new RegExp(".+"), LogLevel.Error))
+      );
+    }
+    return LFService.DEFAULT_LOGGER_FACTORY;
   }
 }
