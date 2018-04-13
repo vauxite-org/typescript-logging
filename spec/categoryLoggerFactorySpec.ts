@@ -57,7 +57,7 @@ describe("CategoryServiceFactory", () => {
   let child1: Category | null = null;
   let child11: Category | null = null;
   let child12: Category | null = null;
-  let logger: CategoryLogger | null;
+  let logger: CategoryLogger | null = null;
 
   beforeEach(() => {
     CategoryServiceFactory.clear();
@@ -84,16 +84,16 @@ describe("CategoryServiceFactory", () => {
 
   it("All categories have runtime settings", () => {
     const service = CategoryServiceImpl.getInstance();
-    expect(service.getCategorySettings(root1)).not.toBeNull();
-    expect(service.getCategorySettings(child1)).not.toBeNull();
-    expect(service.getCategorySettings(child11)).not.toBeNull();
-    expect(service.getCategorySettings(child12)).not.toBeNull();
+    expect(service.getCategorySettings(root1 as Category)).not.toBeNull();
+    expect(service.getCategorySettings(child1 as Category)).not.toBeNull();
+    expect(service.getCategorySettings(child11 as Category)).not.toBeNull();
+    expect(service.getCategorySettings(child12 as Category)).not.toBeNull();
   });
 
   it("Allows to fetch by all categories", () => {
-    expect(() => CategoryServiceFactory.getLogger(child1)).toBeDefined();
-    expect(() => CategoryServiceFactory.getLogger(child11)).toBeDefined();
-    expect(() => CategoryServiceFactory.getLogger(child12)).toBeDefined();
+    expect(() => CategoryServiceFactory.getLogger(child1 as Category)).toBeDefined();
+    expect(() => CategoryServiceFactory.getLogger(child11 as Category)).toBeDefined();
+    expect(() => CategoryServiceFactory.getLogger(child12 as Category)).toBeDefined();
   });
 
   it("Allows adding root category dynamically", () => {
@@ -117,12 +117,12 @@ describe("CategoryServiceFactory", () => {
   });
 
   it("Will return the same logger for root", () => {
-    const anotherLogger = CategoryServiceFactory.getLogger(root1);
+    const anotherLogger = CategoryServiceFactory.getLogger(root1 as Category);
     expect(anotherLogger === logger).toBeTruthy();
   });
 
   it("Loggers are wrapped in delegate", () => {
-    const delegate = CategoryServiceFactory.getLogger(root1);
+    const delegate = CategoryServiceFactory.getLogger(root1 as Category);
     expect(delegate instanceof CategoryDelegateLoggerImpl).toBeTruthy();
   });
 
@@ -139,10 +139,10 @@ describe("CategoryServiceFactory", () => {
 
   it("Default configuration is applied to loggers", () => {
 
-    checkDefaultConfig(root1, CategoryServiceImpl.getInstance().getCategorySettings(root1));
-    checkDefaultConfig(child1, CategoryServiceImpl.getInstance().getCategorySettings(child1));
-    checkDefaultConfig(child11, CategoryServiceImpl.getInstance().getCategorySettings(child11));
-    checkDefaultConfig(child12, CategoryServiceImpl.getInstance().getCategorySettings(child12));
+    checkDefaultConfig(root1 as Category, CategoryServiceImpl.getInstance().getCategorySettings(root1 as Category));
+    checkDefaultConfig(child1 as Category, CategoryServiceImpl.getInstance().getCategorySettings(child1 as Category));
+    checkDefaultConfig(child11 as Category, CategoryServiceImpl.getInstance().getCategorySettings(child11 as Category));
+    checkDefaultConfig(child12 as Category, CategoryServiceImpl.getInstance().getCategorySettings(child12 as Category));
 
     const root2 = new Category("root2");
     const another = new Category("someChild", root2);
@@ -154,7 +154,7 @@ describe("CategoryServiceFactory", () => {
   });
 
   it("New default configuration can be applied to loggers", () => {
-    checkDefaultConfig(root1, CategoryServiceImpl.getInstance().getCategorySettings(root1));
+    checkDefaultConfig(root1 as Category, CategoryServiceImpl.getInstance().getCategorySettings(root1 as Category));
 
     const checkChangedConfig = (cat: Category, settings: CategoryRuntimeSettings) => {
       expect(settings.category === cat).toBeTruthy();
@@ -172,23 +172,23 @@ describe("CategoryServiceFactory", () => {
     );
     CategoryServiceFactory.setDefaultConfiguration(configChanged);
 
-    checkChangedConfig(root1, CategoryServiceImpl.getInstance().getCategorySettings(root1));
-    checkChangedConfig(child1, CategoryServiceImpl.getInstance().getCategorySettings(child1));
-    checkChangedConfig(child11, CategoryServiceImpl.getInstance().getCategorySettings(child11));
-    checkChangedConfig(child12, CategoryServiceImpl.getInstance().getCategorySettings(child12));
+    checkChangedConfig(root1 as Category, CategoryServiceImpl.getInstance().getCategorySettings(root1 as Category));
+    checkChangedConfig(child1 as Category, CategoryServiceImpl.getInstance().getCategorySettings(child1 as Category));
+    checkChangedConfig(child11 as Category, CategoryServiceImpl.getInstance().getCategorySettings(child11 as Category));
+    checkChangedConfig(child12 as Category, CategoryServiceImpl.getInstance().getCategorySettings(child12 as Category));
 
     CategoryServiceFactory.setDefaultConfiguration(new CategoryConfiguration());
-    checkDefaultConfig(root1, CategoryServiceImpl.getInstance().getCategorySettings(root1));
-    checkDefaultConfig(child1, CategoryServiceImpl.getInstance().getCategorySettings(child1));
-    checkDefaultConfig(child11, CategoryServiceImpl.getInstance().getCategorySettings(child11));
-    checkDefaultConfig(child12, CategoryServiceImpl.getInstance().getCategorySettings(child12));
+    checkDefaultConfig(root1 as Category, CategoryServiceImpl.getInstance().getCategorySettings(root1 as Category));
+    checkDefaultConfig(child1 as Category, CategoryServiceImpl.getInstance().getCategorySettings(child1 as Category));
+    checkDefaultConfig(child11 as Category, CategoryServiceImpl.getInstance().getCategorySettings(child11 as Category));
+    checkDefaultConfig(child12 as Category, CategoryServiceImpl.getInstance().getCategorySettings(child12 as Category));
 
     // Now without reset, all will still have the previous settings. New categories added will be different.
     CategoryServiceFactory.setDefaultConfiguration(configChanged, false);
-    checkDefaultConfig(root1, CategoryServiceImpl.getInstance().getCategorySettings(root1));
-    checkDefaultConfig(child1, CategoryServiceImpl.getInstance().getCategorySettings(child1));
-    checkDefaultConfig(child11, CategoryServiceImpl.getInstance().getCategorySettings(child11));
-    checkDefaultConfig(child12, CategoryServiceImpl.getInstance().getCategorySettings(child12));
+    checkDefaultConfig(root1 as Category, CategoryServiceImpl.getInstance().getCategorySettings(root1 as Category));
+    checkDefaultConfig(child1 as Category, CategoryServiceImpl.getInstance().getCategorySettings(child1 as Category));
+    checkDefaultConfig(child11 as Category, CategoryServiceImpl.getInstance().getCategorySettings(child11 as Category));
+    checkDefaultConfig(child12 as Category, CategoryServiceImpl.getInstance().getCategorySettings(child12 as Category));
 
     const anotherRoot = new Category("anotherRoot");
     const anotherChild = new Category("someChild", anotherRoot);
@@ -198,7 +198,7 @@ describe("CategoryServiceFactory", () => {
   });
 
   it("Can use a custom logger", () => {
-    checkDefaultConfig(root1, CategoryServiceImpl.getInstance().getCategorySettings(root1));
+    checkDefaultConfig(root1 as Category, CategoryServiceImpl.getInstance().getCategorySettings(root1 as Category));
 
     const messages: string[] = [];
     const configChanged = new CategoryConfiguration(
@@ -206,14 +206,14 @@ describe("CategoryServiceFactory", () => {
       (rootCategory: Category, runtimeSettings: RuntimeSettings) => new CustomLogger(rootCategory, runtimeSettings, messages)
     );
     CategoryServiceFactory.setDefaultConfiguration(configChanged);
-    const rootLogger = CategoryServiceFactory.getLogger(root1);
+    const rootLogger = CategoryServiceFactory.getLogger(root1 as Category);
     rootLogger.info("First Message");
     rootLogger.info("Second Message");
     expect(messages).toEqual(["First Message", "Second Message"]);
   });
 
   it("Can use a custom message formatter", () => {
-    checkDefaultConfig(root1, CategoryServiceImpl.getInstance().getCategorySettings(root1));
+    checkDefaultConfig(root1 as Category, CategoryServiceImpl.getInstance().getCategorySettings(root1 as Category));
 
     const configChanged = new CategoryConfiguration(LogLevel.Info, LoggerType.MessageBuffer);
     configChanged.formatterLogMessage = (msg: CategoryLogMessage): string => {
@@ -222,15 +222,15 @@ describe("CategoryServiceFactory", () => {
       return typeof(message) === "string" ? message : "";
     };
     CategoryServiceFactory.setDefaultConfiguration(configChanged);
-    const rootLogger = CategoryServiceFactory.getLogger(root1);
+    const rootLogger = CategoryServiceFactory.getLogger(root1 as Category);
     rootLogger.info("Hello root1!");
-    rootLogger.info("Hello child1!", child1);
+    rootLogger.info("Hello child1!", child1 as Category);
 
     expect(getBufferedMessages(rootLogger)).toEqual(["Hello root1!", "Hello child1!"]);
   });
 
   it("Cannot set custom message formatter when custom logger is used", () => {
-    checkDefaultConfig(root1, CategoryServiceImpl.getInstance().getCategorySettings(root1));
+    checkDefaultConfig(root1 as Category, CategoryServiceImpl.getInstance().getCategorySettings(root1 as Category));
 
     const messages: string[] = [];
     const configChanged = new CategoryConfiguration(
@@ -248,7 +248,7 @@ describe("CategoryServiceFactory", () => {
   });
 
   it("Can set different custom formatter on category than default", () => {
-    checkDefaultConfig(root1, CategoryServiceImpl.getInstance().getCategorySettings(root1));
+    checkDefaultConfig(root1 as Category, CategoryServiceImpl.getInstance().getCategorySettings(root1 as Category));
 
     const defaultConfig = new CategoryConfiguration(LogLevel.Info, LoggerType.MessageBuffer);
     defaultConfig.formatterLogMessage = (msg: CategoryLogMessage): string => {
@@ -269,10 +269,10 @@ describe("CategoryServiceFactory", () => {
     CategoryServiceFactory.setDefaultConfiguration(defaultConfig);
     CategoryServiceFactory.setConfigurationCategory(configRoot2, root2);
 
-    const rootLogger = CategoryServiceFactory.getLogger(root1);
+    const rootLogger = CategoryServiceFactory.getLogger(root1 as Category);
     rootLogger.info("Hello root1!");
-    rootLogger.info("Hello child1!", child1);
-    const rootLogger2 = CategoryServiceFactory.getLogger(root2);
+    rootLogger.info("Hello child1!", child1 as Category);
+    const rootLogger2 = CategoryServiceFactory.getLogger(root2 as Category);
     rootLogger2.debug("Hello root2!");
 
     expect(getBufferedMessages(rootLogger)).toEqual(["Hello root1!", "Hello child1!"]);
