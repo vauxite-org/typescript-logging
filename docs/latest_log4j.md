@@ -6,6 +6,7 @@ in the docs bundle.
 **Note**: _This api is not supported by the browser extension, it may be in a future release, if you care for the browser plugin, please use categorized logging instead (see main page).
 
 * [Usage](#usage)
+* [Default LoggerFactory](#default-loggerfactory)
 * [Formatting message](#formatting-message)
 * [Custom logger](#custom-logger)
 * [Examples](#examples)
@@ -85,6 +86,21 @@ Output
 2016-12-22 11:14:26,275 INFO [ui.SomeUI] Pretty ui: Beer
 2016-12-22 11:14:26,276 INFO [ui.SomeUI] Pretty ui: Beer
 ~~~
+
+## Default LoggerFactory
+
+The library provides a default LoggerFactory. This factory is available as: LFService.DEFAULT
+This is the standard factory available and can be used to get Loggers from as well.
+
+The usage of the **default LoggerFactory is recommended for library/framework developers**. 
+By using it, end users can easily enable logging for these frameworks in addition to their own application logging
+when using log4j. By default logging is configured to log on Error level.
+
+Make sure to specify unique Logger names to identify your framework/library.
+
+```typescript
+const logger = LFService.DEFAULT.getLogger("reactjs/components");
+````
 
 ## Formatting message
 
