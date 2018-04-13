@@ -26,7 +26,7 @@ The following documentation sections are available:
 * [Contributing](#contributing)
 * [History and changelog](#history-and-changelog)
 
-`Note: Release 0.5.0 deprecated several methods e.a, please see the changelog to find out what - everything deprecated will be removed in 0.6.0.`
+`Note: Release 0.6.0 removed several previously deprecated methods e.a, please see the changelog to find out what`
 
 ## Installation
 
