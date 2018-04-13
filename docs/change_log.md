@@ -3,6 +3,7 @@
 This page describes the relevant changes per version.
 * 0.6.0
   * [Issue 31](https://github.com/mreuvers/typescript-logging/issues/31) Make default log4j LoggerFactory instance globally available
+  * [Issue 26](https://github.com/mreuvers/typescript-logging/issues/26) Remove deprecated methods (all methods deprecated previously have been removed). See previous version what was deprecated.
 * 0.5.0
   * Bumped TypeScript version to 2.4.2
   * [Issue 25](https://github.com/mreuvers/typescript-logging/issues/25) Simplify usage Logger and CategoryLogger
