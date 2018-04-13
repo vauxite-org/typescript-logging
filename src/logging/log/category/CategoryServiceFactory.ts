@@ -54,20 +54,8 @@ export class CategoryServiceFactory {
    * @param config Config
    * @param category Category
    * @param applyChildren True to apply to child categories, defaults to false.
-   * @param resetRootLogger Defaults to true. If set to true and if category is a root category it will reset the root logger.
    */
-  public static setConfigurationCategory(config: CategoryConfiguration, category: Category, applyChildren: boolean = false,
-                                         resetRootLogger: boolean = true): void {
-    CategoryServiceImpl.getInstance().setConfigurationCategory(config, category, applyChildren, resetRootLogger);
-  }
-
-  /**
-   * Return RuntimeSettings to retrieve information about
-   * RuntimeSettings for categories.
-   * @returns {RuntimeSettings}
-   * @deprecated Since 0.5.0, will be removed in 0.6.0, there are no plans for replacement.
-   */
-  public static getRuntimeSettings(): RuntimeSettings {
-    return CategoryServiceImpl.getInstance();
+  public static setConfigurationCategory(config: CategoryConfiguration, category: Category, applyChildren: boolean = false): void {
+    CategoryServiceImpl.getInstance().setConfigurationCategory(config, category, applyChildren);
   }
 }

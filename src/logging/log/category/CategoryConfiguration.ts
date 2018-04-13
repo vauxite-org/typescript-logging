@@ -82,12 +82,4 @@ export class CategoryConfiguration {
     config.formatterLogMessage = this.formatterLogMessage;
     return config;
   }
-
-}
-
-/**
- * @deprecated Since 0.5.0, will be removed in 0.6.0, use CategoryConfiguration instead.
- */
-export class CategoryDefaultConfiguration extends CategoryConfiguration {
-  // Deprecated, nothing to do.
 }

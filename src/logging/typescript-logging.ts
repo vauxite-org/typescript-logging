@@ -15,7 +15,7 @@ export {CategoryDelegateLoggerImpl} from "./log/category/CategoryDelegateLoggerI
 export {Category} from "./log/category/Category";
 export {CategoryLogger} from "./log/category/CategoryLogger";
 export {CategoryRuntimeSettings} from "./log/category/CategoryRuntimeSettings";
-export {CategoryConfiguration, CategoryDefaultConfiguration} from "./log/category/CategoryConfiguration";
+export {CategoryConfiguration} from "./log/category/CategoryConfiguration";
 export {RuntimeSettings} from "./log/category/RuntimeSettings";
 export {CategoryMessageBufferLoggerImpl} from "./log/category/CategoryMessageBufferImpl";
 export {CategoryServiceFactory} from "./log/category/CategoryServiceFactory";

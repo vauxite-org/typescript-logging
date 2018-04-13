@@ -82,10 +82,8 @@ export class CategoryServiceImpl implements RuntimeSettings {
    * @param config Config
    * @param category Category
    * @param applyChildren True to apply to child categories, defaults to false.
-   * @param resetRootLogger Deprecated since 0.5.0 and not used anymore, no replacement will be removed in next version!
    */
-  public setConfigurationCategory(config: CategoryConfiguration, category: Category, applyChildren: boolean = false,
-                                  resetRootLogger: boolean = true): void {
+  public setConfigurationCategory(config: CategoryConfiguration, category: Category, applyChildren: boolean = false): void {
     this.createOrGetCategoryState(category).updateSettings(config);
 
     // Apply the settings to children recursive if requested
