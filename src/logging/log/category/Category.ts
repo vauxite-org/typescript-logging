@@ -9,7 +9,7 @@ import {ErrorType, MessageType} from "../standard/Logger";
  * You can create child categories (like a tree). You can have multiple root
  * categories.
  */
-export class Category {
+export class Category implements CategoryLogger {
 
   private static currentId: number = 1;
 
