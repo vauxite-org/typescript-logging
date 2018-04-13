@@ -58,36 +58,6 @@ export interface Logger {
 
   fatal(msg: MessageType, error?: ErrorType): void;
 
-  /**
-   * @deprecated Since 0.5.0, will be removed in 0.6.0, use trace instead.
-   */
-  tracec(msg: () => string | LogData, error?: () => Error | null): void;
-
-  /**
-   * @deprecated Since 0.5.0, will be removed in 0.6.0, use debug instead.
-   */
-  debugc(msg: () => string | LogData, error?: () => Error | null): void;
-
-  /**
-   * @deprecated Since 0.5.0, will be removed in 0.6.0, use info instead.
-   */
-  infoc(msg: () => string | LogData, error?: () => Error | null): void;
-
-  /**
-   * @deprecated Since 0.5.0, will be removed in 0.6.0, use warn instead.
-   */
-  warnc(msg: () => string | LogData, error?: () => Error | null): void;
-
-  /**
-   * @deprecated Since 0.5.0, will be removed in 0.6.0, use error instead.
-   */
-  errorc(msg: () => string | LogData, error?: () => Error | null): void;
-
-  /**
-   * @deprecated Since 0.5.0, will be removed in 0.6.0, use fatal instead.
-   */
-  fatalc(msg: () => string | LogData, error?: () => Error | null): void;
-
   isTraceEnabled(): boolean;
 
   isDebugEnabled(): boolean;

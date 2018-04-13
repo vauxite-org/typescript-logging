@@ -8,7 +8,7 @@ import {CategoryMessageBufferLoggerImpl} from "../src/logging/log/category/Categ
 import {Category} from "../src/logging/log/category/Category";
 import {RuntimeSettings} from "../src/logging/log/category/RuntimeSettings";
 import {CategoryRuntimeSettings} from "../src/logging/log/category/CategoryRuntimeSettings";
-import {CategoryConfiguration, CategoryDefaultConfiguration} from "../src/logging/log/category/CategoryConfiguration";
+import {CategoryConfiguration} from "../src/logging/log/category/CategoryConfiguration";
 import {CategoryServiceFactory} from "../src/logging/log/category/CategoryServiceFactory";
 
 const getBufferedMessages = (logger: CategoryLogger): string[] => {
@@ -167,7 +167,7 @@ describe("CategoryServiceFactory", () => {
       expect(settings.callBackLogger).toBeNull();
     };
 
-    const configChanged = new CategoryDefaultConfiguration(
+    const configChanged = new CategoryConfiguration(
       LogLevel.Info, LoggerType.MessageBuffer, new CategoryLogFormat(new DateFormat(DateFormatEnum.YearDayMonthWithFullTime, "/"), false, false)
     );
     CategoryServiceFactory.setDefaultConfiguration(configChanged);
@@ -177,7 +177,7 @@ describe("CategoryServiceFactory", () => {
     checkChangedConfig(child11, CategoryServiceImpl.getInstance().getCategorySettings(child11));
     checkChangedConfig(child12, CategoryServiceImpl.getInstance().getCategorySettings(child12));
 
-    CategoryServiceFactory.setDefaultConfiguration(new CategoryDefaultConfiguration());
+    CategoryServiceFactory.setDefaultConfiguration(new CategoryConfiguration());
     checkDefaultConfig(root1, CategoryServiceImpl.getInstance().getCategorySettings(root1));
     checkDefaultConfig(child1, CategoryServiceImpl.getInstance().getCategorySettings(child1));
     checkDefaultConfig(child11, CategoryServiceImpl.getInstance().getCategorySettings(child11));
@@ -215,7 +215,7 @@ describe("CategoryServiceFactory", () => {
   it("Can use a custom message formatter", () => {
     checkDefaultConfig(root1, CategoryServiceImpl.getInstance().getCategorySettings(root1));
 
-    const configChanged = new CategoryDefaultConfiguration(LogLevel.Info, LoggerType.MessageBuffer);
+    const configChanged = new CategoryConfiguration(LogLevel.Info, LoggerType.MessageBuffer);
     configChanged.formatterLogMessage = (msg: CategoryLogMessage): string => {
       // Just shorten the message, will only have literal text.
       const message = msg.messageAsString;
@@ -233,7 +233,7 @@ describe("CategoryServiceFactory", () => {
     checkDefaultConfig(root1, CategoryServiceImpl.getInstance().getCategorySettings(root1));
 
     const messages: string[] = [];
-    const configChanged = new CategoryDefaultConfiguration(
+    const configChanged = new CategoryConfiguration(
       LogLevel.Info, LoggerType.Custom, new CategoryLogFormat(),
       (rootCategory: Category, runtimeSettings: RuntimeSettings) => new CustomLogger(rootCategory, runtimeSettings, messages)
     );
@@ -283,7 +283,7 @@ describe("CategoryServiceFactory", () => {
     const catRoot = new Category("jmod2ts");
 
     // Should just succeed (this was a bug) due to resetRootLogger=true flag. Fixed in 0.4.1
-    CategoryServiceFactory.setConfigurationCategory(new CategoryDefaultConfiguration(LogLevel.Info), catRoot, true, true);
+    CategoryServiceFactory.setConfigurationCategory(new CategoryConfiguration(LogLevel.Info), catRoot, true);
   });
 
   class CustomLogger extends AbstractCategoryLogger {

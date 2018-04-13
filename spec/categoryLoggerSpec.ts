@@ -3,7 +3,7 @@ import {LogLevel, LoggerType} from "../src/logging/log/LoggerOptions";
 import {CategoryDelegateLoggerImpl} from "../src/logging/log/category/CategoryDelegateLoggerImpl";
 import {CategoryMessageBufferLoggerImpl} from "../src/logging/log/category/CategoryMessageBufferImpl";
 import {Category} from "../src/logging/log/category/Category";
-import {CategoryConfiguration, CategoryDefaultConfiguration} from "../src/logging/log/category/CategoryConfiguration";
+import {CategoryConfiguration} from "../src/logging/log/category/CategoryConfiguration";
 import {CategoryServiceFactory} from "../src/logging/log/category/CategoryServiceFactory";
 
 const getMessagesAsString = (logger: CategoryLogger | Category): string => {
@@ -179,7 +179,7 @@ describe("CategoryLogger...", () => {
 
   it("Default logs to error", () => {
     // Need to switch to messagebuffer for testing, by default or it will go to console.
-    CategoryServiceFactory.setDefaultConfiguration(new CategoryDefaultConfiguration(LogLevel.Error, LoggerType.MessageBuffer));
+    CategoryServiceFactory.setDefaultConfiguration(new CategoryConfiguration(LogLevel.Error, LoggerType.MessageBuffer));
 
     const logger = CategoryServiceFactory.getLogger(catRoot);
     logger.trace("Trace", catRoot);
@@ -202,7 +202,7 @@ describe("CategoryLogger...", () => {
   });
 
   it("Logs to different levels", () => {
-    CategoryServiceFactory.setDefaultConfiguration(new CategoryDefaultConfiguration(LogLevel.Trace, LoggerType.MessageBuffer));
+    CategoryServiceFactory.setDefaultConfiguration(new CategoryConfiguration(LogLevel.Trace, LoggerType.MessageBuffer));
 
     const logger = CategoryServiceFactory.getLogger(catRoot);
     logger.trace("Trace", catRoot);
@@ -223,7 +223,7 @@ describe("CategoryLogger...", () => {
   });
 
   it("Logs to root category by default", () => {
-    CategoryServiceFactory.setDefaultConfiguration(new CategoryDefaultConfiguration(LogLevel.Trace, LoggerType.MessageBuffer));
+    CategoryServiceFactory.setDefaultConfiguration(new CategoryConfiguration(LogLevel.Trace, LoggerType.MessageBuffer));
     const logger = CategoryServiceFactory.getLogger(catRoot);
 
     logger.info("Hello");
@@ -233,9 +233,9 @@ describe("CategoryLogger...", () => {
   });
 
   it("Logs to different levels", () => {
-    CategoryServiceFactory.setDefaultConfiguration(new CategoryDefaultConfiguration(LogLevel.Info, LoggerType.MessageBuffer));
+    CategoryServiceFactory.setDefaultConfiguration(new CategoryConfiguration(LogLevel.Info, LoggerType.MessageBuffer));
     const logger = CategoryServiceFactory.getLogger(catRoot);
-    logger.infoc(() => "Dance", catRoot);
+    logger.info(() => "Dance", catRoot);
     const messages = getMessages(logger);
     expect(messages.length).toEqual(1);
     expect(messages[0]).toContain("[root] Dance");
@@ -296,7 +296,7 @@ describe("CategoryLogger...", () => {
 
     beforeEach(() => {
       // Need to switch to messagebuffer for testing, by default or it will go to console.
-      CategoryServiceFactory.setDefaultConfiguration(new CategoryDefaultConfiguration(LogLevel.Trace, LoggerType.MessageBuffer));
+      CategoryServiceFactory.setDefaultConfiguration(new CategoryConfiguration(LogLevel.Trace, LoggerType.MessageBuffer));
 
       logger = CategoryServiceFactory.getLogger(catRoot);
     });

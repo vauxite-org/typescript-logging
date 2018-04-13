@@ -12,7 +12,7 @@ const loggerFactory = tsl.LFService.createLoggerFactory();
 const loggerOld = loggerFactory.getLogger("Hello");
 loggerOld.error("Log4j on error", new Error("log4j error"));
 
-tsl.CategoryServiceFactory.setDefaultConfiguration(new tsl.CategoryDefaultConfiguration(tsl.LogLevel.Debug));
+tsl.CategoryServiceFactory.setDefaultConfiguration(new tsl.CategoryConfiguration(tsl.LogLevel.Debug));
 
 const catRoot1 = new tsl.Category("root1", null);
 const catChild = new tsl.Category("r1child1", catRoot1);
@@ -31,7 +31,7 @@ logger2.error(function() { return "failed"; }, function() { return new Error("oo
 logger2.debug(function() { return "category on debug"; });
 
 /*
-CategoryServiceFactory.setDefaultConfiguration(new CategoryDefaultConfiguration(LogLevel.Debug));
+CategoryServiceFactory.setDefaultConfiguration(new CategoryConfiguration(LogLevel.Debug));
 
 export const appLog: Category = new Category('myApp');
 export const log: CategoryLogger = CategoryServiceFactory.getLogger(appLog);

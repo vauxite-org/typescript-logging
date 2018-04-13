@@ -53,36 +53,4 @@ export class CategoryDelegateLoggerImpl implements CategoryLogger {
   public log(level: LogLevel, msg: MessageType, error: Error, ...categories: Category[]): void {
     this._delegate.log(level, msg, error, ...categories);
   }
-
-  public tracec(msg: () => string, ...categories: Category[]): void {
-    this._delegate.tracec(msg, ...categories);
-  }
-
-  public debugc(msg: () => string, ...categories: Category[]): void {
-    this._delegate.debugc(msg, ...categories);
-  }
-
-  public infoc(msg: () => string, ...categories: Category[]): void {
-    this._delegate.infoc(msg, ...categories);
-  }
-
-  public warnc(msg: () => string, ...categories: Category[]): void {
-    this._delegate.warnc(msg, ...categories);
-  }
-
-  public errorc(msg: () => string, error: () => Error, ...categories: Category[]): void {
-    this._delegate.errorc(msg, error, ...categories);
-  }
-
-  public fatalc(msg: () => string, error: () => Error, ...categories: Category[]): void {
-    this._delegate.fatalc(msg, error, ...categories);
-  }
-
-  public resolvedc(msg: () => string, error: () => Error, ...categories: Category[]): void {
-    this._delegate.resolvedc(msg, error, ...categories);
-  }
-
-  public logc(level: LogLevel, msg: () => string, error: () => Error, ...categories: Category[]): void {
-    this._delegate.logc(level, msg, error, ...categories);
-  }
 }
