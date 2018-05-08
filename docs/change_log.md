@@ -1,6 +1,8 @@
 # Changelog
 
 This page describes the relevant changes per version.
+* 0.6.1
+  * [Issue 34](https://github.com/mreuvers/typescript-logging/issues/34) Export missing LogData interface
 * 0.6.0
   * [Issue 31](https://github.com/mreuvers/typescript-logging/issues/31) Make default log4j LoggerFactory instance globally available
   * [Issue 26](https://github.com/mreuvers/typescript-logging/issues/26) Remove deprecated methods (all methods deprecated previously have been removed). See previous version what was deprecated.

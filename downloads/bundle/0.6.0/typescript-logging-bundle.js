@@ -64,7 +64,7 @@ var TSL =
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 27);
+/******/ 	return __webpack_require__(__webpack_require__.s = 30);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -1951,7 +1951,7 @@ exports.AbstractLogger = AbstractLogger;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var ST = __webpack_require__(39);
+var ST = __webpack_require__(42);
 var LoggerOptions_1 = __webpack_require__(0);
 /**
  * Some utilities to format messages.
@@ -2141,13 +2141,13 @@ exports.MessageFormatUtils = MessageFormatUtils;
 Object.defineProperty(exports, "__esModule", { value: true });
 var DataStructures_1 = __webpack_require__(1);
 var LoggerOptions_1 = __webpack_require__(0);
-var CategoryConsoleLoggerImpl_1 = __webpack_require__(10);
-var CategoryDelegateLoggerImpl_1 = __webpack_require__(11);
-var CategoryExtensionLoggerImpl_1 = __webpack_require__(25);
-var CategoryMessageBufferImpl_1 = __webpack_require__(12);
+var CategoryConsoleLoggerImpl_1 = __webpack_require__(9);
+var CategoryDelegateLoggerImpl_1 = __webpack_require__(10);
+var CategoryExtensionLoggerImpl_1 = __webpack_require__(27);
+var CategoryMessageBufferImpl_1 = __webpack_require__(11);
 var ExtensionHelper_1 = __webpack_require__(3);
-var CategoryRuntimeSettings_1 = __webpack_require__(13);
-var CategoryConfiguration_1 = __webpack_require__(9);
+var CategoryRuntimeSettings_1 = __webpack_require__(12);
+var CategoryConfiguration_1 = __webpack_require__(8);
 /**
  * The service (only available as singleton) for all category related stuff as
  * retrieving, registering a logger. You should normally NOT use this,
@@ -2207,12 +2207,10 @@ var CategoryServiceImpl = (function () {
      * @param config Config
      * @param category Category
      * @param applyChildren True to apply to child categories, defaults to false.
-     * @param resetRootLogger Deprecated since 0.5.0 and not used anymore, no replacement will be removed in next version!
      */
-    CategoryServiceImpl.prototype.setConfigurationCategory = function (config, category, applyChildren, resetRootLogger) {
+    CategoryServiceImpl.prototype.setConfigurationCategory = function (config, category, applyChildren) {
         var _this = this;
         if (applyChildren === void 0) { applyChildren = false; }
-        if (resetRootLogger === void 0) { resetRootLogger = true; }
         this.createOrGetCategoryState(category).updateSettings(config);
         // Apply the settings to children recursive if requested
         if (applyChildren) {
@@ -2413,370 +2411,6 @@ var LazyState = (function () {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var DataStructures_1 = __webpack_require__(1);
-var LoggerOptions_1 = __webpack_require__(0);
-var LoggerFactoryImpl_1 = __webpack_require__(26);
-var ExtensionHelper_1 = __webpack_require__(3);
-/**
- * Defines a LogGroupRule, this allows you to either have everything configured the same way
- * or for example loggers that start with name model. It allows you to group loggers together
- * to have a certain loglevel and other settings. You can configure this when creating the
- * LoggerFactory (which accepts multiple LogGroupRules).
- */
-var LogGroupRule = (function () {
-    /**
-     * Create a LogGroupRule. Basically you define what logger name(s) match for this group, what level should be used what logger type (where to log)
-     * and what format to write in. If the loggerType is custom, then the callBackLogger must be supplied as callback function to return a custom logger.
-     * @param regExp Regular expression, what matches for your logger names for this group
-     * @param level LogLevel
-     * @param logFormat LogFormat
-     * @param loggerType Type of logger, if Custom, make sure to implement callBackLogger and pass in, this will be called so you can return your own logger.
-     * @param callBackLogger Callback function to return a new clean custom logger (yours!)
-     */
-    function LogGroupRule(regExp, level, logFormat, loggerType, callBackLogger) {
-        if (logFormat === void 0) { logFormat = new LoggerOptions_1.LogFormat(); }
-        if (loggerType === void 0) { loggerType = LoggerOptions_1.LoggerType.Console; }
-        if (callBackLogger === void 0) { callBackLogger = null; }
-        this._formatterLogMessage = null;
-        this._regExp = regExp;
-        this._level = level;
-        this._logFormat = logFormat;
-        this._loggerType = loggerType;
-        this._callBackLogger = callBackLogger;
-    }
-    Object.defineProperty(LogGroupRule.prototype, "regExp", {
-        get: function () {
-            return this._regExp;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(LogGroupRule.prototype, "level", {
-        get: function () {
-            return this._level;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(LogGroupRule.prototype, "loggerType", {
-        get: function () {
-            return this._loggerType;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(LogGroupRule.prototype, "logFormat", {
-        get: function () {
-            return this._logFormat;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(LogGroupRule.prototype, "callBackLogger", {
-        get: function () {
-            return this._callBackLogger;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(LogGroupRule.prototype, "formatterLogMessage", {
-        /**
-         * Get the formatterLogMessage function, see comment on the setter.
-         * @returns {((message:LogMessage)=>string)|null}
-         */
-        get: function () {
-            return this._formatterLogMessage;
-        },
-        /**
-         * Set the default formatterLogMessage function, if set it is applied to all type of loggers except for a custom logger.
-         * By default this is null (not set). You can assign a function to allow custom formatting of a log message.
-         * Each log message will call this function then and expects your function to format the message and return a string.
-         * Will throw an error if you attempt to set a formatterLogMessage if the LoggerType is custom.
-         * @param value The formatter function, or null to reset it.
-         */
-        set: function (value) {
-            if (value !== null && this._loggerType === LoggerOptions_1.LoggerType.Custom) {
-                throw new Error("You cannot specify a formatter for log messages if your loggerType is Custom");
-            }
-            this._formatterLogMessage = value;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    return LogGroupRule;
-}());
-exports.LogGroupRule = LogGroupRule;
-/**
- * Options object you can use to configure the LoggerFactory you create at LFService.
- */
-var LoggerFactoryOptions = (function () {
-    function LoggerFactoryOptions() {
-        this._logGroupRules = [];
-        this._enabled = true;
-    }
-    /**
-     * Add LogGroupRule, see {LogGroupRule) for details
-     * @param rule Rule to add
-     * @returns {LoggerFactoryOptions} returns itself
-     */
-    LoggerFactoryOptions.prototype.addLogGroupRule = function (rule) {
-        this._logGroupRules.push(rule);
-        return this;
-    };
-    /**
-     * Enable or disable logging completely for the LoggerFactory.
-     * @param enabled True for enabled (default)
-     * @returns {LoggerFactoryOptions} returns itself
-     */
-    LoggerFactoryOptions.prototype.setEnabled = function (enabled) {
-        this._enabled = enabled;
-        return this;
-    };
-    Object.defineProperty(LoggerFactoryOptions.prototype, "logGroupRules", {
-        get: function () {
-            return this._logGroupRules;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(LoggerFactoryOptions.prototype, "enabled", {
-        get: function () {
-            return this._enabled;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    return LoggerFactoryOptions;
-}());
-exports.LoggerFactoryOptions = LoggerFactoryOptions;
-/**
- * Represents the runtime settings for a LogGroup (LogGroupRule).
- */
-var LogGroupRuntimeSettings = (function () {
-    function LogGroupRuntimeSettings(logGroupRule) {
-        this._formatterLogMessage = null;
-        this._logGroupRule = logGroupRule;
-        this._level = logGroupRule.level;
-        this._loggerType = logGroupRule.loggerType;
-        this._logFormat = new LoggerOptions_1.LogFormat(new LoggerOptions_1.DateFormat(logGroupRule.logFormat.dateFormat.formatEnum, logGroupRule.logFormat.dateFormat.dateSeparator), logGroupRule.logFormat.showTimeStamp, logGroupRule.logFormat.showLoggerName);
-        this._callBackLogger = logGroupRule.callBackLogger;
-        this._formatterLogMessage = logGroupRule.formatterLogMessage;
-    }
-    Object.defineProperty(LogGroupRuntimeSettings.prototype, "logGroupRule", {
-        /**
-         * Returns original LogGroupRule (so not runtime settings!)
-         * @return {LogGroupRule}
-         */
-        get: function () {
-            return this._logGroupRule;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(LogGroupRuntimeSettings.prototype, "level", {
-        get: function () {
-            return this._level;
-        },
-        set: function (value) {
-            this._level = value;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(LogGroupRuntimeSettings.prototype, "loggerType", {
-        get: function () {
-            return this._loggerType;
-        },
-        set: function (value) {
-            this._loggerType = value;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(LogGroupRuntimeSettings.prototype, "logFormat", {
-        get: function () {
-            return this._logFormat;
-        },
-        set: function (value) {
-            this._logFormat = value;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(LogGroupRuntimeSettings.prototype, "callBackLogger", {
-        get: function () {
-            return this._callBackLogger;
-        },
-        set: function (value) {
-            this._callBackLogger = value;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(LogGroupRuntimeSettings.prototype, "formatterLogMessage", {
-        get: function () {
-            return this._formatterLogMessage;
-        },
-        set: function (value) {
-            this._formatterLogMessage = value;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    return LogGroupRuntimeSettings;
-}());
-exports.LogGroupRuntimeSettings = LogGroupRuntimeSettings;
-var LFServiceImpl = (function () {
-    function LFServiceImpl() {
-        this._nameCounter = 1;
-        this._mapFactories = new DataStructures_1.SimpleMap();
-        // Private constructor.
-        ExtensionHelper_1.ExtensionHelper.register();
-    }
-    LFServiceImpl.getInstance = function () {
-        // Loaded on demand. Do NOT change as webpack may pack things in wrong order otherwise.
-        if (LFServiceImpl._INSTANCE === null) {
-            LFServiceImpl._INSTANCE = new LFServiceImpl();
-        }
-        return LFServiceImpl._INSTANCE;
-    };
-    /**
-     * Create a new LoggerFactory with given options (if any). If no options
-     * are specified, the LoggerFactory, will accept any named logger and will
-     * log on info level by default for, to the console.
-     * @param options Options, optional.
-     * @returns {LoggerFactory}
-     */
-    LFServiceImpl.prototype.createLoggerFactory = function (options) {
-        if (options === void 0) { options = null; }
-        var name = "LoggerFactory" + this._nameCounter++;
-        return this.createNamedLoggerFactory(name, options);
-    };
-    /**
-     * Create a new LoggerFactory using given name (used for console api/extension).
-     * @param name Name Pick something short but distinguishable.
-     * @param options Options, optional
-     * @return {LoggerFactory}
-     */
-    LFServiceImpl.prototype.createNamedLoggerFactory = function (name, options) {
-        if (options === void 0) { options = null; }
-        if (this._mapFactories.exists(name)) {
-            throw new Error("LoggerFactory with name " + name + " already exists.");
-        }
-        var factory;
-        if (options !== null) {
-            factory = new LoggerFactoryImpl_1.LoggerFactoryImpl(name, options);
-        }
-        else {
-            factory = new LoggerFactoryImpl_1.LoggerFactoryImpl(name, LFServiceImpl.createDefaultOptions());
-        }
-        this._mapFactories.put(name, factory);
-        return factory;
-    };
-    /**
-     * Closes all Loggers for LoggerFactories that were created.
-     * After this call, all previously fetched Loggers (from their
-     * factories) are unusable. The factories remain as they were.
-     */
-    LFServiceImpl.prototype.closeLoggers = function () {
-        this._mapFactories.values().forEach(function (factory) {
-            factory.closeLoggers();
-        });
-        this._mapFactories.clear();
-        this._nameCounter = 1;
-    };
-    LFServiceImpl.prototype.getRuntimeSettingsForLoggerFactories = function () {
-        var result = [];
-        this._mapFactories.forEachValue(function (factory) { return result.push(factory); });
-        return result;
-    };
-    LFServiceImpl.prototype.getLogGroupSettings = function (nameLoggerFactory, idLogGroupRule) {
-        var factory = this._mapFactories.get(nameLoggerFactory);
-        if (typeof factory === "undefined") {
-            return null;
-        }
-        return factory.getLogGroupRuntimeSettingsByIndex(idLogGroupRule);
-    };
-    LFServiceImpl.prototype.getLoggerFactoryRuntimeSettingsByName = function (nameLoggerFactory) {
-        var result = this._mapFactories.get(nameLoggerFactory);
-        if (typeof result === "undefined") {
-            return null;
-        }
-        return result;
-    };
-    LFServiceImpl.createDefaultOptions = function () {
-        return new LoggerFactoryOptions().addLogGroupRule(new LogGroupRule(new RegExp(".+"), LoggerOptions_1.LogLevel.Info));
-    };
-    // Loaded on demand. Do NOT change as webpack may pack things in wrong order otherwise.
-    LFServiceImpl._INSTANCE = null;
-    return LFServiceImpl;
-}());
-/**
- * Create and configure your LoggerFactory from here.
- */
-var LFService = (function () {
-    function LFService() {
-    }
-    /**
-     * Create a new LoggerFactory with given options (if any). If no options
-     * are specified, the LoggerFactory, will accept any named logger and will
-     * log on info level by default for, to the console.
-     * @param options Options, optional.
-     * @returns {LoggerFactory}
-     */
-    LFService.createLoggerFactory = function (options) {
-        if (options === void 0) { options = null; }
-        return LFService.INSTANCE_SERVICE.createLoggerFactory(options);
-    };
-    /**
-     * Create a new LoggerFactory using given name (used for console api/extension).
-     * @param name Name Pick something short but distinguishable.
-     * @param options Options, optional
-     * @return {LoggerFactory}
-     */
-    LFService.createNamedLoggerFactory = function (name, options) {
-        if (options === void 0) { options = null; }
-        return LFService.INSTANCE_SERVICE.createNamedLoggerFactory(name, options);
-    };
-    /**
-     * Closes all Loggers for LoggerFactories that were created.
-     * After this call, all previously fetched Loggers (from their
-     * factories) are unusable. The factories remain as they were.
-     */
-    LFService.closeLoggers = function () {
-        return LFService.INSTANCE_SERVICE.closeLoggers();
-    };
-    /**
-     * Return LFServiceRuntimeSettings to retrieve information loggerfactories
-     * and their runtime settings.
-     * @returns {LFServiceRuntimeSettings}
-     */
-    LFService.getRuntimeSettings = function () {
-        return LFService.INSTANCE_SERVICE;
-    };
-    LFService.INSTANCE_SERVICE = LFServiceImpl.getInstance();
-    return LFService;
-}());
-exports.LFService = LFService;
-//# sourceMappingURL=LoggerFactoryService.js.map
-
-/***/ }),
-/* 9 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-Object.defineProperty(exports, "__esModule", { value: true });
 var LoggerOptions_1 = __webpack_require__(0);
 /**
  * Default configuration, can be used to initially set a different default configuration
@@ -2866,21 +2500,10 @@ var CategoryConfiguration = (function () {
     return CategoryConfiguration;
 }());
 exports.CategoryConfiguration = CategoryConfiguration;
-/**
- * @deprecated Since 0.5.0, will be removed in 0.6.0, use CategoryConfiguration instead.
- */
-var CategoryDefaultConfiguration = (function (_super) {
-    __extends(CategoryDefaultConfiguration, _super);
-    function CategoryDefaultConfiguration() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    return CategoryDefaultConfiguration;
-}(CategoryConfiguration));
-exports.CategoryDefaultConfiguration = CategoryDefaultConfiguration;
 //# sourceMappingURL=CategoryConfiguration.js.map
 
 /***/ }),
-/* 10 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2962,7 +2585,7 @@ exports.CategoryConsoleLoggerImpl = CategoryConsoleLoggerImpl;
 //# sourceMappingURL=CategoryConsoleLoggerImpl.js.map
 
 /***/ }),
-/* 11 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3049,77 +2672,13 @@ var CategoryDelegateLoggerImpl = (function () {
         (_a = this._delegate).log.apply(_a, [level, msg, error].concat(categories));
         var _a;
     };
-    CategoryDelegateLoggerImpl.prototype.tracec = function (msg) {
-        var categories = [];
-        for (var _i = 1; _i < arguments.length; _i++) {
-            categories[_i - 1] = arguments[_i];
-        }
-        (_a = this._delegate).tracec.apply(_a, [msg].concat(categories));
-        var _a;
-    };
-    CategoryDelegateLoggerImpl.prototype.debugc = function (msg) {
-        var categories = [];
-        for (var _i = 1; _i < arguments.length; _i++) {
-            categories[_i - 1] = arguments[_i];
-        }
-        (_a = this._delegate).debugc.apply(_a, [msg].concat(categories));
-        var _a;
-    };
-    CategoryDelegateLoggerImpl.prototype.infoc = function (msg) {
-        var categories = [];
-        for (var _i = 1; _i < arguments.length; _i++) {
-            categories[_i - 1] = arguments[_i];
-        }
-        (_a = this._delegate).infoc.apply(_a, [msg].concat(categories));
-        var _a;
-    };
-    CategoryDelegateLoggerImpl.prototype.warnc = function (msg) {
-        var categories = [];
-        for (var _i = 1; _i < arguments.length; _i++) {
-            categories[_i - 1] = arguments[_i];
-        }
-        (_a = this._delegate).warnc.apply(_a, [msg].concat(categories));
-        var _a;
-    };
-    CategoryDelegateLoggerImpl.prototype.errorc = function (msg, error) {
-        var categories = [];
-        for (var _i = 2; _i < arguments.length; _i++) {
-            categories[_i - 2] = arguments[_i];
-        }
-        (_a = this._delegate).errorc.apply(_a, [msg, error].concat(categories));
-        var _a;
-    };
-    CategoryDelegateLoggerImpl.prototype.fatalc = function (msg, error) {
-        var categories = [];
-        for (var _i = 2; _i < arguments.length; _i++) {
-            categories[_i - 2] = arguments[_i];
-        }
-        (_a = this._delegate).fatalc.apply(_a, [msg, error].concat(categories));
-        var _a;
-    };
-    CategoryDelegateLoggerImpl.prototype.resolvedc = function (msg, error) {
-        var categories = [];
-        for (var _i = 2; _i < arguments.length; _i++) {
-            categories[_i - 2] = arguments[_i];
-        }
-        (_a = this._delegate).resolvedc.apply(_a, [msg, error].concat(categories));
-        var _a;
-    };
-    CategoryDelegateLoggerImpl.prototype.logc = function (level, msg, error) {
-        var categories = [];
-        for (var _i = 3; _i < arguments.length; _i++) {
-            categories[_i - 3] = arguments[_i];
-        }
-        (_a = this._delegate).logc.apply(_a, [level, msg, error].concat(categories));
-        var _a;
-    };
     return CategoryDelegateLoggerImpl;
 }());
 exports.CategoryDelegateLoggerImpl = CategoryDelegateLoggerImpl;
 //# sourceMappingURL=CategoryDelegateLoggerImpl.js.map
 
 /***/ }),
-/* 12 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3173,7 +2732,7 @@ exports.CategoryMessageBufferLoggerImpl = CategoryMessageBufferLoggerImpl;
 //# sourceMappingURL=CategoryMessageBufferImpl.js.map
 
 /***/ }),
-/* 13 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3261,7 +2820,7 @@ exports.CategoryRuntimeSettings = CategoryRuntimeSettings;
 //# sourceMappingURL=CategoryRuntimeSettings.js.map
 
 /***/ }),
-/* 14 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3344,7 +2903,335 @@ exports.ConsoleLoggerImpl = ConsoleLoggerImpl;
 //# sourceMappingURL=ConsoleLoggerImpl.js.map
 
 /***/ }),
+/* 14 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var DataStructures_1 = __webpack_require__(1);
+var LoggerOptions_1 = __webpack_require__(0);
+var LoggerFactoryImpl_1 = __webpack_require__(29);
+var ExtensionHelper_1 = __webpack_require__(3);
+var LogGroupRule_1 = __webpack_require__(15);
+var LoggerFactoryOptions_1 = __webpack_require__(16);
+var LFServiceImpl = (function () {
+    function LFServiceImpl() {
+        // Private constructor.
+        this._nameCounter = 1;
+        this._mapFactories = new DataStructures_1.SimpleMap();
+        ExtensionHelper_1.ExtensionHelper.register();
+    }
+    LFServiceImpl.getInstance = function () {
+        // Loaded on demand. Do NOT change as webpack may pack things in wrong order otherwise.
+        if (LFServiceImpl._INSTANCE === null) {
+            LFServiceImpl._INSTANCE = new LFServiceImpl();
+        }
+        return LFServiceImpl._INSTANCE;
+    };
+    /**
+     * Create a new LoggerFactory with given options (if any). If no options
+     * are specified, the LoggerFactory, will accept any named logger and will
+     * log on info level by default for, to the console.
+     * @param options Options, optional.
+     * @returns {LoggerFactory}
+     */
+    LFServiceImpl.prototype.createLoggerFactory = function (options) {
+        if (options === void 0) { options = null; }
+        var name = "LoggerFactory" + this._nameCounter++;
+        return this.createNamedLoggerFactory(name, options);
+    };
+    /**
+     * Create a new LoggerFactory using given name (used for console api/extension).
+     * @param name Name Pick something short but distinguishable.
+     * @param options Options, optional
+     * @return {LoggerFactory}
+     */
+    LFServiceImpl.prototype.createNamedLoggerFactory = function (name, options) {
+        if (options === void 0) { options = null; }
+        if (this._mapFactories.exists(name)) {
+            throw new Error("LoggerFactory with name " + name + " already exists.");
+        }
+        var factory;
+        if (options !== null) {
+            factory = new LoggerFactoryImpl_1.LoggerFactoryImpl(name, options);
+        }
+        else {
+            factory = new LoggerFactoryImpl_1.LoggerFactoryImpl(name, LFServiceImpl.createDefaultOptions());
+        }
+        this._mapFactories.put(name, factory);
+        return factory;
+    };
+    /**
+     * Closes all Loggers for LoggerFactories that were created.
+     * After this call, all previously fetched Loggers (from their
+     * factories) are unusable. The factories remain as they were.
+     */
+    LFServiceImpl.prototype.closeLoggers = function () {
+        this._mapFactories.values().forEach(function (factory) {
+            factory.closeLoggers();
+        });
+        this._mapFactories.clear();
+        this._nameCounter = 1;
+    };
+    LFServiceImpl.prototype.getRuntimeSettingsForLoggerFactories = function () {
+        var result = [];
+        this._mapFactories.forEachValue(function (factory) { return result.push(factory); });
+        return result;
+    };
+    LFServiceImpl.prototype.getLogGroupSettings = function (nameLoggerFactory, idLogGroupRule) {
+        var factory = this._mapFactories.get(nameLoggerFactory);
+        if (typeof factory === "undefined") {
+            return null;
+        }
+        return factory.getLogGroupRuntimeSettingsByIndex(idLogGroupRule);
+    };
+    LFServiceImpl.prototype.getLoggerFactoryRuntimeSettingsByName = function (nameLoggerFactory) {
+        var result = this._mapFactories.get(nameLoggerFactory);
+        if (typeof result === "undefined") {
+            return null;
+        }
+        return result;
+    };
+    LFServiceImpl.createDefaultOptions = function () {
+        return new LoggerFactoryOptions_1.LoggerFactoryOptions().addLogGroupRule(new LogGroupRule_1.LogGroupRule(new RegExp(".+"), LoggerOptions_1.LogLevel.Info));
+    };
+    // Loaded on demand. Do NOT change as webpack may pack things in wrong order otherwise.
+    LFServiceImpl._INSTANCE = null;
+    return LFServiceImpl;
+}());
+/**
+ * Create and configure your LoggerFactory from here.
+ */
+var LFService = (function () {
+    function LFService() {
+    }
+    /**
+     * Create a new LoggerFactory with given options (if any). If no options
+     * are specified, the LoggerFactory, will accept any named logger and will
+     * log on info level by default for, to the console.
+     * @param options Options, optional.
+     * @returns {LoggerFactory}
+     */
+    LFService.createLoggerFactory = function (options) {
+        if (options === void 0) { options = null; }
+        return LFService.INSTANCE_SERVICE.createLoggerFactory(options);
+    };
+    /**
+     * Create a new LoggerFactory using given name (used for console api/extension).
+     * @param name Name Pick something short but distinguishable. The word "DEFAULT" is reserved and cannot be taken, it is used
+     * for the default LoggerFactory.
+     * @param options Options, optional
+     * @return {LoggerFactory}
+     */
+    LFService.createNamedLoggerFactory = function (name, options) {
+        if (options === void 0) { options = null; }
+        if (name === LFService.DEFAULT_LOGGER_FACTORY_NAME) {
+            throw new Error("LoggerFactory name: " + LFService.DEFAULT_LOGGER_FACTORY_NAME + " is reserved and cannot be used.");
+        }
+        return LFService.INSTANCE_SERVICE.createNamedLoggerFactory(name, options);
+    };
+    /**
+     * Closes all Loggers for LoggerFactories that were created.
+     * After this call, all previously fetched Loggers (from their
+     * factories) are unusable. The factories remain as they were.
+     */
+    LFService.closeLoggers = function () {
+        return LFService.INSTANCE_SERVICE.closeLoggers();
+    };
+    /**
+     * Return LFServiceRuntimeSettings to retrieve information loggerfactories
+     * and their runtime settings.
+     * @returns {LFServiceRuntimeSettings}
+     */
+    LFService.getRuntimeSettings = function () {
+        return LFService.INSTANCE_SERVICE;
+    };
+    Object.defineProperty(LFService, "DEFAULT", {
+        /**
+         * This property returns the default LoggerFactory (if not yet initialized it is initialized).
+         * This LoggerFactory can be used to share among multiple
+         * applications/libraries - that way you can enable/change logging over everything from
+         * your own application when required.
+         * It is recommended to be used by library developers to make logging easily available for the
+         * consumers of their libraries.
+         * It is highly recommended to use Loggers from the LoggerFactory with unique grouping/names to prevent
+         * clashes of Loggers between multiple projects.
+         * @returns {LoggerFactory} Returns the default LoggerFactory
+         */
+        get: function () {
+            return LFService.getDefault();
+        },
+        enumerable: true,
+        configurable: true
+    });
+    LFService.getDefault = function () {
+        if (LFService.DEFAULT_LOGGER_FACTORY === null) {
+            LFService.DEFAULT_LOGGER_FACTORY = LFService.DEFAULT_LOGGER_FACTORY = LFService.INSTANCE_SERVICE.createNamedLoggerFactory(LFService.DEFAULT_LOGGER_FACTORY_NAME, new LoggerFactoryOptions_1.LoggerFactoryOptions().addLogGroupRule(new LogGroupRule_1.LogGroupRule(new RegExp(".+"), LoggerOptions_1.LogLevel.Error)));
+        }
+        return LFService.DEFAULT_LOGGER_FACTORY;
+    };
+    LFService.DEFAULT_LOGGER_FACTORY_NAME = "DEFAULT";
+    LFService.INSTANCE_SERVICE = LFServiceImpl.getInstance();
+    LFService.DEFAULT_LOGGER_FACTORY = null;
+    return LFService;
+}());
+exports.LFService = LFService;
+//# sourceMappingURL=LFService.js.map
+
+/***/ }),
 /* 15 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var LoggerOptions_1 = __webpack_require__(0);
+/**
+ * Defines a LogGroupRule, this allows you to either have everything configured the same way
+ * or for example loggers that start with name model. It allows you to group loggers together
+ * to have a certain loglevel and other settings. You can configure this when creating the
+ * LoggerFactory (which accepts multiple LogGroupRules).
+ */
+var LogGroupRule = (function () {
+    /**
+     * Create a LogGroupRule. Basically you define what logger name(s) match for this group, what level should be used what logger type (where to log)
+     * and what format to write in. If the loggerType is custom, then the callBackLogger must be supplied as callback function to return a custom logger.
+     * @param regExp Regular expression, what matches for your logger names for this group
+     * @param level LogLevel
+     * @param logFormat LogFormat
+     * @param loggerType Type of logger, if Custom, make sure to implement callBackLogger and pass in, this will be called so you can return your own logger.
+     * @param callBackLogger Callback function to return a new clean custom logger (yours!)
+     */
+    function LogGroupRule(regExp, level, logFormat, loggerType, callBackLogger) {
+        if (logFormat === void 0) { logFormat = new LoggerOptions_1.LogFormat(); }
+        if (loggerType === void 0) { loggerType = LoggerOptions_1.LoggerType.Console; }
+        if (callBackLogger === void 0) { callBackLogger = null; }
+        this._formatterLogMessage = null;
+        this._regExp = regExp;
+        this._level = level;
+        this._logFormat = logFormat;
+        this._loggerType = loggerType;
+        this._callBackLogger = callBackLogger;
+    }
+    Object.defineProperty(LogGroupRule.prototype, "regExp", {
+        get: function () {
+            return this._regExp;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(LogGroupRule.prototype, "level", {
+        get: function () {
+            return this._level;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(LogGroupRule.prototype, "loggerType", {
+        get: function () {
+            return this._loggerType;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(LogGroupRule.prototype, "logFormat", {
+        get: function () {
+            return this._logFormat;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(LogGroupRule.prototype, "callBackLogger", {
+        get: function () {
+            return this._callBackLogger;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(LogGroupRule.prototype, "formatterLogMessage", {
+        /**
+         * Get the formatterLogMessage function, see comment on the setter.
+         * @returns {((message:LogMessage)=>string)|null}
+         */
+        get: function () {
+            return this._formatterLogMessage;
+        },
+        /**
+         * Set the default formatterLogMessage function, if set it is applied to all type of loggers except for a custom logger.
+         * By default this is null (not set). You can assign a function to allow custom formatting of a log message.
+         * Each log message will call this function then and expects your function to format the message and return a string.
+         * Will throw an error if you attempt to set a formatterLogMessage if the LoggerType is custom.
+         * @param value The formatter function, or null to reset it.
+         */
+        set: function (value) {
+            if (value !== null && this._loggerType === LoggerOptions_1.LoggerType.Custom) {
+                throw new Error("You cannot specify a formatter for log messages if your loggerType is Custom");
+            }
+            this._formatterLogMessage = value;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    return LogGroupRule;
+}());
+exports.LogGroupRule = LogGroupRule;
+//# sourceMappingURL=LogGroupRule.js.map
+
+/***/ }),
+/* 16 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * Options object you can use to configure the LoggerFactory you create at LFService.
+ */
+var LoggerFactoryOptions = (function () {
+    function LoggerFactoryOptions() {
+        this._logGroupRules = [];
+        this._enabled = true;
+    }
+    /**
+     * Add LogGroupRule, see {LogGroupRule) for details
+     * @param rule Rule to add
+     * @returns {LoggerFactoryOptions} returns itself
+     */
+    LoggerFactoryOptions.prototype.addLogGroupRule = function (rule) {
+        this._logGroupRules.push(rule);
+        return this;
+    };
+    /**
+     * Enable or disable logging completely for the LoggerFactory.
+     * @param enabled True for enabled (default)
+     * @returns {LoggerFactoryOptions} returns itself
+     */
+    LoggerFactoryOptions.prototype.setEnabled = function (enabled) {
+        this._enabled = enabled;
+        return this;
+    };
+    Object.defineProperty(LoggerFactoryOptions.prototype, "logGroupRules", {
+        get: function () {
+            return this._logGroupRules;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(LoggerFactoryOptions.prototype, "enabled", {
+        get: function () {
+            return this._enabled;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    return LoggerFactoryOptions;
+}());
+exports.LoggerFactoryOptions = LoggerFactoryOptions;
+//# sourceMappingURL=LoggerFactoryOptions.js.map
+
+/***/ }),
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3402,7 +3289,7 @@ exports.MessageBufferLoggerImpl = MessageBufferLoggerImpl;
 //# sourceMappingURL=MessageBufferLoggerImpl.js.map
 
 /***/ }),
-/* 16 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -3512,7 +3399,7 @@ exports.ArraySet = ArraySet;
 
 
 /***/ }),
-/* 17 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -3552,7 +3439,7 @@ exports.ArraySet = ArraySet;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-var base64 = __webpack_require__(29);
+var base64 = __webpack_require__(32);
 
 // A single base 64 digit can contain 6 bits of data. For the base 64 variable
 // length quantities we use in the source map spec, the first bit is the sign,
@@ -3658,7 +3545,7 @@ exports.decode = function base64VLQ_decode(aStr, aIndex, aOutParam) {
 
 
 /***/ }),
-/* 18 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -3668,10 +3555,10 @@ exports.decode = function base64VLQ_decode(aStr, aIndex, aOutParam) {
  * http://opensource.org/licenses/BSD-3-Clause
  */
 
-var base64VLQ = __webpack_require__(17);
+var base64VLQ = __webpack_require__(19);
 var util = __webpack_require__(2);
-var ArraySet = __webpack_require__(16).ArraySet;
-var MappingList = __webpack_require__(31).MappingList;
+var ArraySet = __webpack_require__(18).ArraySet;
+var MappingList = __webpack_require__(34).MappingList;
 
 /**
  * An instance of the SourceMapGenerator represents a source map which is
@@ -4068,7 +3955,7 @@ exports.SourceMapGenerator = SourceMapGenerator;
 
 
 /***/ }),
-/* 19 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (root, factory) {
@@ -4184,7 +4071,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 
 
 /***/ }),
-/* 20 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4351,14 +4238,14 @@ exports.CategoryServiceControlImpl = CategoryServiceControlImpl;
 //# sourceMappingURL=CategoryServiceControl.js.map
 
 /***/ }),
-/* 21 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var LoggerOptions_1 = __webpack_require__(0);
-var LoggerFactoryService_1 = __webpack_require__(8);
+var LFService_1 = __webpack_require__(14);
 var DataStructures_1 = __webpack_require__(1);
 var LoggerControlImpl = (function () {
     function LoggerControlImpl() {
@@ -4444,7 +4331,7 @@ var LoggerControlImpl = (function () {
         return LoggerControlImpl._getSettings().getRuntimeSettingsForLoggerFactories();
     };
     LoggerControlImpl._getSettings = function () {
-        return LoggerFactoryService_1.LFService.getRuntimeSettings();
+        return LFService_1.LFService.getRuntimeSettings();
     };
     LoggerControlImpl._help = "\n  help(): void\n    ** Shows this help.\n\n  listFactories(): void\n    ** List all registered LoggerFactories with associated log groups with respective ids (ids can be used to target a factory and/or group).\n\n  showSettings(idFactory: number | \"all\"): void\n    ** Show log group settings for idFactory (use listFactories to find id for a LoggerFactory). If idFactory is \"all\" shows all factories.\n\n  getLoggerFactoryControl(idFactory: number): LoggerFactoryControl\n    ** Return LoggerFactoryControl when found for given idFactory or throws Error if invalid or null, get the id by using listFactories()\n\n  reset(idFactory: number | \"all\"): void\n    ** Resets given factory or all factories back to original values.\n";
     return LoggerControlImpl;
@@ -4569,7 +4456,7 @@ var LoggerFactoryControlImpl = (function () {
 //# sourceMappingURL=LogGroupControl.js.map
 
 /***/ }),
-/* 22 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4738,7 +4625,7 @@ exports.Category = Category;
 //# sourceMappingURL=Category.js.map
 
 /***/ }),
-/* 23 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4791,21 +4678,10 @@ var CategoryServiceFactory = (function () {
      * @param config Config
      * @param category Category
      * @param applyChildren True to apply to child categories, defaults to false.
-     * @param resetRootLogger Defaults to true. If set to true and if category is a root category it will reset the root logger.
      */
-    CategoryServiceFactory.setConfigurationCategory = function (config, category, applyChildren, resetRootLogger) {
+    CategoryServiceFactory.setConfigurationCategory = function (config, category, applyChildren) {
         if (applyChildren === void 0) { applyChildren = false; }
-        if (resetRootLogger === void 0) { resetRootLogger = true; }
-        CategoryService_1.CategoryServiceImpl.getInstance().setConfigurationCategory(config, category, applyChildren, resetRootLogger);
-    };
-    /**
-     * Return RuntimeSettings to retrieve information about
-     * RuntimeSettings for categories.
-     * @returns {RuntimeSettings}
-     * @deprecated Since 0.5.0, will be removed in 0.6.0, there are no plans for replacement.
-     */
-    CategoryServiceFactory.getRuntimeSettings = function () {
-        return CategoryService_1.CategoryServiceImpl.getInstance();
+        CategoryService_1.CategoryServiceImpl.getInstance().setConfigurationCategory(config, category, applyChildren);
     };
     return CategoryServiceFactory;
 }());
@@ -4813,7 +4689,7 @@ exports.CategoryServiceFactory = CategoryServiceFactory;
 //# sourceMappingURL=CategoryServiceFactory.js.map
 
 /***/ }),
-/* 24 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5093,7 +4969,7 @@ exports.JSONHelper = JSONHelper;
 //# sourceMappingURL=JSONHelper.js.map
 
 /***/ }),
-/* 25 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5135,7 +5011,94 @@ exports.CategoryExtensionLoggerImpl = CategoryExtensionLoggerImpl;
 //# sourceMappingURL=CategoryExtensionLoggerImpl.js.map
 
 /***/ }),
-/* 26 */
+/* 28 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var LoggerOptions_1 = __webpack_require__(0);
+/**
+ * Represents the runtime settings for a LogGroup (LogGroupRule).
+ */
+var LogGroupRuntimeSettings = (function () {
+    function LogGroupRuntimeSettings(logGroupRule) {
+        this._formatterLogMessage = null;
+        this._logGroupRule = logGroupRule;
+        this._level = logGroupRule.level;
+        this._loggerType = logGroupRule.loggerType;
+        this._logFormat = new LoggerOptions_1.LogFormat(new LoggerOptions_1.DateFormat(logGroupRule.logFormat.dateFormat.formatEnum, logGroupRule.logFormat.dateFormat.dateSeparator), logGroupRule.logFormat.showTimeStamp, logGroupRule.logFormat.showLoggerName);
+        this._callBackLogger = logGroupRule.callBackLogger;
+        this._formatterLogMessage = logGroupRule.formatterLogMessage;
+    }
+    Object.defineProperty(LogGroupRuntimeSettings.prototype, "logGroupRule", {
+        /**
+         * Returns original LogGroupRule (so not runtime settings!)
+         * @return {LogGroupRule}
+         */
+        get: function () {
+            return this._logGroupRule;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(LogGroupRuntimeSettings.prototype, "level", {
+        get: function () {
+            return this._level;
+        },
+        set: function (value) {
+            this._level = value;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(LogGroupRuntimeSettings.prototype, "loggerType", {
+        get: function () {
+            return this._loggerType;
+        },
+        set: function (value) {
+            this._loggerType = value;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(LogGroupRuntimeSettings.prototype, "logFormat", {
+        get: function () {
+            return this._logFormat;
+        },
+        set: function (value) {
+            this._logFormat = value;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(LogGroupRuntimeSettings.prototype, "callBackLogger", {
+        get: function () {
+            return this._callBackLogger;
+        },
+        set: function (value) {
+            this._callBackLogger = value;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(LogGroupRuntimeSettings.prototype, "formatterLogMessage", {
+        get: function () {
+            return this._formatterLogMessage;
+        },
+        set: function (value) {
+            this._formatterLogMessage = value;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    return LogGroupRuntimeSettings;
+}());
+exports.LogGroupRuntimeSettings = LogGroupRuntimeSettings;
+//# sourceMappingURL=LogGroupRuntimeSettings.js.map
+
+/***/ }),
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5143,10 +5106,10 @@ exports.CategoryExtensionLoggerImpl = CategoryExtensionLoggerImpl;
 Object.defineProperty(exports, "__esModule", { value: true });
 var DataStructures_1 = __webpack_require__(1);
 var LoggerOptions_1 = __webpack_require__(0);
-var LoggerFactoryService_1 = __webpack_require__(8);
-var ConsoleLoggerImpl_1 = __webpack_require__(14);
-var MessageBufferLoggerImpl_1 = __webpack_require__(15);
+var ConsoleLoggerImpl_1 = __webpack_require__(13);
+var MessageBufferLoggerImpl_1 = __webpack_require__(17);
 var AbstractLogger_1 = __webpack_require__(5);
+var LogGroupRuntimeSettings_1 = __webpack_require__(28);
 var LoggerFactoryImpl = (function () {
     function LoggerFactoryImpl(name, options) {
         this._loggers = new DataStructures_1.SimpleMap();
@@ -5164,7 +5127,7 @@ var LoggerFactoryImpl = (function () {
         var logGroupRules = this._options.logGroupRules;
         /* tslint:disable:prefer-for-of */
         for (var i = 0; i < logGroupRules.length; i++) {
-            this._logGroupRuntimeSettingsIndexed.push(new LoggerFactoryService_1.LogGroupRuntimeSettings(logGroupRules[i]));
+            this._logGroupRuntimeSettingsIndexed.push(new LogGroupRuntimeSettings_1.LogGroupRuntimeSettings(logGroupRules[i]));
         }
         /* tslint:enable:prefer-for-of */
     };
@@ -5250,7 +5213,7 @@ exports.LoggerFactoryImpl = LoggerFactoryImpl;
 //# sourceMappingURL=LoggerFactoryImpl.js.map
 
 /***/ }),
-/* 27 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5259,37 +5222,38 @@ function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
 }
 Object.defineProperty(exports, "__esModule", { value: true });
-var LogGroupControl_1 = __webpack_require__(21);
-var CategoryServiceControl_1 = __webpack_require__(20);
+var LogGroupControl_1 = __webpack_require__(23);
+var CategoryServiceControl_1 = __webpack_require__(22);
 var ExtensionHelper_1 = __webpack_require__(3);
 exports.ExtensionHelper = ExtensionHelper_1.ExtensionHelper;
 // Category related
 var AbstractCategoryLogger_1 = __webpack_require__(4);
 exports.AbstractCategoryLogger = AbstractCategoryLogger_1.AbstractCategoryLogger;
-var CategoryConsoleLoggerImpl_1 = __webpack_require__(10);
+var CategoryConsoleLoggerImpl_1 = __webpack_require__(9);
 exports.CategoryConsoleLoggerImpl = CategoryConsoleLoggerImpl_1.CategoryConsoleLoggerImpl;
-var CategoryDelegateLoggerImpl_1 = __webpack_require__(11);
+var CategoryDelegateLoggerImpl_1 = __webpack_require__(10);
 exports.CategoryDelegateLoggerImpl = CategoryDelegateLoggerImpl_1.CategoryDelegateLoggerImpl;
-var Category_1 = __webpack_require__(22);
+var Category_1 = __webpack_require__(24);
 exports.Category = Category_1.Category;
-var CategoryRuntimeSettings_1 = __webpack_require__(13);
+var CategoryRuntimeSettings_1 = __webpack_require__(12);
 exports.CategoryRuntimeSettings = CategoryRuntimeSettings_1.CategoryRuntimeSettings;
-var CategoryConfiguration_1 = __webpack_require__(9);
+var CategoryConfiguration_1 = __webpack_require__(8);
 exports.CategoryConfiguration = CategoryConfiguration_1.CategoryConfiguration;
-exports.CategoryDefaultConfiguration = CategoryConfiguration_1.CategoryDefaultConfiguration;
-var CategoryMessageBufferImpl_1 = __webpack_require__(12);
+var CategoryMessageBufferImpl_1 = __webpack_require__(11);
 exports.CategoryMessageBufferLoggerImpl = CategoryMessageBufferImpl_1.CategoryMessageBufferLoggerImpl;
-var CategoryServiceFactory_1 = __webpack_require__(23);
+var CategoryServiceFactory_1 = __webpack_require__(25);
 exports.CategoryServiceFactory = CategoryServiceFactory_1.CategoryServiceFactory;
-var LoggerFactoryService_1 = __webpack_require__(8);
-exports.LoggerFactoryOptions = LoggerFactoryService_1.LoggerFactoryOptions;
-exports.LFService = LoggerFactoryService_1.LFService;
-exports.LogGroupRule = LoggerFactoryService_1.LogGroupRule;
+var LoggerFactoryOptions_1 = __webpack_require__(16);
+exports.LoggerFactoryOptions = LoggerFactoryOptions_1.LoggerFactoryOptions;
+var LogGroupRule_1 = __webpack_require__(15);
+exports.LogGroupRule = LogGroupRule_1.LogGroupRule;
+var LFService_1 = __webpack_require__(14);
+exports.LFService = LFService_1.LFService;
 var AbstractLogger_1 = __webpack_require__(5);
 exports.AbstractLogger = AbstractLogger_1.AbstractLogger;
-var ConsoleLoggerImpl_1 = __webpack_require__(14);
+var ConsoleLoggerImpl_1 = __webpack_require__(13);
 exports.ConsoleLoggerImpl = ConsoleLoggerImpl_1.ConsoleLoggerImpl;
-var MessageBufferLoggerImpl_1 = __webpack_require__(15);
+var MessageBufferLoggerImpl_1 = __webpack_require__(17);
 exports.MessageBufferLoggerImpl = MessageBufferLoggerImpl_1.MessageBufferLoggerImpl;
 var LoggerOptions_1 = __webpack_require__(0);
 exports.CategoryLogFormat = LoggerOptions_1.CategoryLogFormat;
@@ -5302,7 +5266,7 @@ exports.LogLevel = LoggerOptions_1.LogLevel;
 var DataStructures_1 = __webpack_require__(1);
 exports.SimpleMap = DataStructures_1.SimpleMap;
 exports.LinkedList = DataStructures_1.LinkedList;
-__export(__webpack_require__(24));
+__export(__webpack_require__(26));
 var MessageUtils_1 = __webpack_require__(6);
 exports.MessageFormatUtils = MessageUtils_1.MessageFormatUtils;
 /*
@@ -5328,7 +5292,7 @@ exports.getCategoryControl = getCategoryControl;
 //# sourceMappingURL=typescript-logging.js.map
 
 /***/ }),
-/* 28 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function(root, factory) {
@@ -5337,7 +5301,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 
     /* istanbul ignore next */
     if (true) {
-        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(19)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
+        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(21)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
 				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
 				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
@@ -5554,7 +5518,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 
 
 /***/ }),
-/* 29 */
+/* 32 */
 /***/ (function(module, exports) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -5627,7 +5591,7 @@ exports.decode = function (charCode) {
 
 
 /***/ }),
-/* 30 */
+/* 33 */
 /***/ (function(module, exports) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -5744,7 +5708,7 @@ exports.search = function search(aNeedle, aHaystack, aCompare, aBias) {
 
 
 /***/ }),
-/* 31 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -5829,7 +5793,7 @@ exports.MappingList = MappingList;
 
 
 /***/ }),
-/* 32 */
+/* 35 */
 /***/ (function(module, exports) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -5949,7 +5913,7 @@ exports.quickSort = function (ary, comparator) {
 
 
 /***/ }),
-/* 33 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -5960,10 +5924,10 @@ exports.quickSort = function (ary, comparator) {
  */
 
 var util = __webpack_require__(2);
-var binarySearch = __webpack_require__(30);
-var ArraySet = __webpack_require__(16).ArraySet;
-var base64VLQ = __webpack_require__(17);
-var quickSort = __webpack_require__(32).quickSort;
+var binarySearch = __webpack_require__(33);
+var ArraySet = __webpack_require__(18).ArraySet;
+var base64VLQ = __webpack_require__(19);
+var quickSort = __webpack_require__(35).quickSort;
 
 function SourceMapConsumer(aSourceMap) {
   var sourceMap = aSourceMap;
@@ -7037,7 +7001,7 @@ exports.IndexedSourceMapConsumer = IndexedSourceMapConsumer;
 
 
 /***/ }),
-/* 34 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -7047,7 +7011,7 @@ exports.IndexedSourceMapConsumer = IndexedSourceMapConsumer;
  * http://opensource.org/licenses/BSD-3-Clause
  */
 
-var SourceMapGenerator = __webpack_require__(18).SourceMapGenerator;
+var SourceMapGenerator = __webpack_require__(20).SourceMapGenerator;
 var util = __webpack_require__(2);
 
 // Matches a Windows-style `\r\n` newline or a `\n` newline used by all other
@@ -7450,7 +7414,7 @@ exports.SourceNode = SourceNode;
 
 
 /***/ }),
-/* 35 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*
@@ -7458,13 +7422,13 @@ exports.SourceNode = SourceNode;
  * Licensed under the New BSD license. See LICENSE.txt or:
  * http://opensource.org/licenses/BSD-3-Clause
  */
-exports.SourceMapGenerator = __webpack_require__(18).SourceMapGenerator;
-exports.SourceMapConsumer = __webpack_require__(33).SourceMapConsumer;
-exports.SourceNode = __webpack_require__(34).SourceNode;
+exports.SourceMapGenerator = __webpack_require__(20).SourceMapGenerator;
+exports.SourceMapConsumer = __webpack_require__(36).SourceMapConsumer;
+exports.SourceNode = __webpack_require__(37).SourceNode;
 
 
 /***/ }),
-/* 36 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function(root, factory) {
@@ -7584,7 +7548,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 
 
 /***/ }),
-/* 37 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (root, factory) {
@@ -7593,7 +7557,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 
     /* istanbul ignore next */
     if (true) {
-        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(36)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
+        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(39)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
 				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
 				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
@@ -7638,7 +7602,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 
 
 /***/ }),
-/* 38 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function(root, factory) {
@@ -7647,7 +7611,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 
     /* istanbul ignore next */
     if (true) {
-        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(35), __webpack_require__(19)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
+        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(38), __webpack_require__(21)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
 				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
 				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
@@ -7950,7 +7914,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 
 
 /***/ }),
-/* 39 */
+/* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function(root, factory) {
@@ -7959,7 +7923,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 
     /* istanbul ignore next */
     if (true) {
-        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(28), __webpack_require__(37), __webpack_require__(38)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
+        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__(31), __webpack_require__(40), __webpack_require__(41)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
 				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
 				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
