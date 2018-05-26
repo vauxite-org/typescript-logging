@@ -1,15 +1,15 @@
 {
   "name": "typescript-logging",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "Library for logging, written in typescript, can be used by normal es5+ javascript as well.",
   "main": "dist/commonjs/typescript-logging",
   "scripts": {
     "test": "tsc -p tsconfig-test.json && jasmine-node --verbose ./dist-test/spec",
     "testLoadBundle": "webpack --config webpack.config.bundle.node.js && node spec/testLoadUseBundle.js",
-    "tslint": "tslint -c tslint.json -p tsconfig.json 'src/logging/**/*.ts'",
+    "tslint": "tslint -c tslint.json -p tsconfig.json  && tslint -c tslint.json -p tsconfig-test.json",
     "build": "tsc && npm run tslint && webpack --config webpack.config.bundle.js && webpack --config webpack.config.bundle-min.js",
     "docs": "typedoc --tsconfig tsconfig-docs.json --excludeNotExported --excludePrivate --mode modules --out dist/bundle/docs/api src/logging/typescript-logging.ts && github-markdown docs/latest_log4j.md --flavor gfm --title 'TypeScript log4j logging documentation' > dist/bundle/docs/index_log4j.html && github-markdown docs/latest_categorized.md --flavor gfm --title 'TypeScript logging categorized documentation' > dist/bundle/docs/index_categorized.html && node scripts/process-docs.js dist/bundle",
-    "release": "npm run build && npm run test && npm run testLoadBundle && npm run docs"
+    "release": "npm run build && npm run test && npm run tslint && npm run testLoadBundle && npm run docs"
   },
   "files": [
     "dist/",

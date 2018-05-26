@@ -196,14 +196,23 @@ export class MessageFormatUtils {
       ST.fromError(error, {offline: true}).then((frames: ST.StackFrame[]) => {
         const stackStr = (frames.map((frame: ST.StackFrame) => {
           return frame.toString();
-        })).join("\n  ");
+        }) ).join("\n  ");
 
         result += "\n" + stackStr;
 
         // This resolves our returned promise
         resolve(result);
+      }).catch(() => {
+        result = "Unexpected error object was passed in. ";
+        try {
+          result += "Could not resolve it, stringified object: " + JSON.stringify(error);
+        }
+        catch (e) {
+          // Cannot stringify can only tell something was wrong.
+          result += "Could not resolve it or stringify it.";
+        }
+        resolve(result);
       });
-
     });
   }
 }

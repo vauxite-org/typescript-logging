@@ -221,30 +221,6 @@ export abstract class AbstractLogger implements Logger {
     this._log(LogLevel.Fatal, msg, error);
   }
 
-  public tracec(msg: () => string | LogData, error?: () => Error | null): void {
-    this._logc(LogLevel.Trace, msg, error);
-  }
-
-  public debugc(msg: () => string | LogData, error?: () => Error | null): void {
-    this._logc(LogLevel.Debug, msg, error);
-  }
-
-  public infoc(msg: () => string | LogData, error?: () => Error | null): void {
-    this._logc(LogLevel.Info, msg, error);
-  }
-
-  public warnc(msg: () => string | LogData, error?: () => Error | null): void {
-    this._logc(LogLevel.Warn, msg, error);
-  }
-
-  public errorc(msg: () => string | LogData, error?: () => Error | null): void {
-    this._logc(LogLevel.Error, msg, error);
-  }
-
-  public fatalc(msg: () => string | LogData, error?: () => Error | null): void {
-    this._logc(LogLevel.Fatal, msg, error);
-  }
-
   public isTraceEnabled(): boolean {
     return this._logGroupRuntimeSettings.level === LogLevel.Trace;
   }
@@ -316,29 +292,16 @@ export abstract class AbstractLogger implements Logger {
     }
   }
 
-  private _logc(level: LogLevel, msg: () => string | LogData, error?: () => Error | null): void {
-    if (this._open && this._logGroupRuntimeSettings.level <= level) {
-      const functionError = (): Error | null => {
-        if (typeof error === "undefined") {
-          return null;
-        }
-        if (typeof error === "function") {
-          return error();
-        }
-        return error;
-      };
-
-      this._allMessages.addTail(this.createMessage(level, msg, functionError, new Date()));
-      this.processMessages();
-    }
-  }
-
   private createMessage(level: LogLevel, msg: () => string | LogData, error: () => Error | null, date: Date): LogMessageInternal {
     const errorResult = error();
     if (errorResult !== null) {
       const message = new LogMessageInternalImpl(this._name, msg(), null, errorResult, this._logGroupRuntimeSettings.logGroupRule, date, level, false);
       MessageFormatUtils.renderError(errorResult).then((stack: string) => {
         message.errorAsStack = stack;
+        message.ready = true;
+        this.processMessages();
+      }).catch(() => {
+        message.errorAsStack = "<UNKNOWN> unable to get stack.";
         message.ready = true;
         this.processMessages();
       });

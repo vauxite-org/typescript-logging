@@ -12,7 +12,7 @@ TypeScript library for logging. Simple and flexible in usage.
 
 The javascript bundle can be used for normal javascript projects if needed (es5 compatible).
 
-The following documentation sections are available:
+The following **documentation** sections are available:
 * [Installation](#installation)
 * [Usage](#usage)
   * [Category style logging](#category-style-logging)
@@ -26,7 +26,9 @@ The following documentation sections are available:
 * [Contributing](#contributing)
 * [History and changelog](#history-and-changelog)
 
-`Note: Release 0.6.0 removed several previously deprecated methods e.a, please see the changelog to find out what`
+Notes: 
+* Release 0.6.0 removed several previously deprecated methods e.a, please see the changelog to find out what
+* Build in combination with angular-cli 6.0.0+ may fail, for a workaround see [Issue 36](https://github.com/mreuvers/typescript-logging/issues/36), until angular-cli fixes its regression. 
 
 ## Installation
 

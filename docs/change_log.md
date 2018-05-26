@@ -1,6 +1,8 @@
 # Changelog
 
 This page describes the relevant changes per version.
+* 0.6.2
+  * [Issue 37](https://github.com/mreuvers/typescript-logging/issues/37) Handle non Error objects for loggers, instead of bailing out.
 * 0.6.1
   * [Issue 34](https://github.com/mreuvers/typescript-logging/issues/34) Export missing LogData interface
 * 0.6.0

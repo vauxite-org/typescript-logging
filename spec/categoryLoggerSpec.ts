@@ -324,6 +324,27 @@ describe("CategoryLogger...", () => {
       expect(messages.length).toEqual(1);
       expect(messages[0]).toContain(msg);
     });
+
+    it("Test we do not bail on invalid error object", () => {
+      CategoryServiceFactory.setDefaultConfiguration(new CategoryConfiguration(LogLevel.Info, LoggerType.MessageBuffer));
+
+      // Invalid error passsed in, this case a literal object. We should not bail out.
+      const invalidError = { invalid : "bla" };
+      catRoot.error("Failed1", invalidError as any);
+
+      // Next invalid error, but cannot be stringified either. We should not bail out.
+      const anotherInvalidError = new InvalidError();
+      anotherInvalidError.setSelf(anotherInvalidError);
+
+      catRoot.error("Failed2", anotherInvalidError as any);
+
+      const messages = getMessages(logger);
+      waitsFor(() =>   messages.length === 2, "Expected 1 message in log", 1000);
+      runs(() => {
+        expect(messages[0]).toContain("Unexpected error object was passed in. Could not resolve it, stringified object: {\"invalid\":\"bla\"}");
+        expect(messages[1]).toContain("Unexpected error object was passed in. Could not resolve it or stringify it");
+      });
+    });
   });
 
   describe("Normal log methods support normal parameters and lambdas", () => {
@@ -358,3 +379,12 @@ describe("CategoryLogger...", () => {
     });
   });
 });
+
+class InvalidError {
+
+  private _self: InvalidError;
+
+  public setSelf(self: InvalidError) {
+    this._self = self;
+  }
+}

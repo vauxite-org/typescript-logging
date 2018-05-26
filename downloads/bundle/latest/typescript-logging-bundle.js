@@ -1463,62 +1463,6 @@ var AbstractCategoryLogger = (function () {
         }
         this._log.apply(this, [level, msg, error, false].concat(categories));
     };
-    AbstractCategoryLogger.prototype.tracec = function (msg) {
-        var categories = [];
-        for (var _i = 1; _i < arguments.length; _i++) {
-            categories[_i - 1] = arguments[_i];
-        }
-        this._logc.apply(this, [LoggerOptions_1.LogLevel.Trace, msg, function () { return null; }, false].concat(categories));
-    };
-    AbstractCategoryLogger.prototype.debugc = function (msg) {
-        var categories = [];
-        for (var _i = 1; _i < arguments.length; _i++) {
-            categories[_i - 1] = arguments[_i];
-        }
-        this._logc.apply(this, [LoggerOptions_1.LogLevel.Debug, msg, function () { return null; }, false].concat(categories));
-    };
-    AbstractCategoryLogger.prototype.infoc = function (msg) {
-        var categories = [];
-        for (var _i = 1; _i < arguments.length; _i++) {
-            categories[_i - 1] = arguments[_i];
-        }
-        this._logc.apply(this, [LoggerOptions_1.LogLevel.Info, msg, function () { return null; }, false].concat(categories));
-    };
-    AbstractCategoryLogger.prototype.warnc = function (msg) {
-        var categories = [];
-        for (var _i = 1; _i < arguments.length; _i++) {
-            categories[_i - 1] = arguments[_i];
-        }
-        this._logc.apply(this, [LoggerOptions_1.LogLevel.Warn, msg, function () { return null; }, false].concat(categories));
-    };
-    AbstractCategoryLogger.prototype.errorc = function (msg, error) {
-        var categories = [];
-        for (var _i = 2; _i < arguments.length; _i++) {
-            categories[_i - 2] = arguments[_i];
-        }
-        this._logc.apply(this, [LoggerOptions_1.LogLevel.Error, msg, error, false].concat(categories));
-    };
-    AbstractCategoryLogger.prototype.fatalc = function (msg, error) {
-        var categories = [];
-        for (var _i = 2; _i < arguments.length; _i++) {
-            categories[_i - 2] = arguments[_i];
-        }
-        this._logc.apply(this, [LoggerOptions_1.LogLevel.Fatal, msg, error, false].concat(categories));
-    };
-    AbstractCategoryLogger.prototype.resolvedc = function (msg, error) {
-        var categories = [];
-        for (var _i = 2; _i < arguments.length; _i++) {
-            categories[_i - 2] = arguments[_i];
-        }
-        this._logc.apply(this, [LoggerOptions_1.LogLevel.Error, msg, error, true].concat(categories));
-    };
-    AbstractCategoryLogger.prototype.logc = function (level, msg, error) {
-        var categories = [];
-        for (var _i = 3; _i < arguments.length; _i++) {
-            categories[_i - 3] = arguments[_i];
-        }
-        this._logc.apply(this, [level, msg, error, false].concat(categories));
-    };
     AbstractCategoryLogger.prototype.getRootCategory = function () {
         return this.rootCategory;
     };
@@ -1560,14 +1504,6 @@ var AbstractCategoryLogger = (function () {
         };
         this._logInternal.apply(this, [level, functionMessage, functionError, resolved].concat(categories));
     };
-    AbstractCategoryLogger.prototype._logc = function (level, msg, error, resolved) {
-        if (resolved === void 0) { resolved = false; }
-        var categories = [];
-        for (var _i = 4; _i < arguments.length; _i++) {
-            categories[_i - 4] = arguments[_i];
-        }
-        this._logInternal.apply(this, [level, msg, error, resolved].concat(categories));
-    };
     AbstractCategoryLogger.prototype._logInternal = function (level, msg, error, resolved) {
         var _this = this;
         var categories = [];
@@ -1603,6 +1539,10 @@ var AbstractCategoryLogger = (function () {
                     this_1.allMessages.addTail(logMessage_1);
                     MessageUtils_1.MessageFormatUtils.renderError(actualError).then(function (stack) {
                         logMessage_1.errorAsStack = stack;
+                        logMessage_1.setReady(true);
+                        _this.processMessages();
+                    }).catch(function () {
+                        logMessage_1.errorAsStack = "<UNKNOWN> unable to get stack.";
                         logMessage_1.setReady(true);
                         _this.processMessages();
                     });
@@ -1814,24 +1754,6 @@ var AbstractLogger = (function () {
         if (error === void 0) { error = null; }
         this._log(LoggerOptions_1.LogLevel.Fatal, msg, error);
     };
-    AbstractLogger.prototype.tracec = function (msg, error) {
-        this._logc(LoggerOptions_1.LogLevel.Trace, msg, error);
-    };
-    AbstractLogger.prototype.debugc = function (msg, error) {
-        this._logc(LoggerOptions_1.LogLevel.Debug, msg, error);
-    };
-    AbstractLogger.prototype.infoc = function (msg, error) {
-        this._logc(LoggerOptions_1.LogLevel.Info, msg, error);
-    };
-    AbstractLogger.prototype.warnc = function (msg, error) {
-        this._logc(LoggerOptions_1.LogLevel.Warn, msg, error);
-    };
-    AbstractLogger.prototype.errorc = function (msg, error) {
-        this._logc(LoggerOptions_1.LogLevel.Error, msg, error);
-    };
-    AbstractLogger.prototype.fatalc = function (msg, error) {
-        this._logc(LoggerOptions_1.LogLevel.Fatal, msg, error);
-    };
     AbstractLogger.prototype.isTraceEnabled = function () {
         return this._logGroupRuntimeSettings.level === LoggerOptions_1.LogLevel.Trace;
     };
@@ -1890,21 +1812,6 @@ var AbstractLogger = (function () {
             this.processMessages();
         }
     };
-    AbstractLogger.prototype._logc = function (level, msg, error) {
-        if (this._open && this._logGroupRuntimeSettings.level <= level) {
-            var functionError = function () {
-                if (typeof error === "undefined") {
-                    return null;
-                }
-                if (typeof error === "function") {
-                    return error();
-                }
-                return error;
-            };
-            this._allMessages.addTail(this.createMessage(level, msg, functionError, new Date()));
-            this.processMessages();
-        }
-    };
     AbstractLogger.prototype.createMessage = function (level, msg, error, date) {
         var _this = this;
         var errorResult = error();
@@ -1912,6 +1819,10 @@ var AbstractLogger = (function () {
             var message_1 = new LogMessageInternalImpl(this._name, msg(), null, errorResult, this._logGroupRuntimeSettings.logGroupRule, date, level, false);
             MessageUtils_1.MessageFormatUtils.renderError(errorResult).then(function (stack) {
                 message_1.errorAsStack = stack;
+                message_1.ready = true;
+                _this.processMessages();
+            }).catch(function () {
+                message_1.errorAsStack = "<UNKNOWN> unable to get stack.";
                 message_1.ready = true;
                 _this.processMessages();
             });
@@ -2123,6 +2034,16 @@ var MessageFormatUtils = (function () {
                 })).join("\n  ");
                 result += "\n" + stackStr;
                 // This resolves our returned promise
+                resolve(result);
+            }).catch(function () {
+                result = "Unexpected error object was passed in. ";
+                try {
+                    result += "Could not resolve it, stringified object: " + JSON.stringify(error);
+                }
+                catch (e) {
+                    // Cannot stringify can only tell something was wrong.
+                    result += "Could not resolve it or stringify it.";
+                }
                 resolve(result);
             });
         });

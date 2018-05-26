@@ -197,38 +197,6 @@ export abstract class AbstractCategoryLogger implements CategoryLogger {
     this._log(level, msg, error, false, ...categories);
   }
 
-  public tracec(msg: () => string | LogData, ...categories: Category[]): void {
-    this._logc(LogLevel.Trace, msg, () => null, false, ...categories);
-  }
-
-  public debugc(msg: () => string | LogData, ...categories: Category[]): void {
-    this._logc(LogLevel.Debug, msg, () => null, false, ...categories);
-  }
-
-  public infoc(msg: () => string | LogData, ...categories: Category[]): void {
-    this._logc(LogLevel.Info, msg, () => null, false, ...categories);
-  }
-
-  public warnc(msg: () => string | LogData, ...categories: Category[]): void {
-    this._logc(LogLevel.Warn, msg, () => null, false, ...categories);
-  }
-
-  public errorc(msg: () => string | LogData, error: () => Error, ...categories: Category[]): void {
-    this._logc(LogLevel.Error, msg, error, false, ...categories);
-  }
-
-  public fatalc(msg: () => string | LogData, error: () => Error, ...categories: Category[]): void {
-    this._logc(LogLevel.Fatal, msg, error, false, ...categories);
-  }
-
-  public resolvedc(msg: () => string | LogData, error: () => Error, ...categories: Category[]): void {
-    this._logc(LogLevel.Error, msg, error, true, ...categories);
-  }
-
-  public logc(level: LogLevel, msg: () => string | LogData, error: () => Error, ...categories: Category[]): void {
-    this._logc(level, msg, error, false, ...categories);
-  }
-
   protected getRootCategory(): Category {
     return this.rootCategory;
   }
@@ -274,10 +242,6 @@ export abstract class AbstractCategoryLogger implements CategoryLogger {
     this._logInternal(level, functionMessage, functionError, resolved, ...categories);
   }
 
-  private _logc(level: LogLevel, msg: () => string | LogData, error: () => Error | null, resolved: boolean = false, ...categories: Category[]): void {
-    this._logInternal(level, msg, error, resolved, ...categories);
-  }
-
   private _logInternal(level: LogLevel, msg: () => string | LogData, error: () => Error | null, resolved: boolean, ...categories: Category[]): void {
     let logCategories: Category[] = [this.rootCategory];
 
@@ -313,6 +277,10 @@ export abstract class AbstractCategoryLogger implements CategoryLogger {
           this.allMessages.addTail(logMessage);
           MessageFormatUtils.renderError(actualError).then((stack: string) => {
             logMessage.errorAsStack = stack;
+            logMessage.setReady(true);
+            this.processMessages();
+          }).catch(() => {
+            logMessage.errorAsStack = "<UNKNOWN> unable to get stack.";
             logMessage.setReady(true);
             this.processMessages();
           });

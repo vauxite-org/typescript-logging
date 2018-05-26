@@ -114,16 +114,16 @@ describe("Loggers", () => {
     const loggerFactory = LFService.createLoggerFactory(new LoggerFactoryOptions().addLogGroupRule(new LogGroupRule(new RegExp(".+"), LogLevel.Info, new LogFormat(), LoggerType.MessageBuffer)));
     const logger = loggerFactory.getLogger("ABC") as MessageBufferLoggerImpl;
 
-    logger.infoc(() => "Hello");
+    logger.info(() => "Hello");
 
     expect(logger.toString()).toContain("Hello");
 
     // Should not log!
-    logger.debugc(() => "NotMe!");
+    logger.debug(() => "NotMe!");
     expect(logger.toString()).not.toContain("NotMe!");
 
     // Should log
-    logger.errorc(() => "YesMe!", () => new Error("Failed"));
+    logger.error(() => "YesMe!", () => new Error("Failed"));
     waitsFor(() => logger.getMessages().length === 2, "Should have 2 messages by now", 3000);
     runs(() => {
       expect(logger.toString()).toContain("YesMe!");
@@ -292,4 +292,35 @@ describe("Loggers", () => {
       expect(result).toContain("fatalex5");
     });
   });
+
+  it("Test we do not bail on invalid error object", () => {
+    const loggerFactory = LFService.createLoggerFactory(new LoggerFactoryOptions().addLogGroupRule(new LogGroupRule(new RegExp(".+"), LogLevel.Trace, new LogFormat(), LoggerType.MessageBuffer)));
+    const logger = loggerFactory.getLogger("x");
+
+    // Invalid error passsed in, this case a literal object. We should not bail out.
+    const invalidError = { invalid : "bla" };
+    logger.error("Failed1", invalidError as any);
+
+    // Next invalid error, but cannot be stringified either. We should not bail out.
+    const anotherInvalidError = new InvalidError();
+    anotherInvalidError.setSelf(anotherInvalidError);
+
+    logger.error("Failed2", anotherInvalidError as any);
+
+    const messages = getMessages(logger);
+    waitsFor(() =>   messages.length === 2, "Expected 1 message in log", 1000);
+    runs(() => {
+      expect(messages[0]).toContain("Unexpected error object was passed in. Could not resolve it, stringified object: {\"invalid\":\"bla\"}");
+      expect(messages[1]).toContain("Unexpected error object was passed in. Could not resolve it or stringify it");
+    });
+  });
 });
+
+class InvalidError {
+
+  private _self: InvalidError;
+
+  public setSelf(self: InvalidError) {
+    this._self = self;
+  }
+}
