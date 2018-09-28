@@ -148,25 +148,25 @@ export class CategoryServiceImpl implements RuntimeSettings {
   }
 
   private createState(category: Category): CategoryState {
-    return new CategoryState(category, () => this._defaultConfig, (cat1: Category) => this.createLogger(cat1));
+    return new CategoryState(category, () => this._defaultConfig, (config: CategoryConfiguration, cat: Category) => this.createLogger(config, cat));
   }
 
-  private createLogger(category: Category): CategoryLogger {
+  private createLogger(config: CategoryConfiguration, category: Category): CategoryLogger {
     // Default is always a console logger
-    switch (this._defaultConfig.loggerType) {
+    switch (config.loggerType) {
       case LoggerType.Console:
         return new CategoryConsoleLoggerImpl(category, this);
       case LoggerType.MessageBuffer:
         return new CategoryMessageBufferLoggerImpl(category, this);
       case LoggerType.Custom:
-        if (this._defaultConfig.callBackLogger === null) {
+        if (config.callBackLogger === null) {
           throw new Error("Cannot create custom logger, custom callback is null");
         }
         else {
-          return this._defaultConfig.callBackLogger(category, this);
+          return config.callBackLogger(category, this);
         }
       default:
-        throw new Error("Cannot create a Logger for LoggerType: " + this._defaultConfig.loggerType);
+        throw new Error("Cannot create a Logger for LoggerType: " + config.loggerType);
     }
   }
 
@@ -177,10 +177,10 @@ export class CategoryServiceImpl implements RuntimeSettings {
 
 class CategoryState {
 
-  private _category: Category;
-  private _lazyState: LazyState;
+  private readonly _category: Category;
+  private readonly _lazyState: LazyState;
 
-  constructor(category: Category, defaultConfig: () => CategoryConfiguration, createLogger: (category: Category) => CategoryLogger) {
+  constructor(category: Category, defaultConfig: () => CategoryConfiguration, createLogger: (config: CategoryConfiguration, category: Category) => CategoryLogger) {
     this._category = category;
     this._lazyState = new LazyState(category, defaultConfig, createLogger);
   }
@@ -212,9 +212,9 @@ class CategoryState {
 
 class LazyState {
 
-  private _category: Category;
+  private readonly _category: Category;
   private _defaultConfig: () => CategoryConfiguration;
-  private _createLogger: (category: Category) => CategoryLogger;
+  private readonly _createLogger: (config: CategoryConfiguration, category: Category) => CategoryLogger;
 
   private _logger: CategoryLogger; // Original real logger
   private _wrappedLogger: CategoryLogger;  // Wrapped logger, initially _logger - can be changed if extension is enabled.
@@ -223,7 +223,7 @@ class LazyState {
   private _originalRuntimeSettings: CategoryRuntimeSettings;
   private _currentRuntimeSettings: CategoryRuntimeSettings;
 
-  constructor(category: Category, defaultConfig: () => CategoryConfiguration, createLogger: (category: Category) => CategoryLogger) {
+  constructor(category: Category, defaultConfig: () => CategoryConfiguration, createLogger: (config: CategoryConfiguration, category: Category) => CategoryLogger) {
     this._category = category;
     this._defaultConfig = defaultConfig;
     this._createLogger = createLogger;
@@ -269,7 +269,7 @@ class LazyState {
       this._currentRuntimeSettings.formatterLogMessage = config.formatterLogMessage;
 
       // Replace the real logger, it may have changed.
-      this._logger = this._createLogger(this._category);
+      this._logger = this._createLogger(config, this._category);
       if (!(this._wrappedLogger instanceof CategoryExtensionLoggerImpl)) {
         this._wrappedLogger = this._logger;
       }
@@ -283,7 +283,7 @@ class LazyState {
 
   private loadLoggerOnDemand(): void {
     if (!this.isLoaded()) {
-      this._logger = this._createLogger(this._category);
+      this._logger = this._createLogger(this._defaultConfig(), this._category);
       this._wrappedLogger = this._logger;
       this._delegateLogger = new CategoryDelegateLoggerImpl(this._wrappedLogger);
       this._originalRuntimeSettings = this.initNewSettings();

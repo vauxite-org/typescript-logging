@@ -10,6 +10,7 @@ import {RuntimeSettings} from "../src/logging/log/category/RuntimeSettings";
 import {CategoryRuntimeSettings} from "../src/logging/log/category/CategoryRuntimeSettings";
 import {CategoryConfiguration} from "../src/logging/log/category/CategoryConfiguration";
 import {CategoryServiceFactory} from "../src/logging/log/category/CategoryServiceFactory";
+import {CategoryConsoleLoggerImpl} from "../src/logging/log/category/CategoryConsoleLoggerImpl";
 
 const getBufferedMessages = (logger: CategoryLogger): string[] => {
   expect(logger instanceof CategoryDelegateLoggerImpl).toBeTruthy();
@@ -284,6 +285,106 @@ describe("CategoryServiceFactory", () => {
 
     // Should just succeed (this was a bug) due to resetRootLogger=true flag. Fixed in 0.4.1
     CategoryServiceFactory.setConfigurationCategory(new CategoryConfiguration(LogLevel.Info), catRoot, true);
+  });
+
+  it("setConfigurationCategory() must apply changes to categories not yet used (applyChildren=false)", () => {
+    checkDefaultConfig(root1 as Category, CategoryServiceImpl.getInstance().getCategorySettings(root1 as Category));
+
+    const messages: string[] = [];
+    const configChanged = new CategoryConfiguration(
+      LogLevel.Info, LoggerType.Custom, new CategoryLogFormat(),
+      (rootCategory: Category, runtimeSettings: RuntimeSettings) => new CustomLogger(rootCategory, runtimeSettings, messages)
+    );
+
+    const cat = root1 as Category;
+    const catChild = child1 as Category;
+
+    CategoryServiceFactory.setConfigurationCategory(configChanged, cat, false);
+    cat.info("root message");
+    catChild.info("child message");
+
+    /*
+     * The change should have applied to root *only* (parameter was false above), this means
+     * that the root should log using the custom logger but the child should still use a console.
+     */
+    expect((catChild as any)._logger instanceof CategoryConsoleLoggerImpl);
+    expect(messages).toEqual(["root message"]);
+  });
+
+  it("setConfigurationCategory() must apply changes to categories already used (applyChildren=false)", () => {
+    checkDefaultConfig(root1 as Category, CategoryServiceImpl.getInstance().getCategorySettings(root1 as Category));
+
+    const messages: string[] = [];
+    const configChanged = new CategoryConfiguration(
+      LogLevel.Info, LoggerType.Custom, new CategoryLogFormat(),
+      (rootCategory: Category, runtimeSettings: RuntimeSettings) => new CustomLogger(rootCategory, runtimeSettings, messages)
+    );
+
+    const cat = root1 as Category;
+    const catChild = child1 as Category;
+
+    // Initializes the loggers internally
+    cat.info("ignore");
+    catChild.info("ignore");
+
+    CategoryServiceFactory.setConfigurationCategory(configChanged, cat, false);
+    cat.info("root message");
+    catChild.info("child message");
+
+    /*
+     * The change should have applied to root *only* (parameter was false above), this means
+     * that the root should log using the custom logger but the child should still use a console.
+     */
+    expect((catChild as any)._logger instanceof CategoryConsoleLoggerImpl);
+    expect(messages).toEqual(["root message"]);
+  });
+
+  it("setConfigurationCategory() must apply changes to categories not yet used (applyChildren=true)", () => {
+    checkDefaultConfig(root1 as Category, CategoryServiceImpl.getInstance().getCategorySettings(root1 as Category));
+
+    const messages: string[] = [];
+    const configChanged = new CategoryConfiguration(
+      LogLevel.Info, LoggerType.Custom, new CategoryLogFormat(),
+      (rootCategory: Category, runtimeSettings: RuntimeSettings) => new CustomLogger(rootCategory, runtimeSettings, messages)
+    );
+
+    const cat = root1 as Category;
+    const catChild = child1 as Category;
+
+    CategoryServiceFactory.setConfigurationCategory(configChanged, cat, true);
+    cat.info("root message");
+    catChild.info("child message");
+
+    /*
+     * The change should have applied to both, and must use the custom logger.
+     */
+    expect(messages).toEqual(["root message", "child message"]);
+  });
+
+  it("setConfigurationCategory() must apply changes to categories already used (applyChildren=true)", () => {
+    checkDefaultConfig(root1 as Category, CategoryServiceImpl.getInstance().getCategorySettings(root1 as Category));
+
+    const messages: string[] = [];
+    const configChanged = new CategoryConfiguration(
+      LogLevel.Info, LoggerType.Custom, new CategoryLogFormat(),
+      (rootCategory: Category, runtimeSettings: RuntimeSettings) => new CustomLogger(rootCategory, runtimeSettings, messages)
+    );
+
+    const cat = root1 as Category;
+    const catChild = child1 as Category;
+
+    // Initializes the loggers internally
+    cat.info("ignore");
+    catChild.info("ignore");
+
+    CategoryServiceFactory.setConfigurationCategory(configChanged, cat, true);
+    cat.info("root message");
+    catChild.info("child message");
+
+    /*
+     * The change should have applied to both, and must use the custom logger.
+     */
+    expect(messages).toEqual(["root message", "child message"]);
   });
 
   class CustomLogger extends AbstractCategoryLogger {

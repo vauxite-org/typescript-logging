@@ -1,6 +1,8 @@
 # Changelog
 
 This page describes the relevant changes per version.
+* 0.6.3
+  * [Issue 40](https://github.com/mreuvers/typescript-logging/issues/40) CategoryServiceFactory.setConfigurationCategory options are not properly applied has been fixed (regression bug)
 * 0.6.2
   * [Issue 37](https://github.com/mreuvers/typescript-logging/issues/37) Handle non Error objects for loggers, instead of bailing out.
 * 0.6.1
