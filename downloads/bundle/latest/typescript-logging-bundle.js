@@ -2188,24 +2188,24 @@ var CategoryServiceImpl = (function () {
     };
     CategoryServiceImpl.prototype.createState = function (category) {
         var _this = this;
-        return new CategoryState(category, function () { return _this._defaultConfig; }, function (cat1) { return _this.createLogger(cat1); });
+        return new CategoryState(category, function () { return _this._defaultConfig; }, function (config, cat) { return _this.createLogger(config, cat); });
     };
-    CategoryServiceImpl.prototype.createLogger = function (category) {
+    CategoryServiceImpl.prototype.createLogger = function (config, category) {
         // Default is always a console logger
-        switch (this._defaultConfig.loggerType) {
+        switch (config.loggerType) {
             case LoggerOptions_1.LoggerType.Console:
                 return new CategoryConsoleLoggerImpl_1.CategoryConsoleLoggerImpl(category, this);
             case LoggerOptions_1.LoggerType.MessageBuffer:
                 return new CategoryMessageBufferImpl_1.CategoryMessageBufferLoggerImpl(category, this);
             case LoggerOptions_1.LoggerType.Custom:
-                if (this._defaultConfig.callBackLogger === null) {
+                if (config.callBackLogger === null) {
                     throw new Error("Cannot create custom logger, custom callback is null");
                 }
                 else {
-                    return this._defaultConfig.callBackLogger(category, this);
+                    return config.callBackLogger(category, this);
                 }
             default:
-                throw new Error("Cannot create a Logger for LoggerType: " + this._defaultConfig.loggerType);
+                throw new Error("Cannot create a Logger for LoggerType: " + config.loggerType);
         }
     };
     CategoryServiceImpl.getCategoryKey = function (category) {
@@ -2297,7 +2297,7 @@ var LazyState = (function () {
             this._currentRuntimeSettings.callBackLogger = config.callBackLogger;
             this._currentRuntimeSettings.formatterLogMessage = config.formatterLogMessage;
             // Replace the real logger, it may have changed.
-            this._logger = this._createLogger(this._category);
+            this._logger = this._createLogger(config, this._category);
             if (!(this._wrappedLogger instanceof CategoryExtensionLoggerImpl_1.CategoryExtensionLoggerImpl)) {
                 this._wrappedLogger = this._logger;
             }
@@ -2310,7 +2310,7 @@ var LazyState = (function () {
     };
     LazyState.prototype.loadLoggerOnDemand = function () {
         if (!this.isLoaded()) {
-            this._logger = this._createLogger(this._category);
+            this._logger = this._createLogger(this._defaultConfig(), this._category);
             this._wrappedLogger = this._logger;
             this._delegateLogger = new CategoryDelegateLoggerImpl_1.CategoryDelegateLoggerImpl(this._wrappedLogger);
             this._originalRuntimeSettings = this.initNewSettings();
