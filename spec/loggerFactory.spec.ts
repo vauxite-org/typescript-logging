@@ -95,7 +95,7 @@ describe("LoggerFactory configuration", () => {
     expect(loggerHello).not.toBeNull();
 
     const rtSettings = factory.getLogGroupRuntimeSettingsByLoggerName(loggerHello.name) as LogGroupRuntimeSettings;
-    expect(rtSettings).not.toBeNull("Settings should be present");
+    expect(rtSettings).not.toBeNull();
     expect(rtSettings).not.toBeNull();
     expect(rtSettings.level).toEqual(LogLevel.Warn);
 
@@ -129,9 +129,9 @@ describe("LoggerFactory configuration", () => {
   });
 
   it("Default LoggerFactory is available", () => {
-    expect(LFService.DEFAULT).not.toBeNull("Default loggerfactory should not be null");
+    expect(LFService.DEFAULT).not.toBeNull();
     const factory = LFService.DEFAULT;
-    expect(factory === LFService.DEFAULT).toBeTruthy("Should be same instance");
+    expect(factory === LFService.DEFAULT).toBeTruthy();
     factory.configure(new LoggerFactoryOptions().addLogGroupRule(new LogGroupRule(new RegExp(".+"), LogLevel.Warn, new LogFormat(), LoggerType.MessageBuffer)));
     const logger = factory.getLogger("test") as MessageBufferLoggerImpl;
     logger.warn("hello!");

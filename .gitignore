@@ -4,4 +4,6 @@ npm-debug.log
 
 # Exclude dist for git
 dist
-dist-test
+
+# Rollup cache
+.rpt2_cache

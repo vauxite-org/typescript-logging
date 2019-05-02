@@ -20,7 +20,8 @@ export class Category implements CategoryLogger {
   private _children: Category[] = [];
   private _logLevel: LogLevel = LogLevel.Error;
 
-  private _logger: CategoryLogger;
+  // Assigned lazily (on demand)
+  private _logger!: CategoryLogger;
 
   public constructor(name: string, parent: Category | null = null) {
     if (name.indexOf("#") !== -1) {

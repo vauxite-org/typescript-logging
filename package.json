@@ -1,15 +1,23 @@
 {
   "name": "typescript-logging",
-  "version": "0.6.4",
-  "description": "Library for logging, written in typescript, can be used by normal es5+ javascript as well.",
-  "main": "dist/commonjs/typescript-logging",
+  "version": "0.7.0",
+  "description": "Library for logging, written in typescript.",
+  "main": "dist/bundle/typescript-logging.js",
+  "module": "dist/bundle/typescript-logging.esm.js",
+  "browser": "dist/bundle/typescript-logging.browser.js",
+  "typings": "dist/bundle/scr/logging/typescript-logging.d.ts",
   "scripts": {
-    "test": "tsc -p tsconfig-test.json && jasmine-node --verbose ./dist-test/spec",
-    "testLoadBundle": "webpack --config webpack.config.bundle.node.js && node spec/testLoadUseBundle.js",
-    "tslint": "tslint -c tslint.json -p tsconfig.json  && tslint -c tslint.json -p tsconfig-test.json",
-    "build": "tsc && npm run tslint && webpack --config webpack.config.bundle.js && webpack --config webpack.config.bundle-min.js",
-    "docs": "typedoc --tsconfig tsconfig-docs.json --excludeNotExported --excludePrivate --mode modules --out dist/bundle/docs/api src/logging/typescript-logging.ts && github-markdown docs/latest_log4j.md --flavor gfm --title 'TypeScript log4j logging documentation' > dist/bundle/docs/index_log4j.html && github-markdown docs/latest_categorized.md --flavor gfm --title 'TypeScript logging categorized documentation' > dist/bundle/docs/index_categorized.html && node scripts/process-docs.js dist/bundle",
-    "release": "npm run build && npm run test && npm run tslint && npm run testLoadBundle && npm run docs"
+    "clean": "del-cli ./dist",
+    "compile": "rollup -c",
+    "compile-watch": "rollup -cw",
+    "tslint": "tslint -c tslint.json -p tsconfig.json",
+    "test": "jest --no-cache",
+    "test-watch": "jest --watchAll",
+    "test-bundle": "node spec/testLoadUseBundle.js",
+    "bundle-browser": "cross-env BUNDLE_BROWSER=true rollup -c",
+    "build": "npm run compile && npm run bundle-browser && npm run test && npm run tslint",
+    "docs": "typedoc --tsconfig tsconfig-docs.json --excludeNotExported --excludePrivate --mode modules --out dist/bundle/docs/api src/logging/typescript-logging.ts && showdown makehtml -i docs/latest_log4j.md -o dist/bundle/docs/index_log4j.html && showdown makehtml -i docs/latest_categorized.md -o dist/bundle/docs/index_categorized.html && node scripts/process-docs.js dist/bundle",
+    "release": "npm run clean && npm run build && npm run test-bundle && npm run docs && del-cli ./dist/bundle/spec"
   },
   "files": [
     "dist/",
@@ -26,7 +34,6 @@
   "keywords": [
     "typescript-logging",
     "logging",
-    "javascript-logging",
     "log",
     "logger"
   ],
@@ -37,21 +44,28 @@
   },
   "homepage": "https://github.com/mreuvers/typescript-logging#readme",
   "devDependencies": {
-    "@types/jasmine-node": "1.14.32",
-    "@types/stacktrace-js": "0.0.30",
-    "archiver": "2.1.0",
-    "jasmine": "2.8.0",
-    "jasmine-node": "1.14.5",
-    "markdown-to-html": "0.0.13",
-    "shelljs": "0.7.8",
-    "source-map-loader": "0.2.3",
-    "ts-loader": "3.1.1",
-    "tslint": "5.8.0",
-    "typedoc": "0.9.0",
-    "typescript": "2.4.2",
-    "webpack": "2.7.0"
+    "@types/jest": "24.0.11",
+    "@types/stacktrace-js": "0.0.32",
+    "archiver": "3.0.0",
+    "cross-env": "5.2.0",
+    "del-cli": "1.1.0",
+    "jest": "24.7.1",
+    "rollup": "1.10.1",
+    "rollup-plugin-commonjs": "9.3.4",
+    "rollup-plugin-node-resolve": "4.2.3",
+    "rollup-plugin-typescript2": "0.20.1",
+    "rollup-plugin-uglify": "6.0.2",
+    "shelljs": "0.8.3",
+    "showdown": "1.9.0",
+    "source-map-loader": "0.2.4",
+    "ts-jest": "24.0.2",
+    "ts-loader": "5.4.3",
+    "ts-node": "8.1.0",
+    "tslint": "5.16.0",
+    "typedoc": "0.14.2",
+    "typescript": "2.9.2",
+    "wait-for-expect": "1.1.1"
   },
-  "typings": "./dist/commonjs/typescript-logging.d.ts",
   "dependencies": {
     "stacktrace-js": "1.3.1"
   }

@@ -12,7 +12,9 @@ import {LogGroupRuntimeSettings} from "./LogGroupRuntimeSettings";
 export class LoggerFactoryImpl implements LoggerFactory, LoggerFactoryRuntimeSettings {
 
   private _name: string;
-  private _options: LoggerFactoryOptions;
+
+  // Initialized by constructor by calling this.configure(..)
+  private _options!: LoggerFactoryOptions;
   private _loggers: SimpleMap<Logger> = new SimpleMap<Logger>();
 
   private _logGroupRuntimeSettingsIndexed: LogGroupRuntimeSettings[] = [];

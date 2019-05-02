@@ -222,7 +222,7 @@ export class JSONArray<T extends ArrayType> {
   public toString(pretty: boolean = false): string {
     const buffer = new StringBuilder();
     buffer.append("[");
-    this.objects.forEach((value: JSONType<T>, index: number) => {
+    this.objects.forEach((value, index) => {
       if (index > 0) {
         buffer.append(",");
       }

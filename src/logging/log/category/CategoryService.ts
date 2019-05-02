@@ -216,12 +216,12 @@ class LazyState {
   private _defaultConfig: () => CategoryConfiguration;
   private readonly _createLogger: (config: CategoryConfiguration, category: Category) => CategoryLogger;
 
-  private _logger: CategoryLogger; // Original real logger
-  private _wrappedLogger: CategoryLogger;  // Wrapped logger, initially _logger - can be changed if extension is enabled.
-  private _delegateLogger: CategoryDelegateLoggerImpl;
+  private _logger!: CategoryLogger; // Original real logger
+  private _wrappedLogger!: CategoryLogger;  // Wrapped logger, initially _logger - can be changed if extension is enabled.
+  private _delegateLogger!: CategoryDelegateLoggerImpl;
 
-  private _originalRuntimeSettings: CategoryRuntimeSettings;
-  private _currentRuntimeSettings: CategoryRuntimeSettings;
+  private _originalRuntimeSettings!: CategoryRuntimeSettings;
+  private _currentRuntimeSettings!: CategoryRuntimeSettings;
 
   constructor(category: Category, defaultConfig: () => CategoryConfiguration, createLogger: (config: CategoryConfiguration, category: Category) => CategoryLogger) {
     this._category = category;

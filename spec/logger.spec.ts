@@ -1,6 +1,4 @@
-import {
-  LFService
-} from "../src/logging/log/standard/LFService";
+import {LFService} from "../src/logging/log/standard/LFService";
 import {MessageBufferLoggerImpl} from "../src/logging/log/standard/MessageBufferLoggerImpl";
 import {LogLevel, LogFormat, LoggerType} from "../src/logging/log/LoggerOptions";
 import {AbstractLogger, LogMessage} from "../src/logging/log/standard/AbstractLogger";
@@ -9,13 +7,14 @@ import {Logger} from "../src/logging/log/standard/Logger";
 import {LogGroupRuntimeSettings} from "../src/logging/log/standard/LogGroupRuntimeSettings";
 import {LoggerFactoryOptions} from "../src/logging/log/standard/LoggerFactoryOptions";
 import {LogGroupRule} from "../src/logging/log/standard/LogGroupRule";
+import waitForExpect from "wait-for-expect";
 
 /**
  * Custom logger for testing, only logs the last message.
  */
 class CustomLoggerImpl extends AbstractLogger {
 
-  private _message: string;
+  private _message: string = "";
 
   constructor(name: string, settings: LogGroupRuntimeSettings) {
     super(name, settings);
@@ -48,7 +47,7 @@ const getMessages = (logger: Logger): string[] => {
 
 describe("Loggers", () => {
 
-  it("Default logs", () => {
+  it("Default logs", async () => {
 
     const loggerFactory = LFService.createLoggerFactory(new LoggerFactoryOptions().addLogGroupRule(new LogGroupRule(new RegExp("Hello.+"), LogLevel.Info, new LogFormat(), LoggerType.MessageBuffer)));
     const tmpLogger = loggerFactory.getLogger("Hello1");
@@ -73,13 +72,13 @@ describe("Loggers", () => {
 
     // Error stack is constructed async, hence we do this async in the test.
     logger.error("Serious trouble!", new Error("Oops!"));
-    waitsFor(() => messages.length === 3, "Expected 3 messages in log", 3000);
-    runs(() => {
+
+    await waitForExpect(() => {
+      expect(messages.length).toEqual(3);
       expect(messages[2]).toContain("Serious trouble!");
       expect(messages[2]).toContain("ERROR");
       expect(messages[2]).toContain("Oops!");
     });
-
   });
 
   it("Can use custom logger", () => {
@@ -110,7 +109,7 @@ describe("Loggers", () => {
     expect(castLogger.message).toContain("Hello world");
   });
 
-  it("Can use closures for logging", () => {
+  it("Can use closures for logging", async () => {
     const loggerFactory = LFService.createLoggerFactory(new LoggerFactoryOptions().addLogGroupRule(new LogGroupRule(new RegExp(".+"), LogLevel.Info, new LogFormat(), LoggerType.MessageBuffer)));
     const logger = loggerFactory.getLogger("ABC") as MessageBufferLoggerImpl;
 
@@ -124,14 +123,14 @@ describe("Loggers", () => {
 
     // Should log
     logger.error(() => "YesMe!", () => new Error("Failed"));
-    waitsFor(() => logger.getMessages().length === 2, "Should have 2 messages by now", 3000);
-    runs(() => {
+    await waitForExpect(() => {
+      expect(logger.getMessages().length).toEqual(2);
       expect(logger.toString()).toContain("YesMe!");
       expect(logger.toString()).toContain("Failed");
     });
   });
 
-  it("Will log in order", () => {
+  it("Will log in order", async () => {
     const loggerFactory = LFService.createLoggerFactory(new LoggerFactoryOptions().addLogGroupRule(new LogGroupRule(new RegExp(".+"), LogLevel.Info, new LogFormat(), LoggerType.MessageBuffer)));
     const logger = loggerFactory.getLogger("ABC") as MessageBufferLoggerImpl;
     logger.info("First");
@@ -141,15 +140,15 @@ describe("Loggers", () => {
     logger.info("Fifth", new Error("fail"));
 
     const msgs = logger.getMessages();
-    waitsFor(() => msgs.length === 5, "Waited for 5 messages", 3000);
-    runs(() => {
+
+    await waitForExpect(() => {
+      expect(msgs.length).toEqual(5);
       expect(msgs[0]).toContain("First");
       expect(msgs[1]).toContain("Second");
       expect(msgs[2]).toContain("Third");
       expect(msgs[3]).toContain("Fourth");
       expect(msgs[4]).toContain("Fifth");
     });
-
   });
 
   describe("LogData", () => {
@@ -168,7 +167,7 @@ describe("Loggers", () => {
 
       const messages: string[] = logger.getMessages();
       expect(messages.length).toEqual(1);
-      expect(messages[0]).toContain(msg + " [data]: hello " + data.key, "Failed message was: " + messages[0]);
+      expect(messages[0]).toContain(msg + " [data]: hello " + data.key);
     });
 
     it("Can handle LogData without custom ds", () => {
@@ -176,7 +175,7 @@ describe("Loggers", () => {
 
       const messages: string[] = logger.getMessages();
       expect(messages.length).toEqual(1);
-      expect(messages[0]).toContain(msg + " [data]: " + JSON.stringify(data), "Failed message was: " + messages[0]);
+      expect(messages[0]).toContain(msg + " [data]: " + JSON.stringify(data));
     });
 
     it("Can handle LogData without custom ds and only message", () => {
@@ -188,7 +187,7 @@ describe("Loggers", () => {
     });
   });
 
-  it("Tests all log levels", () => {
+  it("Tests all log levels", async () => {
     const loggerFactory = LFService.createLoggerFactory(new LoggerFactoryOptions().addLogGroupRule(new LogGroupRule(new RegExp(".+"), LogLevel.Trace, new LogFormat(), LoggerType.MessageBuffer)));
     const logger = loggerFactory.getLogger("ABC");
 
@@ -241,8 +240,9 @@ describe("Loggers", () => {
     }, () => new Error("fatalex5"));
 
     const messages = getMessages(logger);
-    waitsFor(() =>   messages.length === 30, "Expected 30 messages in log", 5000);
-    runs(() => {
+    await waitForExpect(() => {
+      expect(messages.length).toEqual(30);
+
       const result = getMessagesAsString(logger);
 
       expect(result).toContain("trace1");
@@ -293,7 +293,7 @@ describe("Loggers", () => {
     });
   });
 
-  it("Test we do not bail on invalid error object", () => {
+  it("Test we do not bail on invalid error object", async () => {
     const loggerFactory = LFService.createLoggerFactory(new LoggerFactoryOptions().addLogGroupRule(new LogGroupRule(new RegExp(".+"), LogLevel.Trace, new LogFormat(), LoggerType.MessageBuffer)));
     const logger = loggerFactory.getLogger("x");
 
@@ -308,8 +308,8 @@ describe("Loggers", () => {
     logger.error("Failed2", anotherInvalidError as any);
 
     const messages = getMessages(logger);
-    waitsFor(() =>   messages.length === 2, "Expected 1 message in log", 1000);
-    runs(() => {
+    await waitForExpect(() => {
+      expect(messages.length).toEqual(2);
       expect(messages[0]).toContain("Unexpected error object was passed in. Could not resolve it, stringified object: {\"invalid\":\"bla\"}");
       expect(messages[1]).toContain("Unexpected error object was passed in. Could not resolve it or stringify it");
     });
@@ -318,7 +318,7 @@ describe("Loggers", () => {
 
 class InvalidError {
 
-  private _self: InvalidError;
+  private _self!: InvalidError;
 
   public setSelf(self: InvalidError) {
     this._self = self;
