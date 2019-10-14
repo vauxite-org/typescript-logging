@@ -25,8 +25,6 @@ export class ExtensionHelper {
    */
   public static register(): void {
     if (!ExtensionHelper.registered) {
-      ExtensionHelper.registered = true;
-
       const listener = (evt: MessageEvent) => {
         const msg = evt.data as ExtensionMessageJSON<any>;
         if (msg !== null) {
@@ -34,9 +32,11 @@ export class ExtensionHelper {
         }
       };
 
-      if (typeof window !== "undefined") {
+      if (typeof window !== "undefined" && typeof window.removeEventListener !== "undefined" && typeof window.addEventListener !== "undefined") {
         window.removeEventListener("message", listener);
         window.addEventListener("message", listener);
+
+        ExtensionHelper.registered = true;
       }
     }
   }
@@ -218,7 +218,7 @@ export class ExtensionHelper {
       return;
     }
 
-    if (typeof window !== "undefined") {
+    if (typeof window !== "undefined" && typeof window.postMessage !== "undefined") {
       window.postMessage(msg, "*");
     }
   }
