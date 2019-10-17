@@ -1080,16 +1080,16 @@ var ExtensionHelper = (function () {
      */
     ExtensionHelper.register = function () {
         if (!ExtensionHelper.registered) {
-            ExtensionHelper.registered = true;
             var listener = function (evt) {
                 var msg = evt.data;
                 if (msg !== null) {
                     ExtensionHelper.processMessageFromExtension(msg);
                 }
             };
-            if (typeof window !== "undefined") {
+            if (typeof window !== "undefined" && typeof window.removeEventListener !== "undefined" && typeof window.addEventListener !== "undefined") {
                 window.removeEventListener("message", listener);
                 window.addEventListener("message", listener);
+                ExtensionHelper.registered = true;
             }
         }
     };
@@ -1240,7 +1240,7 @@ var ExtensionHelper = (function () {
         if (!ExtensionHelper.registered) {
             return;
         }
-        if (typeof window !== "undefined") {
+        if (typeof window !== "undefined" && typeof window.postMessage !== "undefined") {
             window.postMessage(msg, "*");
         }
     };
