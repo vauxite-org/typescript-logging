@@ -29,7 +29,7 @@ abstract class JSONTypeImpl<T> implements JSONType<T> {
   public toString(): string {
     const value = this.getValue();
     if (value != null) {
-      return value.toString();
+      return value + "";
     }
     return "null";
   }
@@ -209,7 +209,7 @@ export class JSONObject {
 
 export class JSONArray<T extends ArrayType> {
 
-  private objects: Array<JSONType<ArrayType>> = [];
+  private objects: JSONType<ArrayType>[] = [];
 
   public add(object: T): JSONArray<T> {
     if (object === undefined) {

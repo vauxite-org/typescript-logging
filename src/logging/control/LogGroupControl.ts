@@ -148,6 +148,7 @@ export class LoggerControlImpl implements LoggerControl {
   }
 
   public showSettings(id: number | "all" = "all"): void {
+    // tslint:disable-next-line:array-type
     const result: Array<TuplePair<number, LoggerFactoryRuntimeSettings>> = [];
 
     if (id === "all") {

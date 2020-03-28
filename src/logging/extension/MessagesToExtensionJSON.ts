@@ -37,6 +37,6 @@ export interface ExtensionCategoryLogMessageJSON {
  */
 export interface ExtensionCategoriesUpdateMessageJSON {
 
-  categories: Array<{id: number, logLevel: string}>;
+  categories: {id: number, logLevel: string}[];
 
 }

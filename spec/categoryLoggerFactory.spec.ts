@@ -389,8 +389,10 @@ describe("CategoryServiceFactory", () => {
 
   class CustomLogger extends AbstractCategoryLogger {
 
+    // tslint:disable-next-line:array-type
     private messages: Array<string | LogData> = [];
 
+    // tslint:disable-next-line:array-type
     constructor(rootCategory: Category, runtimeSettings: RuntimeSettings, messages: Array<string | LogData> ) {
       super(rootCategory, runtimeSettings);
       this.messages = messages;
