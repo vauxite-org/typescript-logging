@@ -1,6 +1,8 @@
 # Changelog
 
 This page describes the relevant changes per version.
+* 1.0.0
+  * No changes, 0.6.4 is as of now the official 1.0.0 release.
 * 0.6.4
   * [Issue 43](https://github.com/mreuvers/typescript-logging/issues/43) Fix "window.removeEventListener" is not a function for react-native.
 * 0.6.3

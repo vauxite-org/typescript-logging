@@ -1,4 +1,4 @@
-# typescript-logging
+# TypeScript Logging (typescript-logging)
 
 TypeScript library for logging. Simple and flexible in usage.
 
@@ -10,7 +10,7 @@ TypeScript library for logging. Simple and flexible in usage.
 * Api to control (console) logging at runtime through a (browser's) developer console.
 * Supports a separate chrome browser developer extension, which allows you to control logging at runtime through the chrome developer extension. For details please see: [Typescript Logging Developer Extension](#typescript-logging-developer-extension)
 
-The javascript bundle can be used for normal javascript projects if needed (es5 compatible).
+The javascript bundle is es5 compatible.
 
 The following **documentation** sections are available:
 * [Installation](#installation)
@@ -28,11 +28,11 @@ The following **documentation** sections are available:
 
 Notes: 
 * Release 0.6.0 removed several previously deprecated methods e.a, please see the changelog to find out what
-* Build in combination with angular-cli 6.0.0+ may fail, for a workaround see [Issue 36](https://github.com/mreuvers/typescript-logging/issues/36), until angular-cli fixes its regression. 
+* Build in combination with angular-cli 6.0.0+ may fail, for a workaround see [Issue 36](https://github.com/mreuvers/typescript-logging/issues/36), this has been fixed in later angular-cli versions already.
 
 ## Installation
 
-Use npm to install for usage in your project.
+Use npm to install to use in your project.
 
 ```bash
 npm install --save typescript-logging
@@ -46,10 +46,10 @@ Or download the (minified) javascript bundle and documentation from [here](https
 ### Promise
 
 The library does NOT ship with a polyfill of Promise anymore, this was done on purpose as shipping with a polyfill
-often lead to conflicts if other projects already have a different promise polyfill included.
+often leads to conflicts if other projects already have a different promise polyfill included. Also, current browsers
+all support Promise out of the box these days.
 
-So if you do care about old browsers, that do not have Promise support you must provide one yourself such as e.g. es6-promise.
-
+So if you do care about old browsers that do not have Promise support, you must provide one yourself such as e.g. es6-promise.
 
 ## Usage
 
@@ -208,7 +208,7 @@ to *not* pack typescript-logging within it's module by using the external option
 var webpack = require("webpack");
 
 module.exports = {
-    ... more webpack config here
+    // ... more webpack config here
 
     externals : {
       "typescript-logging": "typescript-logging"
