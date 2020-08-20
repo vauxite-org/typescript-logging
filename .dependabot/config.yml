@@ -1,0 +1,14 @@
+version: 1
+update_configs:
+  - package_manager: "javascript"
+    directory: "/"
+    update_schedule: "weekly"
+    default_reviewers:
+      - "mreuvers"
+    default_assignees:
+      - "mreuvers"
+    allowed_updates:
+      - match:
+          dependency_type: "production"
+          update_type: "security"
+    version_requirement_updates: "increase_versions_if_necessary"
