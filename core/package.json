@@ -1,0 +1,52 @@
+{
+  "name": "typescript-logging-core",
+  "version": "2.0.0",
+  "description": "Core dependency for typescript logging (written in typescript).",
+  "main": "dist/bundle/typescript-logging-core.js",
+  "module": "dist/bundle/typescript-logging-core.esm.js",
+  "typings": "dist/bundle/scr/logging/typescript-logging-core.d.ts",
+  "scripts": {
+    "compile": "rollup -c",
+    "compile-watch": "rollup -cw",
+    "tslint": "tslint -c tslint.json -p tsconfig.json",
+    "test": "jest --no-cache",
+    "test-watch": "jest --watchAll",
+    "build": "npm run compile && npm run test && npm run tslint"
+  },
+  "files": [
+    "dist/",
+    "src/",
+    "LICENSE",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vauxite-org/typescript-logging.git"
+  },
+  "keywords": [
+    "typescript-logging",
+    "typescript-logging-core",
+    "logging",
+    "log",
+    "logger"
+  ],
+  "author": "Martijn Reuvers <martijnr.work@gmail.com>",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/vauxite-org/typescript-logging/issues"
+  },
+  "homepage": "https://github.com/vauxite-org/typescript-logging/core/#readme",
+  "devDependencies": {
+    "@types/jest": "26.0.10",
+    "jest": "26.4.1",
+    "rollup": "2.26.4",
+    "@rollup/plugin-commonjs": "15.0.0",
+    "@rollup/plugin-node-resolve": "9.0.0",
+    "rollup-plugin-typescript2": "0.27.2",
+    "ts-jest": "26.2.0",
+    "ts-loader": "8.0.2",
+    "ts-node": "8.10.2",
+    "tslint": "6.1.3",
+    "typescript": "4.0.2"
+  }
+}
