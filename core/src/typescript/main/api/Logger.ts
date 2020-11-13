@@ -1,6 +1,7 @@
 import {ExceptionType} from "./type/ExceptionType";
 import {LogLevel} from "./LogLevel";
-import {LogDataType} from "./type/LogDataType";
+import {LogMessageType} from "./type/LogMessageType";
+import {ArgumentsType} from "./type/ArgumentsType";
 
 export interface Logger {
 
@@ -9,27 +10,32 @@ export interface Logger {
    */
   readonly logLevel: LogLevel;
 
-  trace(message: LogDataType, ...args: any): void;
+  /**
+   * Number by which this logger is identified (not relevant for an end user).
+   */
+  readonly id: number;
 
-  trace(message: LogDataType, error: ExceptionType, ...args: any): void;
+  trace(message: LogMessageType, args?: ArgumentsType): void;
 
-  debug(message: LogDataType, ...args: any): void;
+  trace(message: LogMessageType, error: ExceptionType, args?: ArgumentsType): void;
 
-  debug(message: LogDataType, error: ExceptionType, ...args: any): void;
+  debug(message: LogMessageType, args?: ArgumentsType): void;
 
-  info(message: LogDataType, ...args: any): void;
+  debug(message: LogMessageType, error: ExceptionType, args?: ArgumentsType): void;
 
-  info(message: LogDataType, error: ExceptionType, ...args: any): void;
+  info(message: LogMessageType, args?: ArgumentsType): void;
 
-  warn(message: LogDataType, ...args: any): void;
+  info(message: LogMessageType, error: ExceptionType, args?: ArgumentsType): void;
 
-  warn(message: LogDataType, error: ExceptionType, ...args: any): void;
+  warn(message: LogMessageType, args?: ArgumentsType): void;
 
-  error(message: LogDataType, ...args: any): void;
+  warn(message: LogMessageType, error: ExceptionType, args?: ArgumentsType): void;
 
-  error(message: LogDataType, error: ExceptionType, ...args: any): void;
+  error(message: LogMessageType, args?: ArgumentsType): void;
 
-  fatal(message: LogDataType, ...args: any): void;
+  error(message: LogMessageType, error: ExceptionType, args?: ArgumentsType): void;
 
-  fatal(message: LogDataType, error: ExceptionType, ...args: any): void;
+  fatal(message: LogMessageType, args?: ArgumentsType): void;
+
+  fatal(message: LogMessageType, error: ExceptionType, args?: ArgumentsType): void;
 }
