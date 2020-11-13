@@ -7,7 +7,7 @@
     "max-line-length": [true, 200],
     "member-ordering": [true, { "order":
       ["private-static-field","protected-static-field","public-static-field","private-instance-field","protected-instance-field","public-instance-field",
-        "constructor","public-static-method","public-instance-method","protected-instance-method","private-instance-method", "protected-static-method", "private-static-method"
+        "constructor","public-instance-method","protected-instance-method","private-instance-method", "public-static-field", "protected-static-method", "private-static-method"
       ]
     }],
     "one-line": [true, "check-open-brace", "check-whitespace"],

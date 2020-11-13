@@ -29,8 +29,7 @@ export interface RawLogMessage {
   readonly exception?: Error;
 
   /**
-   * All (remaining) arguments after the message was formatted, or all arguments when no formatting was needed.
-   * If not set, there were no args at all (or none left after formatting).
+   * Additional arguments when they were logged, else undefined.
    */
-  readonly args?: any[];
+  readonly args?: ReadonlyArray<any>;
 }
