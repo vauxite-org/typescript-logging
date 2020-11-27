@@ -6,6 +6,9 @@ import {EnhancedMap} from "../util/EnhancedMap";
 import {LogRuntimeImpl} from "./LogRuntimeImpl";
 import {CoreLogger} from "./CoreLogger";
 
+/**
+ * Implementation for {@link LogControl}
+ */
 export class LogControlImpl implements LogControl {
 
   /**

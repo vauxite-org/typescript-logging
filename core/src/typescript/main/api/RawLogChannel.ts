@@ -1,8 +1,7 @@
 import {RawLogMessage} from "./RawLogMessage";
 
 /**
- * Used to write a log message to, can be used to write a raw log message. Raw log messages
- * do lack things like log level, date and so on.
+ * Used to write a raw log message to.
  */
 export interface RawLogChannel {
 

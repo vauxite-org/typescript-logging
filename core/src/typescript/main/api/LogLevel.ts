@@ -14,14 +14,10 @@ export enum LogLevel {
 export namespace LogLevel {
 
   /**
-   *
+   * Convert given value to LogLevel, if not matching returns undefined.
    * @param val Value to convert
    */
-  export function from(val: string): LogLevel {
-    if (val == null) {
-      throw new Error("Argument must be set");
-    }
-
+  export function toLogLevel(val: string): LogLevel | undefined {
     switch (val.toLowerCase()) {
       case "trace":
         return LogLevel.Trace;
@@ -36,7 +32,7 @@ export namespace LogLevel {
       case "fatal":
         return LogLevel.Fatal;
       default:
-        throw new Error("Unsupported value for conversion: " + val);
+        return undefined;
     }
   }
 }

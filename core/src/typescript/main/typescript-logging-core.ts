@@ -30,7 +30,7 @@ export * from "./impl/DefaultFormatters";
 /**
  * Create a new LogControl, this is for flavor usage only. End users should not
  * use this and instead use whatever the flavor offers to build some config and
- * get loggers from therec
+ * get loggers from there.
  */
 export function createLogControl(settings: LogSettings): LogControl {
   return new LogControlImpl(settings);

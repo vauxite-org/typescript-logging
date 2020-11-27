@@ -1,6 +1,6 @@
 /**
  * The LogMessage to write away to a LogChannel. LogMessage is pre-formatted and ready to be written
- * away. This is the default message created. It is possible to also receive the RawMessage
+ * away. This is the message created for a LogChannel.
  */
 export interface LogMessage {
 
