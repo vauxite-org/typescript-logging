@@ -22,6 +22,7 @@ export class CoreLogger implements Logger {
   public get id() {
     return this._runtime.id;
   }
+
   public trace(message: LogMessageType, exceptionOrArgs?: ExceptionType | ArgumentsType, args?: ArgumentsType): void {
     this.logMessage(LogLevel.Trace, message, exceptionOrArgs, args);
   }
@@ -120,7 +121,7 @@ export class CoreLogger implements Logger {
           error: errorResult,
         };
 
-        this._runtime.channel.write(logMessage, this._runtime.argumentFormatter);
+        this._runtime.channel.write(logMessage);
         break;
     }
   }

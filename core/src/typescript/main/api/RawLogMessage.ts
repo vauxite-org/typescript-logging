@@ -1,5 +1,10 @@
 import {LogLevel} from "./LogLevel";
 
+/**
+ * The RawLogMessage to write away to a RawLogChannel. RawLogMessage contains
+ * the raw data, and allows one to format it in any way wanted. It is written
+ * to a RawLogChannel.
+ */
 export interface RawLogMessage {
 
   /**

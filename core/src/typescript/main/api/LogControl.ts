@@ -2,6 +2,10 @@ import {LoggerNameType} from "./type/LoggerNameType";
 import {Logger} from "./Logger";
 import {LogRuntime} from "./LogRuntime";
 
+/**
+ * Represents the updatable part of the settings. Can be used to update
+ * the runtime settings for a logger or all loggers.
+ */
 export type UpdatableRuntimeSettings = Partial<Pick<LogRuntime, "level" | "channel">>;
 
 export interface LogControl {
