@@ -2,6 +2,7 @@
  * Log level for a logger.
  */
 export enum LogLevel {
+  // Do not reverse/change order, a test relies on it.
   Trace,
   Debug,
   Info,

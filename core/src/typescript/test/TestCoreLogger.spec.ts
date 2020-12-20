@@ -8,6 +8,15 @@ import {LogMessage} from "../main/api/LogMessage";
 
 describe("Test core logger", () => {
 
+  it ("Test logger level", () => {
+    assertLogLevels(LogLevel.Trace);
+    assertLogLevels(LogLevel.Debug);
+    assertLogLevels(LogLevel.Info);
+    assertLogLevels(LogLevel.Warn);
+    assertLogLevels(LogLevel.Error);
+    assertLogLevels(LogLevel.Fatal);
+  });
+
   it ("Test formatting", () => {
     const channel = new RawArrayChannel();
     const log = new CoreLogger({
@@ -39,15 +48,7 @@ describe("Test core logger", () => {
   });
 
   it("Test arguments formatting",() => {
-    const channel = new ArrayChannel();
-    const log = new CoreLogger({
-      level: LogLevel.Debug,
-      id: 1, channel,
-      name: "Main",
-      dateFormatter: millis => "XXX",
-      argumentFormatter: arg => formatArgument(arg),
-      messageFormatter: formatMessage
-    });
+    const [log, channel] = createDefaultLogger(LogLevel.Debug);
 
     log.debug("Hello!", ["A"]);
     log.debug("Hello!", ["A", 4, undefined, null, ["dance", "again"]]);
@@ -60,6 +61,21 @@ describe("Test core logger", () => {
       ]
     );
   });
+
+  function assertLogLevels(logLevel: LogLevel) {
+    const input = ["trace","debug","info","warn","error","fatal"];
+    const [log, channel] = createDefaultLogger(logLevel);
+    log.trace(input[0]);
+    log.debug(input[1]);
+    log.info(input[2]);
+    log.warn(input[3]);
+    log.error(input[4]);
+    log.fatal(input[5]);
+
+    const idx: number = logLevel;
+    const expected = input.slice(idx).map(v => "XXX [Main] " + v);
+    expect(channel.messages).toEqual(expected);
+  }
 });
 
 class ArrayChannel implements LogChannel {
@@ -91,4 +107,18 @@ class RawArrayChannel implements RawLogChannel {
   public get errors(): ReadonlyArray<Error | undefined> {
     return this._buffer.map(m => m.exception);
   }
+}
+
+
+function createDefaultLogger(level: LogLevel): [logger: CoreLogger, channel: ArrayChannel] {
+  const channel = new ArrayChannel();
+  return [new CoreLogger({
+    level,
+    id: 1,
+    channel,
+    name: "Main",
+    dateFormatter: millis => "XXX",
+    argumentFormatter: arg => formatArgument(arg),
+    messageFormatter: formatMessage
+  }), channel];
 }
