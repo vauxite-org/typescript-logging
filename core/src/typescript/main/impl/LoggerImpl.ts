@@ -7,7 +7,10 @@ import {LogMessageType} from "../api/type/LogMessageType";
 import {LogRuntime} from "../api/LogRuntime";
 import {ArgumentsType} from "../api/type/ArgumentsType";
 
-export class CoreLogger implements Logger {
+/**
+ * Standard logger implementation that provides the basis for all loggers.
+ */
+export class LoggerImpl implements Logger {
 
   private readonly _runtime: LogRuntime;
 

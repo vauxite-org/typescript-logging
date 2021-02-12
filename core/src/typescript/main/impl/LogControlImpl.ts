@@ -1,15 +1,15 @@
-import {LogControl, UpdatableRuntimeSettings} from "../api/LogControl";
+import {LogProvider, UpdatableLogSettings} from "../api/LogProvider";
 import {LoggerNameType} from "../api/type/LoggerNameType";
 import {Logger} from "../api/Logger";
 import {LogSettings} from "../api/config/LogSettings";
 import {EnhancedMap} from "../util/EnhancedMap";
 import {LogRuntimeImpl} from "./LogRuntimeImpl";
-import {CoreLogger} from "./CoreLogger";
+import {LoggerImpl} from "./LoggerImpl";
 
 /**
- * Implementation for {@link LogControl}
+ * Implementation for {@link LogProvider}
  */
-export class LogControlImpl implements LogControl {
+export class LogControlImpl implements LogProvider {
 
   /**
    * Default settings that were taken on creation.
@@ -29,11 +29,11 @@ export class LogControlImpl implements LogControl {
     return this.getOrCreateLogger(name);
   }
 
-  public updateLoggerRuntime(log: Logger, settings: UpdatableRuntimeSettings): void {
+  public updateLoggerRuntime(log: Logger, settings: UpdatableLogSettings): void {
     // TODO: implement
   }
 
-  public updateRuntimeSettings(settings: UpdatableRuntimeSettings): void {
+  public updateRuntimeSettings(settings: UpdatableLogSettings): void {
     // TODO: implement
   }
 
@@ -54,7 +54,7 @@ export class LogControlImpl implements LogControl {
       this._settings.dateFormatter,
       this._settings.messageFormatter,
     );
-    return new CoreLogger(runtime);
+    return new LoggerImpl(runtime);
   }
 
   // TODO: Loggers need an id to be distinguishable!

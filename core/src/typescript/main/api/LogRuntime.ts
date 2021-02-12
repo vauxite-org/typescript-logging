@@ -5,10 +5,10 @@ import {ArgumentFormatterType} from "./type/ArgumentFormatterType";
 import {DateFormatterType} from "./type/DateFormatterType";
 import {MessageFormatterType} from "./type/MessageFormatterType";
 import {LoggerNameType} from "./type/LoggerNameType";
-import {LogControl} from "./LogControl";
+import {LogProvider} from "./LogProvider";
 
 /**
- * Represents runtime settings that are created for a {@link LogControl} instance.
+ * Represents runtime settings that are created for a {@link LogProvider} instance.
  */
 export interface LogRuntime {
   readonly id: number;

@@ -1,10 +1,10 @@
 import {LogSettings} from "./api/config/LogSettings";
-import {LogControl} from "./api/LogControl";
+import {LogProvider} from "./api/LogProvider";
 import {LogControlImpl} from "./impl/LogControlImpl";
 
 /* Export the API */
 export { LogChannel } from "./api/LogChannel";
-export { LogControl } from "./api/LogControl";
+export { LogProvider } from "./api/LogProvider";
 export { Logger } from "./api/Logger";
 export { LogLevel } from "./api/LogLevel";
 export { LogMessage } from "./api/LogMessage";
@@ -32,6 +32,6 @@ export * from "./impl/DefaultFormatters";
  * use this and instead use whatever the flavor offers to build some config and
  * get loggers from there.
  */
-export function createLogControl(settings: LogSettings): LogControl {
+export function createLogControl(settings: LogSettings): LogProvider {
   return new LogControlImpl(settings);
 }
