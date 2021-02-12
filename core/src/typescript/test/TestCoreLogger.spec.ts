@@ -1,4 +1,4 @@
-import {CoreLogger} from "../main/impl/CoreLogger";
+import {LoggerImpl} from "../main/impl/LoggerImpl";
 import {LogLevel} from "../main/api/LogLevel";
 import {RawLogMessage} from "../main/api/RawLogMessage";
 import {RawLogChannel} from "../main/api/RawLogChannel";
@@ -19,7 +19,7 @@ describe("Test core logger", () => {
 
   it ("Test formatting", () => {
     const channel = new RawArrayChannel();
-    const log = new CoreLogger({
+    const log = new LoggerImpl({
       level: LogLevel.Debug,
       id: 1, channel,
       name: "Main",
@@ -31,6 +31,7 @@ describe("Test core logger", () => {
     // No formatting
     log.debug("Hello");
     log.debug("Dance1", new Error("X"));
+    log.debug(() => "Hello 2!");
 
     // Formatting
     log.debug(fmt => fmt("Dance: {}", ["2"]));
@@ -43,8 +44,8 @@ describe("Test core logger", () => {
     // Formatting with too many args, unused args are ignored.
     log.debug(fmt => fmt("Dance: {}", ["Friend", "Foe"]));
 
-    expect(channel.messages).toEqual(["Hello", "Dance1", `Dance: '2'`, `Dance: '1000' and '2000'`, "Dance: {}", "Dance: {} and {}", `Dance: 'Friend'`]);
-    expect(channel.errors).toEqual([undefined, new Error("X"), undefined, undefined, undefined, new Error("y"), undefined]);
+    expect(channel.messages).toEqual(["Hello", "Dance1",  "Hello 2!", `Dance: '2'`, `Dance: '1000' and '2000'`, "Dance: {}", "Dance: {} and {}", `Dance: 'Friend'`]);
+    expect(channel.errors).toEqual([undefined, new Error("X"), undefined, undefined, undefined, undefined, new Error("y"), undefined]);
   });
 
   it("Test arguments formatting",() => {
@@ -110,14 +111,14 @@ class RawArrayChannel implements RawLogChannel {
 }
 
 
-function createDefaultLogger(level: LogLevel): [logger: CoreLogger, channel: ArrayChannel] {
+function createDefaultLogger(level: LogLevel): [logger: LoggerImpl, channel: ArrayChannel] {
   const channel = new ArrayChannel();
-  return [new CoreLogger({
+  return [new LoggerImpl({
     level,
     id: 1,
     channel,
     name: "Main",
-    dateFormatter: millis => "XXX",
+    dateFormatter: _ => "XXX",
     argumentFormatter: arg => formatArgument(arg),
     messageFormatter: formatMessage
   }), channel];
