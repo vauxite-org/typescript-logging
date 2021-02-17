@@ -2,7 +2,7 @@ import {LogProvider, UpdatableLogSettings} from "../api/LogProvider";
 import {LoggerNameType} from "../api/type/LoggerNameType";
 import {Logger} from "../api/Logger";
 import {LogSettings} from "../api/config/LogSettings";
-import {EnhancedMap} from "../util/EnhancedMap";
+import {EnhancedMap} from "../../util/EnhancedMap";
 import {LogRuntimeImpl} from "./LogRuntimeImpl";
 import {LoggerImpl} from "./LoggerImpl";
 

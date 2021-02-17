@@ -1,10 +1,10 @@
-import {LoggerImpl} from "../main/impl/LoggerImpl";
-import {LogLevel} from "../main/api/LogLevel";
-import {RawLogMessage} from "../main/api/RawLogMessage";
-import {RawLogChannel} from "../main/api/RawLogChannel";
-import {formatArgument, formatDate, formatMessage} from "../main/impl/DefaultFormatters";
-import {LogChannel} from "../main/api/LogChannel";
-import {LogMessage} from "../main/api/LogMessage";
+import {LoggerImpl} from "../main/core/impl/LoggerImpl";
+import {LogLevel} from "../main/core/api/LogLevel";
+import {RawLogMessage} from "../main/core/api/RawLogMessage";
+import {RawLogChannel} from "../main/core/api/RawLogChannel";
+import {formatArgument, formatDate, formatMessage} from "../main/core/impl/DefaultFormatters";
+import {LogChannel} from "../main/core/api/LogChannel";
+import {LogMessage} from "../main/core/api/LogMessage";
 
 describe("Test core logger", () => {
 
