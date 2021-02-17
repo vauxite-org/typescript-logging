@@ -1,10 +1,10 @@
 {
-  "name": "typescript-logging-core",
+  "name": "typescript-logging",
   "version": "2.0.0",
-  "description": "Core dependency for typescript logging (written in typescript).",
-  "main": "dist/bundle/typescript-logging-core.js",
-  "module": "dist/bundle/typescript-logging-core.esm.js",
-  "typings": "dist/bundle/scr/logging/typescript-logging-core.d.ts",
+  "description": "TypeScript Logging written in and to be used by TypeScript.",
+  "main": "dist/bundle/typescript-logging.js",
+  "module": "dist/bundle/typescript-logging.esm.js",
+  "typings": "dist/bundle/scr/logging/typescript-logging.d.ts",
   "scripts": {
     "compile": "rollup -c",
     "compile-watch": "rollup -cw",
@@ -25,7 +25,9 @@
   },
   "keywords": [
     "typescript-logging",
-    "typescript-logging-core",
+    "typescript logger",
+    "log4ts",
+    "log4js-like",
     "logging",
     "log",
     "logger"

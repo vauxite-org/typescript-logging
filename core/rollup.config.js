@@ -5,7 +5,7 @@ import resolve from "@rollup/plugin-node-resolve";
 import pkg from "./package.json";
 
 export default {
-  input: "src/typescript/main/typescript-logging-core.ts",
+  input: "src/typescript/main/typescript-logging.ts",
   output: [
     {
       file: pkg.main,
