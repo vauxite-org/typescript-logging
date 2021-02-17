@@ -1,31 +1,31 @@
-import {LogSettings} from "./api/config/LogSettings";
-import {LogProvider} from "./api/LogProvider";
-import {LogControlImpl} from "./impl/LogControlImpl";
+import {LogSettings} from "./core/api/config/LogSettings";
+import {LogProvider} from "./core/api/LogProvider";
+import {LogControlImpl} from "./core/impl/LogControlImpl";
 
 /* Export the API */
-export { LogChannel } from "./api/LogChannel";
-export { LogProvider } from "./api/LogProvider";
-export { Logger } from "./api/Logger";
-export { LogLevel } from "./api/LogLevel";
-export { LogMessage } from "./api/LogMessage";
-export { LogRuntime } from "./api/LogRuntime";
-export { RawLogChannel } from "./api/RawLogChannel";
-export { RawLogMessage } from "./api/RawLogMessage";
+export { LogChannel } from "./core/api/LogChannel";
+export { LogProvider } from "./core/api/LogProvider";
+export { Logger } from "./core/api/Logger";
+export { LogLevel } from "./core/api/LogLevel";
+export { LogMessage } from "./core/api/LogMessage";
+export { LogRuntime } from "./core/api/LogRuntime";
+export { RawLogChannel } from "./core/api/RawLogChannel";
+export { RawLogMessage } from "./core/api/RawLogMessage";
 
-export { LogSettings } from "./api/config/LogSettings"
+export { LogSettings } from "./core/api/config/LogSettings"
 
-export { ArgumentFormatterType } from "./api/type/ArgumentFormatterType";
-export { ArgumentsType } from "./api/type/ArgumentsType";
-export { DateFormatterType } from "./api/type/DateFormatterType";
-export { ExceptionType } from "./api/type/ExceptionType";
-export { LogChannelType } from "./api/type/LogChannelType";
-export { LoggerNameType } from "./api/type/LoggerNameType";
-export { LogMessageType } from "./api/type/LogMessageType";
-export { MessageArgumentFormatterType } from "./api/type/MessageArgumentFormatterType";
-export { MessageFormatterType } from "./api/type/MessageFormatterType";
+export { ArgumentFormatterType } from "./core/api/type/ArgumentFormatterType";
+export { ArgumentsType } from "./core/api/type/ArgumentsType";
+export { DateFormatterType } from "./core/api/type/DateFormatterType";
+export { ExceptionType } from "./core/api/type/ExceptionType";
+export { LogChannelType } from "./core/api/type/LogChannelType";
+export { LoggerNameType } from "./core/api/type/LoggerNameType";
+export { LogMessageType } from "./core/api/type/LogMessageType";
+export { MessageArgumentFormatterType } from "./core/api/type/MessageArgumentFormatterType";
+export { MessageFormatterType } from "./core/api/type/MessageFormatterType";
 
 /* Export a few utilities from impl, only what we deem convenient for end users */
-export * from "./impl/DefaultFormatters";
+export * from "./core/impl/DefaultFormatters";
 
 /**
  * Create a new LogControl, this is for flavor usage only. End users should not
