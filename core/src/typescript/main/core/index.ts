@@ -28,10 +28,12 @@ export { MessageFormatterType } from "./api/type/MessageFormatterType";
 export * from "./impl/DefaultFormatters";
 
 /**
- * Create a new LogControl, this is for flavor usage only. End users should not
+ * Create a new LogProvider, this is for flavor usage only. End users should not
  * use this and instead use whatever the flavor offers to build some config and
  * get loggers from there.
+ *
+ * @internal
  */
-export function createLogControl(settings: LogSettings): LogProvider {
+export function createLogProvider(settings: LogSettings): LogProvider {
   return new LogControlImpl(settings);
 }

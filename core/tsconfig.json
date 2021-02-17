@@ -13,7 +13,8 @@
       "ES2015",
       "DOM"
     ],
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "stripInternal": true,
   },
   "include": [
     "./src/typescript/**/*"
