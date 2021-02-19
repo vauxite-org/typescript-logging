@@ -9,7 +9,7 @@ import {LoggerImpl} from "./LoggerImpl";
 /**
  * Implementation for {@link LogProvider}
  */
-export class LogControlImpl implements LogProvider {
+export class LogProviderImpl implements LogProvider {
 
   /**
    * Default settings that were taken on creation.
@@ -38,10 +38,9 @@ export class LogControlImpl implements LogProvider {
   }
 
   private getOrCreateLogger(name: LoggerNameType): Logger {
-    const key = LogControlImpl.createKey(name);
+    const key = LogProviderImpl.createKey(name);
 
-    // Note the '!', we know we never store undefined values for a key.
-    return this._loggers.computeIfAbsent(key, (_) => this.createNewLogger(name))!;
+    return this._loggers.computeIfAbsent(key, (_) => this.createNewLogger(name));
   }
 
   private createNewLogger(name: LoggerNameType): Logger {
