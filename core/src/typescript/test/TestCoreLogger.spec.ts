@@ -1,14 +1,18 @@
+import {
+  formatArgument,
+  formatDate,
+  formatMessage,
+  LogChannel,
+  LogLevel,
+  LogMessage,
+  RawLogChannel,
+  RawLogMessage
+} from "../main/core";
 import {LoggerImpl} from "../main/core/impl/LoggerImpl";
-import {LogLevel} from "../main/core/api/LogLevel";
-import {RawLogMessage} from "../main/core/api/RawLogMessage";
-import {RawLogChannel} from "../main/core/api/RawLogChannel";
-import {formatArgument, formatDate, formatMessage} from "../main/core/impl/DefaultFormatters";
-import {LogChannel} from "../main/core/api/LogChannel";
-import {LogMessage} from "../main/core/api/LogMessage";
 
 describe("Test core logger", () => {
 
-  it ("Test logger level", () => {
+  test ("Test logger level", () => {
     assertLogLevels(LogLevel.Trace);
     assertLogLevels(LogLevel.Debug);
     assertLogLevels(LogLevel.Info);
@@ -17,7 +21,7 @@ describe("Test core logger", () => {
     assertLogLevels(LogLevel.Fatal);
   });
 
-  it ("Test formatting", () => {
+  test ("Test formatting", () => {
     const channel = new RawArrayChannel();
     const log = new LoggerImpl({
       level: LogLevel.Debug,
@@ -48,7 +52,7 @@ describe("Test core logger", () => {
     expect(channel.errors).toEqual([undefined, new Error("X"), undefined, undefined, undefined, undefined, new Error("y"), undefined]);
   });
 
-  it("Test arguments formatting",() => {
+  test ("Test arguments formatting",() => {
     const [log, channel] = createDefaultLogger(LogLevel.Debug);
 
     log.debug("Hello!", ["A"]);
@@ -109,7 +113,6 @@ class RawArrayChannel implements RawLogChannel {
     return this._buffer.map(m => m.exception);
   }
 }
-
 
 function createDefaultLogger(level: LogLevel): [logger: LoggerImpl, channel: ArrayChannel] {
   const channel = new ArrayChannel();
