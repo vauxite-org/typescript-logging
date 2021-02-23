@@ -102,12 +102,12 @@ export class LoggerImpl implements Logger {
         }, this._runtime.argumentFormatter);
         return;
       case "LogChannel":
-        let errorResult: { name: string, stack?: string } | undefined;
-        if (realError !== undefined) {
-          errorResult = {
-            name: realError.name,
-            stack: realError.stack,
-          };
+        let errorResult: string | undefined;
+        if (realError) {
+          errorResult = `${realError.name}: ${realError.message}`;
+          if (realError.stack) {
+            errorResult += `@\n${realError.stack}`;
+          }
         }
 
         /*
