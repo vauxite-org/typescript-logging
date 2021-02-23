@@ -4,7 +4,7 @@ import {PartialExcept} from "../../util/TypeUtils";
 /**
  * Group config for a Log4TSProvider.
  */
-export type Log4TSGroupConfig = Omit<Log4TSConfig, "groups"> & {
+export type Log4TSGroupConfig = Omit<Log4TSConfig, "groups" | "channel"> & {
   readonly expression: RegExp;
 }
 
