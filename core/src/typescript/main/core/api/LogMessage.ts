@@ -10,11 +10,8 @@ export interface LogMessage {
   readonly message: string;
 
   /**
-   * The error if present. Contains the name of the error (or empty string if none), and stack of the error
+   * The error if present. Contains the name of the error, the message, finally followed by the stack of the error
    * if present.
    */
-  readonly error?: {
-    name: string,
-    stack?: string,
-  };
+  readonly error?: string;
 }
