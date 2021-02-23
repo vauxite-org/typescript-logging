@@ -1,6 +1,8 @@
 import {LogSettings} from "./api/config/LogSettings";
 import {LogProvider} from "./api/LogProvider";
 import {LogProviderImpl} from "./impl/LogProviderImpl";
+import {ConsoleChannel} from "./impl/channel/ConsoleChannel";
+import {LogChannel} from "./api/LogChannel";
 
 /* Export the API */
 export { LogChannel } from "./api/LogChannel";
@@ -25,7 +27,8 @@ export { MessageArgumentFormatterType } from "./api/type/MessageArgumentFormatte
 export { MessageFormatterType } from "./api/type/MessageFormatterType";
 
 
-/* Export a few utilities from impl, only what we deem convenient for end users */
+/* Export default channels and few utilities from impl, only what we deem convenient for end users */
+export * from "./impl/channel/DefaultChannels";
 export * from "./impl/DefaultFormatters";
 
 /**
