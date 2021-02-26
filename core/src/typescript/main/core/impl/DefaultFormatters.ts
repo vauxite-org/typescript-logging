@@ -70,12 +70,16 @@ export function formatArgument(arg: any): string {
  * Default date formatter function, used by the library, see {@link DateFormatterType}.
  * Can be used by an end user as well if needed.
  * @param millisSinceEpoch Milliseconds since epoch
- * @returns The date in format: yyyy-MM-dd
+ * @returns The date in format: yyyy-MM-dd HH:mm:ss,SSS (example: 2021-02-26 09:06:28,123)
  */
 export function formatDate(millisSinceEpoch: number): string {
   const date = new Date(millisSinceEpoch);
   const year = date.getFullYear();
-  const month = date.getMonth().toString().padStart(2, "0");
+  const month = (date.getMonth() + 1).toString().padStart(2, "0");
   const day = date.getDate().toString().padStart(2, "0");
-  return year + "-" + month + "-" + day;
+  const hours = date.getHours().toString().padStart(2, "0");
+  const minutes = date.getMinutes().toString().padStart(2, "0");
+  const seconds = date.getSeconds().toString().padStart(2, "0");
+  const millis = date.getMilliseconds().toString().padStart(3, "0");
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds},${millis}`;
 }
