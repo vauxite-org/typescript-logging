@@ -2,13 +2,10 @@ import {
   formatArgument,
   formatDate,
   formatMessage,
-  LogChannel,
   LogLevel,
-  LogMessage,
-  RawLogChannel,
-  RawLogMessage
 } from "../main/core";
 import {LoggerImpl} from "../main/core/impl/LoggerImpl";
+import {ArrayLogChannel, ArrayRawLogChannel} from "./TestClasses";
 
 describe("Test core logger", () => {
 
@@ -22,7 +19,7 @@ describe("Test core logger", () => {
   });
 
   test ("Test formatting", () => {
-    const channel = new RawArrayChannel();
+    const channel = new ArrayRawLogChannel();
     const log = new LoggerImpl({
       level: LogLevel.Debug,
       id: 1, channel,
@@ -83,39 +80,8 @@ describe("Test core logger", () => {
   }
 });
 
-class ArrayChannel implements LogChannel {
-  private readonly _buffer: LogMessage[] = [];
-  public readonly type = "LogChannel";
-
-  public write(msg: LogMessage): void {
-    this._buffer.push(msg);
-  }
-
-  public get messages() {
-    return this._buffer.map(msg => msg.message);
-  }
-}
-
-class RawArrayChannel implements RawLogChannel {
-
-  private readonly _buffer: RawLogMessage[] = [];
-  public readonly type = "RawLogChannel";
-
-  public write(msg: RawLogMessage, _: (arg: any) => string): void {
-    this._buffer.push(msg);
-  }
-
-  public get messages(): ReadonlyArray<string> {
-    return this._buffer.map(m => m.message);
-  }
-
-  public get errors(): ReadonlyArray<Error | undefined> {
-    return this._buffer.map(m => m.exception);
-  }
-}
-
-function createDefaultLogger(level: LogLevel): [logger: LoggerImpl, channel: ArrayChannel] {
-  const channel = new ArrayChannel();
+function createDefaultLogger(level: LogLevel): [logger: LoggerImpl, channel: ArrayLogChannel] {
+  const channel = new ArrayLogChannel();
   return [new LoggerImpl({
     level,
     id: 1,

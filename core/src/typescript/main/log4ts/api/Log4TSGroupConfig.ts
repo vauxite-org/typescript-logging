@@ -13,4 +13,4 @@ export type Log4TSGroupConfig = Omit<Log4TSConfig, "groups"> & {
  * All other options are optional and can be omitted, in which case they use
  * the defaults as specified for the Log4TSProvider this group belongs to.
  */
-export type Log4TSGroupConfigOptional = PartialExcept<Log4TSGroupConfig, "expression" | "channel">;
+export type Log4TSGroupConfigOptional = Omit<PartialExcept<Log4TSGroupConfig, "expression">, "channel">;
