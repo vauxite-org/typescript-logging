@@ -1,6 +1,7 @@
 import {Logger} from "../../core";
-import {Log4TSConfig, Log4TSConfigOptional} from "./Log4TSConfig";
+import {Log4TSConfigOptional} from "./Log4TSConfig";
 import {LOG4TS_PROVIDER_SERVICE} from "../impl/Log4TSProviderService";
+import {Log4TSGroupConfig} from "./Log4TSGroupConfig";
 
 /**
  * Provider for Log4TS flavor, can be used to get loggers.
@@ -9,7 +10,16 @@ import {LOG4TS_PROVIDER_SERVICE} from "../impl/Log4TSProviderService";
  */
 export interface Log4TSProvider {
   readonly name: string;
-  readonly config: Log4TSConfig;
+
+  /**
+   * The default config, this is used when a logger does not match any groups. This is always based on the default config of a provider.
+   */
+  readonly config: Log4TSGroupConfig;
+
+  /**
+   * Returns all configured groups, see config for the defaults
+   */
+  readonly groupConfigs: ReadonlyArray<Log4TSGroupConfig>;
   readonly getLogger: (name: string) => Logger;
 }
 
