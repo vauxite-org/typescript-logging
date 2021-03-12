@@ -4,7 +4,7 @@ import {LogLevel} from "../api/LogLevel";
 import {LogMessage} from "../api/LogMessage";
 import {LogChannel} from "../api/LogChannel";
 import {LogMessageType} from "../api/type/LogMessageType";
-import {LogRuntime} from "../api/LogRuntime";
+import {LogRuntime} from "../api/runtime/LogRuntime";
 import {ArgumentsType} from "../api/type/ArgumentsType";
 
 /**
@@ -56,36 +56,7 @@ export class LoggerImpl implements Logger {
     }
     const nowMillis = Date.now();
     const message = typeof logMessageType === "string" ? logMessageType : logMessageType(this._runtime.messageFormatter);
-
-    let realError: Error | undefined;
-    let args: ReadonlyArray<any> | undefined;
-
-    if (typeof exceptionOrArgs !== "undefined") {
-      let data: readonly any[] | Error;
-      if (typeof exceptionOrArgs === "function") {
-        data = exceptionOrArgs();
-      }
-      else {
-        data = exceptionOrArgs;
-      }
-
-      if (data instanceof Error) {
-        realError = data;
-
-        // The additional args may be set now.
-        if (typeof argumentsType !== "undefined") {
-          if (typeof argumentsType === "function") {
-            args = argumentsType();
-          }
-          else {
-            args = argumentsType;
-          }
-        }
-      }
-      else {
-        args = data;
-      }
-    }
+    const [realError, args] = LoggerImpl.determineErrorAndArgs(exceptionOrArgs, argumentsType);
 
     /*
      * Deal with raw message here.
@@ -137,5 +108,38 @@ export class LoggerImpl implements Logger {
       // We don't really care what failed, except that the convert function failed.
       return `>>ARG CONVERT FAILED: '${value !== undefined ? value.toString() : "undefined"}'<<`;
     }
+  }
+
+  private static determineErrorAndArgs(exceptionOrArgs?: ExceptionType | ArgumentsType, argumentsType?: ArgumentsType): [error?: Error, args?: ReadonlyArray<any>]  {
+    let realError: Error | undefined;
+    let args: ReadonlyArray<any> | undefined;
+
+    if (typeof exceptionOrArgs !== "undefined") {
+      let data: readonly any[] | Error;
+      if (typeof exceptionOrArgs === "function") {
+        data = exceptionOrArgs();
+      }
+      else {
+        data = exceptionOrArgs;
+      }
+
+      if (data instanceof Error) {
+        realError = data;
+
+        // The additional args may be set now.
+        if (typeof argumentsType !== "undefined") {
+          if (typeof argumentsType === "function") {
+            args = argumentsType();
+          }
+          else {
+            args = argumentsType;
+          }
+        }
+      }
+      else {
+        args = data;
+      }
+    }
+    return [realError, args];
   }
 }
