@@ -10,7 +10,7 @@ export { Logger } from "./api/Logger";
 export { LogLevel } from "./api/LogLevel";
 export { LogMessage } from "./api/LogMessage";
 export { LogProvider } from "./api/LogProvider";
-export { LogRuntime } from "./api/LogRuntime";
+export { LogRuntime } from "./api/runtime/LogRuntime";
 export { RawLogChannel } from "./api/RawLogChannel";
 export { RawLogMessage } from "./api/RawLogMessage";
 
