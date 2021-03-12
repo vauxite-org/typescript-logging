@@ -1,11 +1,15 @@
 import {Log4TSProvider} from "../api/Log4TSProvider";
 import {createLogProvider, Logger, LogProvider} from "../../core";
 import {Log4TSGroupConfig} from "../api/Log4TSGroupConfig";
+import {getInternalLogger} from "../../internal/InternalLogger";
+import {log4TSGroupConfigDebug} from "../../util/DebugUtil";
 
 /**
  * Implementation class for Log4TSProvider.
  */
 export class Log4TSProviderImpl implements Log4TSProvider {
+
+  private readonly _log = getInternalLogger("log4ts.impl.Log4TSProviderImpl");
 
   private readonly _name: string;
   private readonly _defaultConfig: [Log4TSGroupConfig, LogProvider];
@@ -19,6 +23,11 @@ export class Log4TSProviderImpl implements Log4TSProvider {
 
     /* Create various providers for the different groups so each will have the correct config */
     this._logProviders = new Map(groupConfigs.map(config => [config, createLogProvider(config)]));
+
+    this._log.trace(() => {
+      const groupProvLog = [...this._logProviders.keys()].map(e => log4TSGroupConfigDebug(e)).join(", ");
+      return `Creating Log4TSProviderImpl '${this._name}', defaultConfig: ${log4TSGroupConfigDebug(this._defaultConfig[0])}, groupConfigs: ${groupProvLog}`;
+    });
   }
 
   public get name(): string {

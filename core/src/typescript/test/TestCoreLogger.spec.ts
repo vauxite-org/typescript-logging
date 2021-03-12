@@ -1,9 +1,4 @@
-import {
-  formatArgument,
-  formatDate,
-  formatMessage,
-  LogLevel,
-} from "../main/core";
+import {formatArgument, formatDate, formatMessage, LogLevel,} from "../main/core";
 import {LoggerImpl} from "../main/core/impl/LoggerImpl";
 import {ArrayLogChannel, ArrayRawLogChannel} from "./TestClasses";
 

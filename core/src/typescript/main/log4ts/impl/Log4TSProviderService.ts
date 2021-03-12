@@ -5,6 +5,7 @@ import {DefaultChannels, formatArgument, formatDate, formatMessage, LogLevel} fr
 import {Log4TSGroupConfig, Log4TSGroupConfigOptional} from "../api/Log4TSGroupConfig";
 import {Log4TSConfig, Log4TSConfigOptional} from "../api/Log4TSConfig";
 import {getInternalLogger} from "../../internal/InternalLogger";
+import {log4TSConfigDebug} from "../../util/DebugUtil";
 
 /**
  * Provider for the Log4TS flavor, each provider is a unique instance that can be used to
@@ -22,7 +23,7 @@ class Log4TSProviderService {
       }
       const mainConfig: Log4TSConfig = mergeLog4TSConfigs(createDefaultLog4TSConfig(), config);
       validateLog4TSConfig(mainConfig);
-      this._log.debug(() => `Creating new Log4TSProvider with name '${name}', using main config settings '${JSON.stringify(mainConfig)}'.`);
+      this._log.debug(() => `Creating new Log4TSProvider with name '${name}', using main config settings '${log4TSConfigDebug(mainConfig)}'.`);
 
       const defaultGroupConfig: Log4TSGroupConfig = {
         channel: mainConfig.channel,

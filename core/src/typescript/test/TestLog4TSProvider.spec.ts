@@ -1,7 +1,7 @@
 import {LOG4TS_PROVIDER_SERVICE} from "../main/log4ts/impl/Log4TSProviderService";
 import {Log4TSProvider} from "../main/log4ts";
 import {ArgumentFormatterType, DateFormatterType, LogChannel, LogLevel, MessageFormatterType} from "../main/core";
-import {ArrayLogChannel, ArrayRawLogChannel} from "./TestClasses";
+import {ArrayRawLogChannel} from "./TestClasses";
 
 describe("Test Log4TSProvider", () => {
 
