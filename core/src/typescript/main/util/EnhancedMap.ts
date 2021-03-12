@@ -21,6 +21,34 @@ export class EnhancedMap<K,V> extends Map<K, V> {
   }
 
   /**
+   * If the key exists already calls given computer, if the key does not exist
+   * this method does nothing.
+   *
+   * The computer is called with current key and current value associated. The
+   * computer can return a (new) value V or undefined. When undefined is returned
+   * the key is removed from this map, when a V is returned the key is updated
+   * with the new value V.
+   * @param key Key
+   * @param computer Computer which is called only if the key has a mapping already
+   * @return Undefined if the key has no mapping, otherwise the value returned from computer
+   */
+  public computeIfPresent(key: K, computer: (currentKey: K, currentValue: V) => V | undefined): V | undefined {
+    const currentValue = this.get(key);
+    if (currentValue === undefined) {
+      return undefined;
+    }
+
+    const newValue = computer(key, currentValue);
+    if (newValue !== undefined) {
+      this.set(key, newValue);
+    }
+    else {
+      this.delete(key);
+    }
+    return newValue;
+  }
+
+  /**
    * Computes a value for given key, the computer can return a value V (in which case the map
    * will set the value for given key), if it returns undefined the mapping for key K will be
    * removed.
