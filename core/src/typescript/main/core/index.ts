@@ -1,7 +1,9 @@
+/* This one must be first to assure the internal logging is available before we export anything else */
+export {$INTERNAL_LOGGING_SETTINGS$} from "../internal/InternalLogger";
+
 import {LogSettings} from "./api/config/LogSettings";
 import {LogProvider} from "./api/LogProvider";
 import {LogProviderImpl} from "./impl/LogProviderImpl";
-import {ConsoleChannel} from "./impl/channel/ConsoleChannel";
 import {LogChannel} from "./api/LogChannel";
 
 /* Export the API */
@@ -14,7 +16,9 @@ export { LogRuntime } from "./api/runtime/LogRuntime";
 export { RawLogChannel } from "./api/RawLogChannel";
 export { RawLogMessage } from "./api/RawLogMessage";
 
-export { LogSettings } from "./api/config/LogSettings"
+export { LogSettings } from "./api/config/LogSettings";
+
+export { UpdatableRuntimeSettings } from "./api/runtime/UpdatableRuntimeSettings";
 
 export { ArgumentFormatterType } from "./api/type/ArgumentFormatterType";
 export { ArgumentsType } from "./api/type/ArgumentsType";
@@ -25,7 +29,6 @@ export { LoggerNameType } from "./api/type/LoggerNameType";
 export { LogMessageType } from "./api/type/LogMessageType";
 export { MessageArgumentFormatterType } from "./api/type/MessageArgumentFormatterType";
 export { MessageFormatterType } from "./api/type/MessageFormatterType";
-
 
 /* Export default channels and few utilities from impl, only what we deem convenient for end users */
 export * from "./impl/channel/DefaultChannels";
