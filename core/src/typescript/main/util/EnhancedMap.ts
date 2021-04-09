@@ -55,6 +55,7 @@ export class EnhancedMap<K,V> extends Map<K, V> {
    * @param key Key to compute
    * @param computer Computer which is called, note that the currentValue argument contains the existing
    *                 value or is undefined when no mapping exists for the key.
+   * @return The newly computed value
    */
   public compute(key: K, computer: (currentKey: K, currentValue: V | undefined) => V | undefined) {
     const currentValue = this.get(key);

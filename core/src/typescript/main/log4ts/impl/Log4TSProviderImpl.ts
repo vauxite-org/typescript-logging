@@ -53,4 +53,3 @@ export class Log4TSProviderImpl implements Log4TSProvider {
     return this._defaultConfig[1].getLogger(name);
   }
 }
-
