@@ -1,7 +1,7 @@
 /* This one must be first to assure the internal logging is available before we export anything else */
 export {$INTERNAL_LOGGING_SETTINGS$} from "../internal/InternalLogger";
 
-import {LogSettings} from "./api/config/LogSettings";
+import {LogConfig} from "./api/config/LogConfig";
 import {LogProvider} from "./api/LogProvider";
 import {LogProviderImpl} from "./impl/LogProviderImpl";
 import {LogChannel} from "./api/LogChannel";
@@ -16,7 +16,7 @@ export { LogRuntime } from "./api/runtime/LogRuntime";
 export { RawLogChannel } from "./api/RawLogChannel";
 export { RawLogMessage } from "./api/RawLogMessage";
 
-export { LogSettings } from "./api/config/LogSettings";
+export { LogConfig } from "./api/config/LogConfig";
 
 export { UpdatableRuntimeSettings } from "./api/runtime/UpdatableRuntimeSettings";
 
@@ -41,6 +41,6 @@ export * from "./impl/DefaultFormatters";
  *
  * @internal
  */
-export function createLogProvider(settings: LogSettings): LogProvider {
+export function createLogProvider(settings: LogConfig): LogProvider {
   return new LogProviderImpl(settings);
 }

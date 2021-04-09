@@ -1,10 +1,10 @@
-import {LogSettings} from "../../core";
+import {LogConfig} from "../../core";
 import {Log4TSGroupConfig, Log4TSGroupConfigOptional} from "./Log4TSGroupConfig";
 
 /**
  * Configuration for the log4ts flavor (used by Log4TSProvider).
  */
-export interface Log4TSConfig extends LogSettings {
+export interface Log4TSConfig extends LogConfig {
 
   /** Groups registered, a group is used to match loggers by name/expression path, at least 1 group is required */
   readonly groups: ReadonlyArray<Log4TSGroupConfig>;
@@ -15,7 +15,7 @@ export interface Log4TSConfig extends LogSettings {
  * All is optional, except groups of which 1 is required. Defaults are used when
  * not specified.
  */
-export type Log4TSConfigOptional = Partial<LogSettings> & {
+export type Log4TSConfigOptional = Partial<LogConfig> & {
   /**
    * Configure at least 1 group.
    */

@@ -6,11 +6,11 @@ import {LogChannel} from "../LogChannel";
 import {RawLogChannel} from "../RawLogChannel";
 
 /**
- * The LogSettings that must be provided to the core.
+ * The LogConfig that must be provided to the core.
  * These represent all the standard settings initially
  * in use.
  */
-export interface LogSettings {
+export interface LogConfig {
   /**
    * Default LogLevel.
    */
