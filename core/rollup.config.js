@@ -23,6 +23,7 @@ export default {
     typescript({
       typescript: require("typescript"),
       clean: true,
+      tsconfig: "tsconfig.prod.json",
     }),
     commonjs(),
     // Allow node_modules resolution, so you can use 'external' to control
