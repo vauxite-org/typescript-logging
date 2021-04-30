@@ -89,6 +89,7 @@ function mergeLog4TSGroupConfigs(lhs: Log4TSConfig, rhs: Log4TSGroupConfigOption
     expression: rhs.expression,
     level: rhs.level ? rhs.level : lhs.level,
     messageFormatter: rhs.messageFormatter ? rhs.messageFormatter : lhs.messageFormatter,
+    identifier: rhs.identifier,
   };
 }
 
