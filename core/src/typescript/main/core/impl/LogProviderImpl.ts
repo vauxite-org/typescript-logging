@@ -5,7 +5,7 @@ import {LogConfig} from "../api/config/LogConfig";
 import {EnhancedMap} from "../../util/EnhancedMap";
 import {LogRuntimeImpl} from "./LogRuntimeImpl";
 import {LoggerImpl} from "./LoggerImpl";
-import {UpdatableRuntimeSettings, UpdatableRuntimeSettingsRequired} from "../api/runtime/UpdatableRuntimeSettings";
+import {RuntimeSettings, RuntimeSettingsRequired} from "../api/runtime/RuntimeSettings";
 import {getInternalLogger} from "../../internal/InternalLogger";
 import {formatArgument, formatDate, formatMessage} from "./DefaultFormatters";
 import {DefaultChannels} from "./channel/DefaultChannels";
@@ -23,10 +23,10 @@ export class LogProviderImpl implements LogProvider {
    * @private
    */
   private readonly _settings: LogConfig;
-  private readonly _loggers: EnhancedMap<string, { logger: Logger, updatableRuntimeSettings: UpdatableRuntimeSettingsRequired }>;
+  private readonly _loggers: EnhancedMap<string, { logger: Logger, runtimeSettings: RuntimeSettingsRequired }>;
   private readonly _idToKeyMap: EnhancedMap<number, string>;
 
-  private _globalUpdatableRuntimeSettings: UpdatableRuntimeSettingsRequired | undefined;
+  private _globalRuntimeSettings: RuntimeSettingsRequired | undefined;
   private _nextLoggerId: number;
 
   public constructor(settings: LogConfig) {
@@ -37,14 +37,14 @@ export class LogProviderImpl implements LogProvider {
 
     this._log.trace(() => `Created LogProviderImpl with settings: ${JSON.stringify(this._settings)}`);
 
-    this.getCurrentUpdatableRuntimeSettings = this.getCurrentUpdatableRuntimeSettings.bind(this);
+    this.getCurrentRuntimeSettings = this.getCurrentRuntimeSettings.bind(this);
   }
 
   public getLogger(name: LoggerNameType): Logger {
     return this.getOrCreateLogger(name);
   }
 
-  public updateLoggerRuntime(log: Logger, settings: UpdatableRuntimeSettings): void {
+  public updateLoggerRuntime(log: Logger, settings: RuntimeSettings): void {
     this._log.debug(() => `Updating logger ${log.id} runtime settings using: '${JSON.stringify(settings)}'`);
 
     const key = this._idToKeyMap.get(log.id);
@@ -54,25 +54,25 @@ export class LogProviderImpl implements LogProvider {
     }
 
     this._loggers.computeIfPresent(key, (currentKey, currentValue) => {
-      currentValue.updatableRuntimeSettings = {
-        level: settings.level ? settings.level : currentValue.updatableRuntimeSettings.level,
-        channel: settings.channel ? settings.channel : currentValue.updatableRuntimeSettings.channel,
+      currentValue.runtimeSettings = {
+        level: settings.level ? settings.level : currentValue.runtimeSettings.level,
+        channel: settings.channel ? settings.channel : currentValue.runtimeSettings.channel,
       };
       return currentValue;
     });
   }
 
-  public updateRuntimeSettings(settings: UpdatableRuntimeSettings): void {
+  public updateRuntimeSettings(settings: RuntimeSettings): void {
     this._log.debug(() => `Updating global runtime settings and updating existing loggers runtime settings using: '${JSON.stringify(settings)}'`);
 
-    this._globalUpdatableRuntimeSettings = {
+    this._globalRuntimeSettings = {
       level: settings.level ? settings.level : this._settings.level,
       channel: settings.channel ? settings.channel : this._settings.channel,
     };
     [...this._loggers.values()].forEach(logData => {
-      logData.updatableRuntimeSettings = {
-        level: settings.level ? settings.level : logData.updatableRuntimeSettings.level,
-        channel: settings.channel ? settings.channel : logData.updatableRuntimeSettings.channel,
+      logData.runtimeSettings = {
+        level: settings.level ? settings.level : logData.runtimeSettings.level,
+        channel: settings.channel ? settings.channel : logData.runtimeSettings.channel,
       };
     });
   }
@@ -83,7 +83,7 @@ export class LogProviderImpl implements LogProvider {
   public clear() {
     this._loggers.clear();
     this._idToKeyMap.clear();
-    this._globalUpdatableRuntimeSettings = undefined;
+    this._globalRuntimeSettings = undefined;
     this._nextLoggerId = 1;
   }
 
@@ -92,7 +92,7 @@ export class LogProviderImpl implements LogProvider {
 
     const result = this._loggers.computeIfAbsent(key, () => ({
       logger: this.createNewLogger(name),
-      updatableRuntimeSettings: this._globalUpdatableRuntimeSettings ? this._globalUpdatableRuntimeSettings : { level: this._settings.level, channel: this._settings.channel },
+      runtimeSettings: this._globalRuntimeSettings ? this._globalRuntimeSettings : { level: this._settings.level, channel: this._settings.channel },
     }));
     this._idToKeyMap.computeIfAbsent(result.logger.id, () => key);
     return result.logger;
@@ -105,12 +105,12 @@ export class LogProviderImpl implements LogProvider {
       this._settings.argumentFormatter,
       this._settings.dateFormatter,
       this._settings.messageFormatter,
-      this.getCurrentUpdatableRuntimeSettings,
+      this.getCurrentRuntimeSettings,
     );
     return new LoggerImpl(runtime);
   }
 
-  private getCurrentUpdatableRuntimeSettings(logId: number): UpdatableRuntimeSettingsRequired {
+  private getCurrentRuntimeSettings(logId: number): RuntimeSettingsRequired {
     const key = this._idToKeyMap.get(logId);
     if (key === undefined) {
       return { level: this._settings.level, channel: this._settings.channel };
@@ -119,7 +119,7 @@ export class LogProviderImpl implements LogProvider {
     if (value === undefined) {
       return { level: this._settings.level, channel: this._settings.channel };
     }
-    return value.updatableRuntimeSettings;
+    return value.runtimeSettings;
   }
 
   // TODO: Loggers need an id to be distinguishable!

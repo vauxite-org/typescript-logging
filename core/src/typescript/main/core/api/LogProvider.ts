@@ -1,6 +1,6 @@
 import {LoggerNameType} from "./type/LoggerNameType";
 import {Logger} from "./Logger";
-import {UpdatableRuntimeSettings} from "./runtime/UpdatableRuntimeSettings";
+import {RuntimeSettings} from "./runtime/RuntimeSettings";
 
 /**
  * The LogProvider provides the bare minimum that various implementations can use.
@@ -15,11 +15,11 @@ export interface LogProvider {
   /**
    * Updates the given Logger's runtime settings, only applies settings given, leaves the rest as-is.
    */
-  readonly updateLoggerRuntime: (log: Logger, settings: UpdatableRuntimeSettings) => void;
+  readonly updateLoggerRuntime: (log: Logger, settings: RuntimeSettings) => void;
 
   /**
    * Updates the runtime settings for *all* loggers already created as well
    * as for future created loggers.
    */
-  readonly updateRuntimeSettings: (settings: UpdatableRuntimeSettings) => void;
+  readonly updateRuntimeSettings: (settings: RuntimeSettings) => void;
 }

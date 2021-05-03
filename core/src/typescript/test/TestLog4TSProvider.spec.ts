@@ -287,6 +287,4 @@ describe("Test Log4TSProvider", () => {
       }],
     })).toThrowError(new Error("Log4TSProvider with name 'test' already exists, cannot create another."));
   });
-
-
 });

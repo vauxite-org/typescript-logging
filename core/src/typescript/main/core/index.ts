@@ -18,7 +18,7 @@ export { RawLogMessage } from "./api/RawLogMessage";
 
 export { LogConfig } from "./api/config/LogConfig";
 
-export { UpdatableRuntimeSettings } from "./api/runtime/UpdatableRuntimeSettings";
+export { RuntimeSettings } from "./api/runtime/RuntimeSettings";
 
 export { ArgumentFormatterType } from "./api/type/ArgumentFormatterType";
 export { ArgumentsType } from "./api/type/ArgumentsType";

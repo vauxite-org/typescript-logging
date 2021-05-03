@@ -6,7 +6,7 @@ import {RawLogChannel} from "../api/RawLogChannel";
 import {ArgumentFormatterType} from "../api/type/ArgumentFormatterType";
 import {DateFormatterType} from "../api/type/DateFormatterType";
 import {MessageFormatterType} from "../api/type/MessageFormatterType";
-import {UpdatableRuntimeSettingsRequired} from "../api/runtime/UpdatableRuntimeSettings";
+import {RuntimeSettingsRequired} from "../api/runtime/RuntimeSettings";
 
 /**
  * Implementation for {@link LogRuntime}
@@ -20,16 +20,16 @@ export class LogRuntimeImpl implements LogRuntime {
   private readonly _dateFormatter: DateFormatterType;
   private readonly _messageFormatter: MessageFormatterType;
 
-  private readonly _fnGetCurrentUpdatableRuntimeSettings: (logId: number) => UpdatableRuntimeSettingsRequired;
+  private readonly _fnGetCurrentRuntimeSettings: (logId: number) => RuntimeSettingsRequired;
 
   public constructor(id: number, name: LoggerNameType, argumentFormatter: ArgumentFormatterType, dateFormatter: DateFormatterType,
-                     messageFormatter: MessageFormatterType, fnGetCurrentUpdatableRuntimeSettings: (logId: number) => UpdatableRuntimeSettingsRequired) {
+                     messageFormatter: MessageFormatterType, fnGetCurrentRuntimeSettings: (logId: number) => RuntimeSettingsRequired) {
     this._id = id;
     this._name = name;
     this._argumentFormatter = argumentFormatter;
     this._dateFormatter = dateFormatter;
     this._messageFormatter = messageFormatter;
-    this._fnGetCurrentUpdatableRuntimeSettings = fnGetCurrentUpdatableRuntimeSettings;
+    this._fnGetCurrentRuntimeSettings = fnGetCurrentRuntimeSettings;
   }
 
   public get id(): number {
@@ -41,11 +41,11 @@ export class LogRuntimeImpl implements LogRuntime {
   }
 
   public get level(): LogLevel {
-    return this._fnGetCurrentUpdatableRuntimeSettings(this._id).level;
+    return this._fnGetCurrentRuntimeSettings(this._id).level;
   }
 
   public get channel(): LogChannel | RawLogChannel {
-    return this._fnGetCurrentUpdatableRuntimeSettings(this._id).channel;
+    return this._fnGetCurrentRuntimeSettings(this._id).channel;
   }
 
   public get argumentFormatter(): ArgumentFormatterType {

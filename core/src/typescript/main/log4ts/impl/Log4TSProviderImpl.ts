@@ -1,5 +1,5 @@
 import {Log4TSProvider} from "../api/Log4TSProvider";
-import {createLogProvider, Logger, LogProvider, UpdatableRuntimeSettings} from "../../core";
+import {createLogProvider, Logger, LogProvider, RuntimeSettings} from "../../core";
 import {Log4TSGroupConfig} from "../api/Log4TSGroupConfig";
 import {getInternalLogger} from "../../internal/InternalLogger";
 import {log4TSGroupConfigDebug} from "../../util/DebugUtil";
@@ -56,7 +56,7 @@ export class Log4TSProviderImpl implements Log4TSProvider {
     return this._defaultConfig[1].getLogger(name);
   }
 
-  public updateRuntimeSettingsGroups(fnUpdateConfig: (identifier: string, config: Log4TSGroupConfig) => UpdatableRuntimeSettings | undefined): void {
+  public updateRuntimeSettingsGroups(fnUpdateConfig: (identifier: string, config: Log4TSGroupConfig) => RuntimeSettings | undefined): void {
     this._logProviders.forEach((logProvider, cfg) => {
       const idForUser = cfg.identifier ? cfg.identifier : cfg.expression.toString();
       const runtimeSettings = fnUpdateConfig(idForUser, cfg);
@@ -68,7 +68,7 @@ export class Log4TSProviderImpl implements Log4TSProvider {
     });
   }
 
-  public updateRuntimeSettings(settings: UpdatableRuntimeSettings) {
+  public updateRuntimeSettings(settings: RuntimeSettings) {
     this._log.debug(() => `Will update settings for all groups and existing loggers - will apply runtime change: ${JSON.stringify(settings)}.`);
 
     this._logProviders.forEach((logProvider, cfg) => {
@@ -77,7 +77,7 @@ export class Log4TSProviderImpl implements Log4TSProvider {
     });
   }
 
-  private static updateLog4TGroupConfig(cfg: Mutable<Log4TSGroupConfig>, provider: LogProvider, runtimeSettings: UpdatableRuntimeSettings) {
+  private static updateLog4TGroupConfig(cfg: Mutable<Log4TSGroupConfig>, provider: LogProvider, runtimeSettings: RuntimeSettings) {
     if (runtimeSettings.level) {
       cfg.level = runtimeSettings.level;
     }

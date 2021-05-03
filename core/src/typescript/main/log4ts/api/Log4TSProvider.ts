@@ -1,4 +1,4 @@
-import {Logger, UpdatableRuntimeSettings} from "../../core";
+import {Logger, RuntimeSettings} from "../../core";
 import {Log4TSConfigOptional} from "./Log4TSConfig";
 import {LOG4TS_PROVIDER_SERVICE} from "../impl/Log4TSProviderService";
 import {Log4TSGroupConfig} from "./Log4TSGroupConfig";
@@ -37,7 +37,7 @@ export interface Log4TSProvider {
   /**
    * Can be used to update the runtime settings for one or more registered Log4TSGroupConfigs.
    * When called, the provider will callback with each registered Log4TSGroupConfig and expects you
-   * to either return an UpdatableRuntimeSettings or undefined. Where the UpdatableRuntimeSettings will
+   * to either return an RuntimeSettings or undefined. Where the RuntimeSettings will
    * be applied to the group and it's respective (future) loggers. When undefined is returned no
    * changes will occur for that group.
    *
@@ -62,7 +62,7 @@ export interface Log4TSProvider {
    * </pre>
    * Note that you also have access to the current config as second parameter of the config if needed.
    */
-  readonly updateRuntimeSettingsGroups: (fnUpdateConfig: (identifier: string, config: Log4TSGroupConfig) => Omit<UpdatableRuntimeSettings, "channel"> | undefined) => void;
+  readonly updateRuntimeSettingsGroups: (fnUpdateConfig: (identifier: string, config: Log4TSGroupConfig) => Omit<RuntimeSettings, "channel"> | undefined) => void;
 
   /**
    * Applies given runtime settings to all registered groups of this provider as well as any already existing loggers, this function also allows changing the log channel.
@@ -74,7 +74,7 @@ export interface Log4TSProvider {
    *   });
    * </pre>
    */
-  readonly updateRuntimeSettings: (settings: UpdatableRuntimeSettings) => void;
+  readonly updateRuntimeSettings: (settings: RuntimeSettings) => void;
 }
 
 // tslint:disable-next-line:no-namespace
