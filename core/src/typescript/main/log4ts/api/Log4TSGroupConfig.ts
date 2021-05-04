@@ -6,6 +6,14 @@ import {PartialExcept} from "../../util/TypeUtils";
  */
 export type Log4TSGroupConfig = Omit<Log4TSConfig, "groups"> & {
   readonly expression: RegExp;
+
+  /**
+   * Identifier, this is used to make your life easier when you need to dynamically
+   * control the log levels of this group and easily wish to recognize it.
+   *
+   * It is used in Log4TSProvider.updateRuntimeSettings(..) for example as the identifier there.
+   */
+  readonly identifier?: string;
 }
 
 /**

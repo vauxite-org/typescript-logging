@@ -6,11 +6,11 @@ import {LogChannel} from "../LogChannel";
 import {RawLogChannel} from "../RawLogChannel";
 
 /**
- * The LogSettings that must be provided to the core.
+ * The LogConfig that must be provided to the core.
  * These represent all the standard settings initially
  * in use.
  */
-export interface LogSettings {
+export interface LogConfig {
   /**
    * Default LogLevel.
    */
@@ -18,6 +18,8 @@ export interface LogSettings {
 
   /**
    * What kind of channel to log to (a normal or raw channel).
+   * This is the default channel. Can be overridden depending on the
+   * configuration options by the chosen logging solution.
    */
   readonly channel: LogChannel | RawLogChannel;
 

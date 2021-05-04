@@ -4,16 +4,17 @@
     "module": "ES2015",
     "moduleResolution": "Node",
     "target": "ES2015",
-    "outDir": "./dist/commonjs",
+    "outDir": "./dist/test",
     "sourceMap": true,
     "strict": true,
     "declaration": true,
     "lib": ["ES2015","DOM"],
     "esModuleInterop": true,
     "stripInternal": true,
+    "types": [], // We don't want jest types, as that enables esXXXX version, way newer than what we want (see lib), instead compile must fail.
   },
   "include": [
-    "./src/typescript/**/*"
+    "./src/typescript/main/**/*"
   ],
   "exclude": [
     "node_modules",

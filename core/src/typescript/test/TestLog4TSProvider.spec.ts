@@ -1,7 +1,7 @@
 import {LOG4TS_PROVIDER_SERVICE} from "../main/log4ts/impl/Log4TSProviderService";
 import {Log4TSProvider} from "../main/log4ts";
 import {ArgumentFormatterType, DateFormatterType, LogChannel, LogLevel, MessageFormatterType} from "../main/core";
-import {ArrayLogChannel, ArrayRawLogChannel} from "./TestClasses";
+import {ArrayRawLogChannel} from "./TestClasses";
 
 describe("Test Log4TSProvider", () => {
 
@@ -164,6 +164,108 @@ describe("Test Log4TSProvider", () => {
 
     logger = provider.getLogger("notMatching");
     expect(logger === provider.getLogger("notMatching")).toEqual(true);
+  });
+
+  test ("Test log level can be changed dynamically", () => {
+    const channel = new ArrayRawLogChannel();
+    /* Default logs to error */
+    const provider = Log4TSProvider.createLog4TSProvider("test", {
+      channel,
+      groups: [{
+        expression: new RegExp("model.+"),
+        identifier: "model",
+      },{
+        expression: new RegExp("service.+"),
+      }],
+    });
+    expect(provider.groupConfigs[0].identifier).toEqual("model");
+    const logProduct = provider.getLogger("model.Product");
+    const logAccountService = provider.getLogger("service.AccountService");
+    logProduct.warn("warn");
+    logAccountService.warn("warn");
+    expect(channel.size).toEqual(0);
+
+    /* Changes level to info for all groups */
+    provider.updateRuntimeSettingsGroups(() => ({ level: LogLevel.Info }));
+    logProduct.info("product");
+    logAccountService.info("accountService");
+    expect(channel.messages).toEqual(["product", "accountService"]);
+    channel.clear();
+
+    const logCustomer = provider.getLogger("model.Customer");
+    const logCustomerService = provider.getLogger("service.CustomerService");
+    logCustomer.info("customer");
+    logCustomerService.info("customerService");
+    expect(channel.messages).toEqual(["customer", "customerService"]);
+    channel.clear();
+
+    /* Change only 1 group */
+    provider.updateRuntimeSettingsGroups(id => {
+      if (id === "model") {
+        return { level: LogLevel.Error };
+      }
+      return undefined;
+    });
+    logProduct.warn("product");
+    logCustomer.warn("customer");
+    logAccountService.info("accountService");
+    logCustomerService.info("customerService");
+    expect(channel.messages).toEqual(["accountService", "customerService"]);
+    channel.clear();
+
+    const logApple = provider.getLogger("model.amazing.Apple");
+    const logFruitService = provider.getLogger("service.amazing.FruitService");
+    logApple.warn("apple");
+    logApple.error("appleError");
+    logFruitService.debug("fruitDebug");
+    logFruitService.info("fruitInfo");
+    expect(channel.messages).toEqual(["appleError", "fruitInfo"]);
+  });
+
+  test ("Test channel can be changed dynamically", () => {
+    const channel1 = new ArrayRawLogChannel();
+    const channel2 = new ArrayRawLogChannel();
+    /* Default logs to error */
+    const provider = Log4TSProvider.createLog4TSProvider("test", {
+      level: LogLevel.Info,
+      channel: channel1,
+      groups: [{
+        expression: new RegExp("model.+"),
+      },{
+        expression: new RegExp("service.+"),
+        identifier: "service"
+      }],
+    });
+    expect(provider.groupConfigs[0].identifier).toBeUndefined();
+    expect(provider.groupConfigs[1].identifier).toEqual("service");
+    const logProduct = provider.getLogger("model.Product");
+    const logService = provider.getLogger("service.ProductService");
+    logProduct.info("product");
+    logService.info("productService");
+    expect(channel1.messages).toEqual(["product", "productService"]);
+    expect(channel2.messages).toEqual([]);
+    channel1.clear();
+    channel2.clear();
+
+    /* Change channel for all */
+    provider.updateRuntimeSettings({ channel: channel2 });
+    logProduct.info("product");
+    logService.info("productService");
+    expect(channel2.messages).toEqual(["product", "productService"]);
+    expect(channel1.messages).toEqual([]);
+    channel1.clear();
+    channel2.clear();
+
+    const logFruit = provider.getLogger("model.Fruit");
+    const logFruitService  = provider.getLogger("service.FruitService");
+    logFruit.info("fruit");
+    logFruitService.info("fruitService")
+    logProduct.info("product");
+    logService.info("productService");
+    expect(channel2.messages).toEqual(["fruit", "fruitService", "product", "productService"]);
+    expect(channel1.messages).toEqual([]);
+    channel1.clear();
+    channel2.clear();
   });
 
   /* Tests that must fail follow */

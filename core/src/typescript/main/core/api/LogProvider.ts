@@ -1,12 +1,6 @@
 import {LoggerNameType} from "./type/LoggerNameType";
 import {Logger} from "./Logger";
-import {LogRuntime} from "./LogRuntime";
-
-/**
- * Represents the updatable part of the settings. Can be used to update
- * the runtime settings for a logger or all loggers.
- */
-export type UpdatableLogSettings = Partial<Pick<LogRuntime, "level" | "channel">>;
+import {RuntimeSettings} from "./runtime/RuntimeSettings";
 
 /**
  * The LogProvider provides the bare minimum that various implementations can use.
@@ -21,11 +15,11 @@ export interface LogProvider {
   /**
    * Updates the given Logger's runtime settings, only applies settings given, leaves the rest as-is.
    */
-  readonly updateLoggerRuntime: (log: Logger, settings: UpdatableLogSettings) => void;
+  readonly updateLoggerRuntime: (log: Logger, settings: RuntimeSettings) => void;
 
   /**
    * Updates the runtime settings for *all* loggers already created as well
    * as for future created loggers.
    */
-  readonly updateRuntimeSettings: (settings: UpdatableLogSettings) => void;
+  readonly updateRuntimeSettings: (settings: RuntimeSettings) => void;
 }
