@@ -186,7 +186,7 @@ describe("Test Log4TSProvider", () => {
     expect(channel.size).toEqual(0);
 
     /* Changes level to info for all groups */
-    provider.updateRuntimeSettingsGroups(() => ({ level: LogLevel.Info }));
+    provider.updateRuntimeSettings({ level: LogLevel.Info });
     logProduct.info("product");
     logAccountService.info("accountService");
     expect(channel.messages).toEqual(["product", "accountService"]);
@@ -200,12 +200,7 @@ describe("Test Log4TSProvider", () => {
     channel.clear();
 
     /* Change only 1 group */
-    provider.updateRuntimeSettingsGroups(id => {
-      if (id === "model") {
-        return { level: LogLevel.Error };
-      }
-      return undefined;
-    });
+    provider.updateRuntimeSettingsGroup("model", { level: LogLevel.Error });
     logProduct.warn("product");
     logCustomer.warn("customer");
     logAccountService.info("accountService");
@@ -236,7 +231,7 @@ describe("Test Log4TSProvider", () => {
         identifier: "service"
       }],
     });
-    expect(provider.groupConfigs[0].identifier).toBeUndefined();
+    expect(provider.groupConfigs[0].identifier).toEqual("/model.+/"); // This is guaranteed to be set if no id was given originally.
     expect(provider.groupConfigs[1].identifier).toEqual("service");
     const logProduct = provider.getLogger("model.Product");
     const logService = provider.getLogger("service.ProductService");
@@ -259,7 +254,7 @@ describe("Test Log4TSProvider", () => {
     const logFruit = provider.getLogger("model.Fruit");
     const logFruitService  = provider.getLogger("service.FruitService");
     logFruit.info("fruit");
-    logFruitService.info("fruitService")
+    logFruitService.info("fruitService");
     logProduct.info("product");
     logService.info("productService");
     expect(channel2.messages).toEqual(["fruit", "fruitService", "product", "productService"]);
