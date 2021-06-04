@@ -3,6 +3,11 @@
  */
 export interface Log4TSControlProvider {
   /**
+   * The name of the Log4TSProvider that is being controlled by this instance.
+   */
+  readonly name: string;
+
+  /**
    * Shows current settings.
    */
   readonly showSettings: () => void;
