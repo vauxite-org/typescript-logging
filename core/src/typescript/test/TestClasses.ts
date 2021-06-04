@@ -49,3 +49,25 @@ export class ArrayRawLogChannel implements RawLogChannel {
   }
 }
 
+/**
+ * Test class to help test the log control.
+ */
+export class TestControlMessage {
+  private _messages: string[] = [];
+
+  public constructor() {
+    this.write = this.write.bind(this);
+  }
+
+  public get messages(): string[] {
+    return this._messages;
+  }
+
+  public write(msg: string) {
+    this._messages.push(msg);
+  }
+
+  public clear(): void {
+    this._messages = [];
+  }
+}
