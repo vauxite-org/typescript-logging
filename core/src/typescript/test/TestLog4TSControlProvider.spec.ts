@@ -190,13 +190,13 @@ describe("Test Log4TSControlProvider", () => {
     let controlProvider = control.getProvider("test");
     let logModel = provider.getLogger("model.Sample");
     const expectedLevels = [{identifier: "model", level: LogLevel.Error}, {identifier: "service", level: LogLevel.Error}];
-    expect(provider.groupConfigs.map(v => ({ identifier: v.identifier as string,  level: v.level }))).toStrictEqual(expectedLevels);
+    expect(provider.groupConfigs.map(v => ({ identifier: v.identifier,  level: v.level }))).toStrictEqual(expectedLevels);
     controlProvider.update("info", "model");
 
     expectedLevels[0].level = LogLevel.Info;
     expect(logModel.logLevel).toEqual(LogLevel.Info);
     expect(message.messages).toEqual(["Updated group config with id 'model' successfully."]);
-    expect(provider.groupConfigs.map(v => ({ identifier: v.identifier as string,  level: v.level }))).toStrictEqual(expectedLevels);
+    expect(provider.groupConfigs.map(v => ({ identifier: v.identifier,  level: v.level }))).toStrictEqual(expectedLevels);
     message.clear();
 
     controlProvider.save();
@@ -220,7 +220,7 @@ describe("Test Log4TSControlProvider", () => {
     logModel = provider.getLogger("model.Sample");
     expect(logModel.logLevel).toEqual(LogLevel.Error);
     expectedLevels[0].level = LogLevel.Error;
-    expect(provider.groupConfigs.map(v => ({ identifier: v.identifier as string,  level: v.level }))).toStrictEqual(expectedLevels);
+    expect(provider.groupConfigs.map(v => ({ identifier: v.identifier,  level: v.level }))).toStrictEqual(expectedLevels);
     controlProvider.restore();
 
     expect(message.messages).toEqual(

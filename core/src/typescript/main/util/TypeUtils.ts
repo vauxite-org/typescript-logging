@@ -3,6 +3,9 @@
  */
 export type PartialExcept<T, K extends keyof T> = Partial<T> & Pick<T, K>;
 
+/**
+ * Make all properties of T mutable.
+ */
 export type Mutable<T> = {
   -readonly [P in keyof T]: T[P];
 };

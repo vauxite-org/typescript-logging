@@ -20,14 +20,13 @@ export class Log4TSProviderImpl implements Log4TSProvider {
     this._name = name;
 
     /* The default config, used as fallback if a logger does not match any group */
-    this._defaultConfig = [{...defaultConfig, identifier: Log4TSProviderImpl.updateIdentifier(defaultConfig)}, createLogProvider(defaultConfig)];
+    this._defaultConfig = [{...defaultConfig, identifier: defaultConfig.identifier}, createLogProvider(defaultConfig)];
 
     /* Create various providers for the different groups so each will have the correct config */
     this._logProviders = new Map(groupConfigs.map(config => {
-      const newId = Log4TSProviderImpl.updateIdentifier(config);
-      const updatedConfig: Mutable<Log4TSGroupConfig> = {...config, identifier: newId, };
+      const updatedConfig: Mutable<Log4TSGroupConfig> = {...config };
       const provider = createLogProvider(config);
-      return [newId, { groupConfig: updatedConfig, provider  }];
+      return [config.identifier, { groupConfig: updatedConfig, provider }];
     }));
 
     this._log.trace(() => {
@@ -89,9 +88,5 @@ export class Log4TSProviderImpl implements Log4TSProvider {
       cfg.channel = runtimeSettings.channel;
     }
     provider.updateRuntimeSettings(runtimeSettings);
-  }
-
-  private static updateIdentifier(cfg: Log4TSGroupConfig) {
-    return cfg.identifier ? cfg.identifier : cfg.expression.toString();
   }
 }
