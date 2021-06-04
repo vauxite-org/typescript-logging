@@ -35,7 +35,7 @@ export class Log4TSControlProviderImpl implements Log4TSControlProvider {
     const groupConfigs = this._provider.groupConfigs.map(cfg => ({
       level: LogLevel[cfg.level],
       channelDescription: cfg.channel.toString ? cfg.channel.toString() : JSON.stringify(cfg.channel),
-      identifier: cfg.identifier as string, // This is updated and set during initialization of a provider, guaranteed.
+      identifier: cfg.identifier,
     }));
     const maxWidthIndex = groupConfigs.length.toString().length;
     const maxWidthIdentifier = maxLengthStringValueInArray(groupConfigs.map(cfg => cfg.identifier));
@@ -85,7 +85,7 @@ export class Log4TSControlProviderImpl implements Log4TSControlProvider {
         throw new Error(`Group config with index '${groupId}' does not exist (outside of range).`);
       }
       const expectedGroup = groups[groupId];
-      this._provider.updateRuntimeSettingsGroup(expectedGroup.identifier as string, settings); // Identifier is guaranteed to be set
+      this._provider.updateRuntimeSettingsGroup(expectedGroup.identifier, settings);
       this._messageChannel(`Updated group config with index '${groupId}' successfully.`);
       return;
     }
@@ -110,8 +110,7 @@ export class Log4TSControlProviderImpl implements Log4TSControlProvider {
 
     const data: SaveData = {
       name: this._provider.name,
-      // The identifier is updated and set during initialization of a provider, guaranteed.)
-      groups: this._provider.groupConfigs.map(cfg => ({identifier: cfg.identifier as string, level: LogLevel[cfg.level]})),
+      groups: this._provider.groupConfigs.map(cfg => ({identifier: cfg.identifier, level: LogLevel[cfg.level]})),
     };
 
     localStorage.setItem(this.createKey(), JSON.stringify(data));
@@ -195,7 +194,7 @@ export class Log4TSControlProviderImpl implements Log4TSControlProvider {
   }
 
   private static loadCurrentGroupLogLevels(provider: Log4TSProvider):  Map<string, LogLevel> {
-    return new Map<string, LogLevel>(provider.groupConfigs.map(cfg => [cfg.identifier as string, cfg.level]));
+    return new Map<string, LogLevel>(provider.groupConfigs.map(cfg => [cfg.identifier, cfg.level]));
   }
 }
 

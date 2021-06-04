@@ -12,8 +12,10 @@ export type Log4TSGroupConfig = Omit<Log4TSConfig, "groups"> & {
    * control the log levels of this group and easily wish to recognize it.
    *
    * It is used in Log4TSProvider.updateRuntimeSettings(..) for example as the identifier there.
+   *
+   * If not set externally, it will be set to the expression's representation as string instead.
    */
-  readonly identifier?: string;
+  readonly identifier: string;
 };
 
 /**

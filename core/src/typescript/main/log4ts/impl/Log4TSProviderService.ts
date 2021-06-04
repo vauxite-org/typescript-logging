@@ -29,13 +29,15 @@ class Log4TSProviderService {
       validateLog4TSConfig(mainConfig);
       this._log.debug(() => `Creating new Log4TSProvider with name '${name}', using main config settings '${log4TSConfigDebug(mainConfig)}'.`);
 
+      const defaultExpression = new RegExp(".+");
       const defaultGroupConfig: Log4TSGroupConfig = {
         channel: mainConfig.channel,
         level: mainConfig.level,
-        expression: new RegExp(".+"), // Not really used but set it to match * as that what it entails anyway as fallback
+        expression: defaultExpression, // Not really used but set it to match * as that what it entails anyway as fallback
         messageFormatter: mainConfig.messageFormatter,
         dateFormatter: mainConfig.dateFormatter,
         argumentFormatter: mainConfig.argumentFormatter,
+        identifier: defaultExpression.toString(),
       };
       return new Log4TSProviderImpl(key, defaultGroupConfig, mainConfig.groups);
     });
@@ -64,7 +66,7 @@ class Log4TSProviderService {
     };
 
     return {
-      help: () => this.help(fnMessageChannel),
+      help: () => Log4TSProviderService.help(fnMessageChannel),
       showSettings: () => fnMessageChannel(this.showSettings()),
       getProvider: (id: number | string): Log4TSControlProvider => this.getLog4TSControlProviderByIdOrName(id, fnMessageChannel),
     };
@@ -101,7 +103,7 @@ class Log4TSProviderService {
     return new Log4TSControlProviderImpl(providers[id], messageChannel);
   }
 
-  private help(messageChannel: (msg: string) => void) {
+  private static help(messageChannel: (msg: string) => void) {
     const msg =
       `You can use the following commands:\n` +
       "  showSettings()                                            => Shows the current configuration settings.\n" +
@@ -154,7 +156,7 @@ function mergeLog4TSGroupConfigs(lhs: Log4TSConfig, rhs: Log4TSGroupConfigOption
     expression: rhs.expression,
     level: rhs.level ? rhs.level : lhs.level,
     messageFormatter: rhs.messageFormatter ? rhs.messageFormatter : lhs.messageFormatter,
-    identifier: rhs.identifier,
+    identifier: rhs.identifier ? rhs.identifier : rhs.expression.toString(),
   };
 }
 
