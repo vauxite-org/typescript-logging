@@ -14,7 +14,7 @@ export type Log4TSGroupConfig = Omit<Log4TSConfig, "groups"> & {
    * It is used in Log4TSProvider.updateRuntimeSettings(..) for example as the identifier there.
    */
   readonly identifier?: string;
-}
+};
 
 /**
  * Used to configure a group. The expression matching a name and/or path must be specified.
