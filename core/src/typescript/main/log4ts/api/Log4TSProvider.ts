@@ -23,8 +23,11 @@ export interface Log4TSProvider {
 
   /**
    * Returns all configured groups, see the 'config' property for the defaults.
-   * This property returns the *current* config at requested time, so if for example the log level was changed at some point in time,
-   * and then this property was read it will reflect the current runtime config for this provider at that time.
+   * This property returns the *current* config at the requested time.
+   *
+   * This means it reflects the settings from when requested. When the config is changed again
+   * the previously fetched groupConfigs do not reflect the change, instead this property must be
+   * read anew.
    */
   readonly groupConfigs: ReadonlyArray<Log4TSGroupConfig>;
 
@@ -35,34 +38,21 @@ export interface Log4TSProvider {
   readonly getLogger: (name: string) => Logger;
 
   /**
-   * Can be used to update the runtime settings for one or more registered Log4TSGroupConfigs.
-   * When called, the provider will callback with each registered Log4TSGroupConfig and expects you
-   * to either return an RuntimeSettings or undefined. Where the RuntimeSettings will
-   * be applied to the group and it's respective (future) loggers. When undefined is returned no
-   * changes will occur for that group.
+   * Can be used to update the runtime settings for one group.
    *
-   * Note the identifier in the callback is set to either the Log4TSGroupConfig.identifier when set, otherwise
-   * it falls back to the expression.toString() instead.
+   * The identifier must be the Log4TSGroupConfig identifier if set, otherwise
+   * it falls back to the expression.toString() instead (for convenience
+   * it is recommended to set the identifier of a group).
    *
-   * Example to change the loglevel for all groups:
+   * If the identifier is invalid and does not exist, will throw an Error.
    *
-   * <pre>
-   *   provider.updateRuntimeSettings(() => ({ level: LogLevel.Debug }));
-   * </pre>
+   * Example to change the loglevel for a group:
    *
-   * Example to change a single group's loglevel (we assume we set the identifier to ''MyGroup' on Log4TSGroupConfig here to make it easier):
+   *   provider.updateRuntimeSettings("MyId", { level: LogLevel.Debug });
    *
-   * <pre>
-   *   provider.updateRuntimeSettingsGroups(id => {
-   *     if (id === "MyGroup") {
-   *       return { level: LogLevel.Debug };
-   *     }
-   *     return undefined;
-   *   });
-   * </pre>
-   * Note that you also have access to the current config as second parameter of the config if needed.
+   * To update all groups at once use 'updateRuntimeSettings' instead.
    */
-  readonly updateRuntimeSettingsGroups: (fnUpdateConfig: (identifier: string, config: Log4TSGroupConfig) => Omit<RuntimeSettings, "channel"> | undefined) => void;
+  readonly updateRuntimeSettingsGroup: (identifier: string, config: Omit<RuntimeSettings, "channel">) => void;
 
   /**
    * Applies given runtime settings to all registered groups of this provider as well as any already existing loggers, this function also allows changing the log channel.
