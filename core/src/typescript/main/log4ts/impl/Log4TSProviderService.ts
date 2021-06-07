@@ -66,7 +66,7 @@ class Log4TSProviderService {
     };
 
     return {
-      help: () => Log4TSProviderService.help(fnMessageChannel),
+      help: () => fnMessageChannel(Log4TSProviderService.help()),
       showSettings: () => fnMessageChannel(this.showSettings()),
       getProvider: (id: number | string): Log4TSControlProvider => this.getLog4TSControlProviderByIdOrName(id, fnMessageChannel),
     };
@@ -103,14 +103,14 @@ class Log4TSProviderService {
     return new Log4TSControlProviderImpl(providers[id], messageChannel);
   }
 
-  private static help(messageChannel: (msg: string) => void) {
+  private static help(): string {
     const msg =
       `You can use the following commands:\n` +
       "  showSettings()                                            => Shows the current configuration settings.\n" +
       "  getProvider: (id: number | string): Log4TSControlProvider => Get access to a Log4TSControlProvider to change log levels.\n" +
-      "    id: The id (use showSettings to see) or identifier of the provider\n" +
+      "    id: The id (use showSettings to see) or name of the provider\n" +
       "  help()                                                    => Shows this help.\n";
-    messageChannel(msg);
+    return msg;
   }
 }
 

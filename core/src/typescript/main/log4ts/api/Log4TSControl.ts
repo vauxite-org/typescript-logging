@@ -15,7 +15,9 @@ export interface Log4TSControl {
   readonly showSettings: () => void;
 
   /**
-   * Find provider by index or by it's identifier. Throws error when not found.
+   * Find provider by index or by it's name. Throws error when not found.
+   * The index and name can both be found by using showSettings() which will print
+   * the necessary information.
    */
   readonly getProvider: (id: number | string) => Log4TSControlProvider;
 }
