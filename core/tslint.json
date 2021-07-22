@@ -1,19 +1,56 @@
 {
   "extends": "tslint:recommended",
   "rules": {
-    "indent": [true, "spaces", 2],
+    "indent": [
+      true,
+      "spaces",
+      2
+    ],
     "interface-name": false,
-    "max-classes-per-file": [true, 6],
-    "max-line-length": [true, 200],
-    "member-ordering": [true, { "order":
-      ["private-static-field","protected-static-field","public-static-field","private-instance-field","protected-instance-field","public-instance-field",
-        "constructor","public-instance-method","protected-instance-method","private-instance-method", "public-static-field", "protected-static-method", "private-static-method"
-      ]
-    }],
-    "one-line": [true, "check-open-brace", "check-whitespace"],
+    "max-classes-per-file": [
+      true,
+      6
+    ],
+    "max-line-length": [
+      true,
+      200
+    ],
+    "member-ordering": [
+      true,
+      {
+        "order": [
+          "private-static-field",
+          "protected-static-field",
+          "public-static-field",
+          "private-instance-field",
+          "protected-instance-field",
+          "public-instance-field",
+          "constructor",
+          "public-instance-method",
+          "protected-instance-method",
+          "private-instance-method",
+          "public-static-method",
+          "protected-static-method",
+          "private-static-method"
+        ]
+      }
+    ],
+    "one-line": [
+      true,
+      "check-open-brace",
+      "check-whitespace"
+    ],
     "ordered-imports": false,
-    "semicolon": [true, "always"],
+    "semicolon": [
+      true,
+      "always"
+    ],
     "trailing-comma": false,
-    "variable-name": [true, "ban-keywords", "check-format", "allow-leading-underscore"]
+    "variable-name": [
+      true,
+      "ban-keywords",
+      "check-format",
+      "allow-leading-underscore"
+    ]
   }
 }
