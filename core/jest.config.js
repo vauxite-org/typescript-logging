@@ -3,6 +3,7 @@ module.exports = {
     "src/typescript",
   ],
   "preset": "ts-jest",
+  "testEnvironment": "jsdom",
   "moduleFileExtensions": [
     "ts",
     "tsx",
