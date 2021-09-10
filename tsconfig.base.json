@@ -1,0 +1,22 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "rootDir": ".",
+    "baseUrl": ".",
+    "module": "ES2015",
+    "moduleResolution": "Node",
+    "target": "ES2015",
+    "outDir": "./dist/tsc",
+    "sourceMap": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "stripInternal": true,
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true
+  },
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}
