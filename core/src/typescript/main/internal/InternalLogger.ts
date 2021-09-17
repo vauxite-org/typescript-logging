@@ -27,6 +27,11 @@ export enum InternalLogLevel {
   Error
 }
 
+/**
+ * Internal logger, this is NOT for end users. Instead this is used to enable logging for typescript-logging itself in case of problems.
+ *
+ * @param name Name of logger
+ */
 export function getInternalLogger(name: string): InternalLogger {
   return provider.getLogger(name);
 }
@@ -37,7 +42,7 @@ export function getInternalLogger(name: string): InternalLogger {
  *
  * As such should normally not be used by end users.
  */
-export const $INTERNAL_LOGGING_SETTINGS$ = {
+export const INTERNAL_LOGGING_SETTINGS = {
   /**
    * Changes the log level for the internal logging (for all new and existing loggers)
    * @param level New log level
@@ -56,7 +61,7 @@ export const $INTERNAL_LOGGING_SETTINGS$ = {
    * for all new and existing loggers.
    */
   reset: () => provider.reset(),
- };
+};
 
 interface InternalProvider {
   getLogger(name: string): InternalLogger;
