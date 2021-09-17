@@ -79,4 +79,15 @@ export namespace Log4TSProvider {
   export function createLog4TSProvider(name: string, config: Log4TSConfigOptional): Log4TSProvider {
     return LOG4TS_PROVIDER_SERVICE.createLogProvider(name, config);
   }
+
+  /**
+   * Resets and clears *all* created Log4TSProviders, every logger that was retrieved previously
+   * will be invalid afterwards.
+   *
+   * This call essentially reverts the Log4TSProvider back to it's initial state. This should normally not be used
+   * unless absolutely necessary.
+   */
+  export function clear() {
+    LOG4TS_PROVIDER_SERVICE.clear();
+  }
 }

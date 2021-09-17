@@ -92,7 +92,7 @@ export class LogProviderImpl implements LogProvider {
 
     const result = this._loggers.computeIfAbsent(key, () => ({
       logger: this.createNewLogger(name),
-      runtimeSettings: this._globalRuntimeSettings ? this._globalRuntimeSettings : { level: this._settings.level, channel: this._settings.channel },
+      runtimeSettings: this._globalRuntimeSettings ? this._globalRuntimeSettings : {level: this._settings.level, channel: this._settings.channel},
     }));
     this._idToKeyMap.computeIfAbsent(result.logger.id, () => key);
     return result.logger;
@@ -113,11 +113,11 @@ export class LogProviderImpl implements LogProvider {
   private getCurrentRuntimeSettings(logId: number): RuntimeSettingsRequired {
     const key = this._idToKeyMap.get(logId);
     if (key === undefined) {
-      return { level: this._settings.level, channel: this._settings.channel };
+      return {level: this._settings.level, channel: this._settings.channel};
     }
     const value = this._loggers.get(key);
     if (value === undefined) {
-      return { level: this._settings.level, channel: this._settings.channel };
+      return {level: this._settings.level, channel: this._settings.channel};
     }
     return value.runtimeSettings;
   }

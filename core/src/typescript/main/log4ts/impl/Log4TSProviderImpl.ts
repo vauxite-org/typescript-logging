@@ -24,9 +24,9 @@ export class Log4TSProviderImpl implements Log4TSProvider {
 
     /* Create various providers for the different groups so each will have the correct config */
     this._logProviders = new Map(groupConfigs.map(config => {
-      const updatedConfig: Mutable<Log4TSGroupConfig> = {...config };
+      const updatedConfig: Mutable<Log4TSGroupConfig> = {...config};
       const provider = createLogProvider(config);
-      return [config.identifier, { groupConfig: updatedConfig, provider }];
+      return [config.identifier, {groupConfig: updatedConfig, provider}];
     }));
 
     this._log.trace(() => {

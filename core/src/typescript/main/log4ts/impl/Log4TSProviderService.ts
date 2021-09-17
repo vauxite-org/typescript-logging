@@ -135,7 +135,7 @@ function mergeLog4TSConfigs(lhs: Log4TSConfig, rhs: Log4TSConfigOptional): Log4T
   const value = {
     argumentFormatter: rhs.argumentFormatter ? rhs.argumentFormatter : lhs.argumentFormatter,
     channel: rhs.channel ? rhs.channel : lhs.channel,
-    dateFormatter: rhs.dateFormatter ? rhs.dateFormatter: lhs.dateFormatter,
+    dateFormatter: rhs.dateFormatter ? rhs.dateFormatter : lhs.dateFormatter,
     groups: [] as Log4TSGroupConfig[], // Just so we can assign below
     level: rhs.level ? rhs.level : lhs.level,
     messageFormatter: rhs.messageFormatter ? rhs.messageFormatter : lhs.messageFormatter,
@@ -152,7 +152,7 @@ function mergeLog4TSGroupConfigs(lhs: Log4TSConfig, rhs: Log4TSGroupConfigOption
   return {
     argumentFormatter: rhs.argumentFormatter ? rhs.argumentFormatter : lhs.argumentFormatter,
     channel: lhs.channel, // We don't allow override for this yet at least.
-    dateFormatter: rhs.dateFormatter ? rhs.dateFormatter: lhs.dateFormatter,
+    dateFormatter: rhs.dateFormatter ? rhs.dateFormatter : lhs.dateFormatter,
     expression: rhs.expression,
     level: rhs.level ? rhs.level : lhs.level,
     messageFormatter: rhs.messageFormatter ? rhs.messageFormatter : lhs.messageFormatter,
