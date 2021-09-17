@@ -1,5 +1,6 @@
 import {fileSizeToBytes, RetentionStrategy} from "../api/RetentionStrategy";
-import {NodeLogWriter} from "./NodeLogWriter";
+import {NodeLogWriter, StreamCallBack} from "./NodeLogWriter";
+import * as fs from "fs";
 
 /**
  * Base class for node channels which contains all the logic around retention and where to write to.
@@ -8,6 +9,7 @@ export abstract class AbstractNodeChannel {
 
   private readonly _retentionStrategy: RetentionStrategy;
   private readonly _maxSizeBytes: number;
+  private _streamCallBacks: StreamCallBack | undefined;
 
   private _initialized: boolean = false;
   private _writer: NodeLogWriter | undefined;
@@ -23,8 +25,37 @@ export abstract class AbstractNodeChannel {
       /* Default of 100 MB */
       this._maxSizeBytes = fileSizeToBytes({value: 100, unit: "MegaBytes"});
     }
+    this.onStreamError = this.onStreamError.bind(this);
+    this.onFinished = this.onFinished.bind(this);
+    this.onClose = this.onClose.bind(this);
   }
 
+  /**
+   * Forcefully close the underlying writer.
+   */
+  public close() {
+    if (this._writer) {
+      this._writer.close();
+      this._writer = undefined;
+    }
+  }
+
+  /**
+   * For testing purposes only, provides access to some stream events.
+   * Will be applied next time a new stream is opened (not to current stream if any is open).
+   *
+   * @param callbacks The custom callback, when undefined unsets the callback.
+   */
+  public setStreamCallBacks(callbacks: StreamCallBack | undefined) {
+    this._streamCallBacks = callbacks;
+  }
+
+  /**
+   * Subclasses must not override this function, instead override the appropriate channel one (write(..)), create the message
+   * there and then call this method to write the actual data.
+   * @param msg Message to write
+   * @protected
+   */
   protected writeMessage(msg: string) {
     if (!this._initialized) {
       this.initialize();
@@ -61,10 +92,12 @@ export abstract class AbstractNodeChannel {
     const mustRollOver = this._writer !== undefined;
     if (this._writer) {
       this._writer.close();
+      this._currentSize = 0;
     }
-    this._currentSize = 0;
-    const nextFile = this._retentionStrategy.nextFile(mustRollOver);
-    this._writer = new NodeLogWriter(nextFile, this._retentionStrategy.encoding);
+    const [nextFile, newSize] = this._retentionStrategy.nextFile(mustRollOver);
+    this._currentSize = newSize;
+
+    this._writer = new NodeLogWriter(nextFile, this._retentionStrategy.encoding, this.createStreamCallBack());
   }
 
   private writeAndUpdateSize(msg: string, byteSize: number) {
@@ -75,6 +108,40 @@ export abstract class AbstractNodeChannel {
     }
     else {
       throw new Error(`Writer is not available (file system issue?), cannot log message '${msg}'`);
+    }
+  }
+
+  private createStreamCallBack(): StreamCallBack {
+    return {
+      onFinished: this.onFinished,
+      onError: this.onStreamError,
+      onClose: this.onClose,
+    };
+  }
+
+  private onFinished(path: fs.PathLike) {
+    if (this._streamCallBacks && this._streamCallBacks.onFinished) {
+      this._streamCallBacks.onFinished(path);
+    }
+  }
+
+  private onClose(path: fs.PathLike) {
+    if (this._streamCallBacks && this._streamCallBacks.onClose) {
+      this._streamCallBacks.onClose(path);
+    }
+  }
+
+  private onStreamError(error: Error) {
+    /*
+      This closes the current errored stream, we will try the next instead.
+     */
+    try {
+      this.nextWriter();
+    }
+    finally {
+      if (this._streamCallBacks && this._streamCallBacks.onError) {
+        this._streamCallBacks.onError(error);
+      }
     }
   }
 }

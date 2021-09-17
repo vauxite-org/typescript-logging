@@ -1,4 +1,4 @@
-import {PathLike} from "fs";
+import * as fs from "fs";
 
 /**
  * Retention settings used by the NodeLogChannel.
@@ -20,10 +20,12 @@ export interface RetentionStrategy {
   initialize(): void;
 
   /**
-   * Called by the channel when it needs the next file to write to, *must* return the next file path to write to.
+   * Called by the channel when it needs the next file to write to, *must* return the next file path to write to as well as
+   * the current size of it when it exists, 0 if it doesn't exist (or empty file).
+   *
    * @param mustRollOver When mustRollOver is true must rollover to the next file, even if the last file is not full yet.
    */
-  nextFile(mustRollOver: boolean): PathLike;
+  nextFile(mustRollOver: boolean): [path: fs.PathLike, size: number];
 }
 
 /**

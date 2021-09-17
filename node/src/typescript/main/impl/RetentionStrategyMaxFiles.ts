@@ -2,8 +2,8 @@ import {FileSize, fileSizeToBytes, RetentionStrategy} from "../api/RetentionStra
 import * as fs from "fs";
 import {listFiles} from "./FileUtils";
 import * as p from "path";
-import {getInternalLogger, InternalLogger} from "typescript-logging";
-import {RetentionStrategyMaxFilesOptions} from "../api/RetentionStrategyMaxFilesOptions";
+import {$internal} from "typescript-logging";
+import {RetentionStrategyMaxFilesOptions} from "../api";
 
 /**
  * Implements the max files retention strategy.
@@ -19,7 +19,9 @@ export class RetentionStrategyMaxFiles implements RetentionStrategy {
   private readonly _maxFiles: number;
   private readonly _onRollOver: (path: string) => void;
   private readonly _allowedFileNamesShort = new Set<string>();
-  private readonly _log: InternalLogger;
+  private readonly _log: $internal.InternalLogger;
+
+  private _lastFileShortName: string | undefined;
 
   public constructor(options: Required<RetentionStrategyMaxFilesOptions>) {
     this._directory = options.directory;
@@ -31,19 +33,20 @@ export class RetentionStrategyMaxFiles implements RetentionStrategy {
     this._maxFiles = options.maxFiles;
     this._onRollOver = options.onRollOver;
 
-    this._log = getInternalLogger("node.RetentionMaxFiles");
+    this._log = $internal.getInternalLogger("node.RetentionMaxFiles");
 
     const exists = fs.existsSync(this._directory);
     if (!exists) {
       const created = fs.mkdirSync(this._directory, {recursive: true});
       if (!created) {
-        throw new Error(`Failed to create directory '${created}', is the path valid?`);
+        throw new Error(`Failed to create directory '${this._directory}', is the path valid?`);
       }
     }
 
     try {
       const fileInfo = fs.statSync(this._directory);
       if (!fileInfo.isDirectory()) {
+        // noinspection ExceptionCaughtLocallyJS
         throw new Error(`Directory '${this._directory}' does exist but is not a directory, or cannot be accessed.`);
       }
     }
@@ -65,40 +68,43 @@ export class RetentionStrategyMaxFiles implements RetentionStrategy {
 
   public initialize(): void {
     for (let i = 1; i <= this._maxFiles; i++) {
-      this._allowedFileNamesShort.add(this.getLogFileName(i));
+      this._allowedFileNamesShort.add(this.getShortfileName(i));
+    }
+
+    const currentFile = this.determineCurrentFile();
+    if (currentFile) {
+      this._lastFileShortName = currentFile.name;
     }
   }
 
-  public nextFile(mustRollOver: boolean): fs.PathLike {
+  public nextFile(mustRollOver: boolean): [path: fs.PathLike, size: number] {
     const logFilesFound = this.getLogFiles();
     if (logFilesFound.length === 0) {
-      return this.getLogFileName(1);
+      const result = this.getLogFileName(1);
+      this._lastFileShortName = this.getShortfileName(1);
+      return [result, 0];
     }
 
-    /**
-     * Find the last file in use.
-     */
-    const lastFile = logFilesFound.reduce((lhs, rhs) => {
-      const diff = lhs.lastModified - rhs.lastModified;
-      if (diff < 0) {
-        return lhs;
-      }
-      if (diff > 0) {
-        return rhs;
-      }
-      return lhs;
-    });
+    const lastFile = logFilesFound.find(f => f.name === this._lastFileShortName);
+    if (!lastFile) {
+      /* Seems the file was removed in between, try again .. */
+      return this.nextFile(mustRollOver);
+    }
 
+    /* The check on size is only there for startup, while running it will never be up-to-date as files won't be flushed by node yet (due to events still need to be processed by node) */
     if (mustRollOver || lastFile.sizeInBytes >= this._maxFileSizeBytes) {
       /* We are forced to rollover, or the file is full, so go to the next file (1 up) */
-      return this.rolloverFile(lastFile);
+      const result = this.rolloverFile(lastFile);
+      this._lastFileShortName = result[1];
+      return [result[0], result[2]];
     }
 
     /* Existing file is good to go */
-    return lastFile.filePath;
+    this._lastFileShortName = lastFile.name;
+    return [lastFile.filePath, lastFile.sizeInBytes];
   }
 
-  private rolloverFile(lastFile: FileInfo): string {
+  private rolloverFile(lastFile: FileInfo): [file: fs.PathLike, shortName: string, size: number] {
     let numValue = parseInt(lastFile.name.substring(this._namePrefix.length, lastFile.name.length - this._extension.length), 10);
     if (numValue === this._maxFiles) {
       numValue = 1;
@@ -121,7 +127,7 @@ export class RetentionStrategyMaxFiles implements RetentionStrategy {
       this._onRollOver?.(lastFile.filePath);
     }
 
-    return newFileName;
+    return [newFileName, this.getShortfileName(numValue), 0];
   }
 
   /**
@@ -146,6 +152,32 @@ export class RetentionStrategyMaxFiles implements RetentionStrategy {
 
   private getLogFileName(value: number) {
     return this._directory + p.sep + this._namePrefix + value + this._extension;
+  }
+
+  private getShortfileName(value: number) {
+    return this._namePrefix + value + this._extension;
+  }
+
+  private determineCurrentFile() {
+    const logFilesFound = this.getLogFiles();
+
+    if (logFilesFound.length === 0) {
+      return undefined;
+    }
+
+    /**
+     * Find the last file in use.
+     */
+    return logFilesFound.reduce((lhs, rhs) => {
+      const diff = lhs.lastModified - rhs.lastModified;
+      if (diff > 0) {
+        return lhs;
+      }
+      if (diff < 0) {
+        return rhs;
+      }
+      return lhs;
+    });
   }
 }
 
