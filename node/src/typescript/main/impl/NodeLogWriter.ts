@@ -22,14 +22,14 @@ export interface StreamCallBack {
 export class NodeLogWriter {
   private readonly _path: fs.PathLike;
   private readonly _encoding: BufferEncoding;
-  private readonly _streamCallBack: StreamCallBack;
+  private readonly _streamCallBack: StreamCallBack | undefined;
   private _writeStream: Writable | undefined;
 
   private readonly _log: $internal.InternalLogger;
   private _draining: boolean = false;
   private _endCalled: boolean = false;
 
-  public constructor(path: fs.PathLike, encoding: BufferEncoding, streamCallBack: StreamCallBack) {
+  public constructor(path: fs.PathLike, encoding: BufferEncoding, streamCallBack: StreamCallBack | undefined) {
     this._path = path;
     this._encoding = encoding;
     this._streamCallBack = streamCallBack;

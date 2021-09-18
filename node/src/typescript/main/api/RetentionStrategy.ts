@@ -15,9 +15,12 @@ export interface RetentionStrategy {
   encoding: BufferEncoding;
 
   /**
-   * Called when the NodeLogChannel wants to write a message, this is only called once and allows for initialization/cleanup if needed.
+   * Called when the NodeLogChannel wants to write a message the first time, this is only called once and allows for initialization/cleanup if needed.
+   *
+   * @param onRollOver Optional rollover function to be called when rollover occurs (when the user specified one when creating a channel, undefined otherwise.
+   *                   Note that the actual function may not be what the user set as it can and will be wrapped in the default implementation.
    */
-  initialize(): void;
+  initialize(onRollOver?: (path: fs.PathLike) => void): void;
 
   /**
    * Called by the channel when it needs the next file to write to, *must* return the next file path to write to as well as

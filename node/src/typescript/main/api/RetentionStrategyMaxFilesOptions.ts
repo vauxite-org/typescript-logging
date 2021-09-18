@@ -40,15 +40,4 @@ export interface RetentionStrategyMaxFilesOptions {
    * anew for that file.
    */
   readonly maxFiles?: number;
-
-  /**
-   * When specified this function is called as soon as a rollover is about to occur, this refers to the file that is now full. If needed
-   * you can back it up and/or compress it elsewhere. Keep in mind that if you do this in a synchronous fashion that may take some time
-   * slowing the application down.
-   *
-   * If your rollover frequency is not very high, it is recommended you deal with the file in an asynchronous
-   * fashion. Keep in mind that the file will be deleted once the maxFiles is reached again so may not exist anymore then
-   * (normally that should take a while, unless logging occurs continuously and/or files are configured to be small).
-   */
-  readonly onRollOver?: (path: string) => void;
 }
