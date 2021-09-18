@@ -17,10 +17,10 @@ export class RetentionStrategyMaxFiles implements RetentionStrategy {
   private readonly _maxFileSize: FileSize;
   private readonly _maxFileSizeBytes: number;
   private readonly _maxFiles: number;
-  private readonly _onRollOver: (path: string) => void;
   private readonly _allowedFileNamesShort = new Set<string>();
   private readonly _log: $internal.InternalLogger;
 
+  private _onRollOver: ((path: fs.PathLike) => void) | undefined;
   private _lastFileShortName: string | undefined;
 
   public constructor(options: Required<RetentionStrategyMaxFilesOptions>) {
@@ -31,7 +31,6 @@ export class RetentionStrategyMaxFiles implements RetentionStrategy {
     this._maxFileSize = options.maxFileSize;
     this._maxFileSizeBytes = fileSizeToBytes(options.maxFileSize);
     this._maxFiles = options.maxFiles;
-    this._onRollOver = options.onRollOver;
 
     this._log = $internal.getInternalLogger("node.RetentionMaxFiles");
 
@@ -66,9 +65,10 @@ export class RetentionStrategyMaxFiles implements RetentionStrategy {
     return this._maxFileSize;
   }
 
-  public initialize(): void {
+  public initialize(onRollOver: (path: fs.PathLike) => void): void {
+    this._onRollOver = onRollOver;
     for (let i = 1; i <= this._maxFiles; i++) {
-      this._allowedFileNamesShort.add(this.getShortfileName(i));
+      this._allowedFileNamesShort.add(this.getShortFileName(i));
     }
 
     const currentFile = this.determineCurrentFile();
@@ -81,7 +81,7 @@ export class RetentionStrategyMaxFiles implements RetentionStrategy {
     const logFilesFound = this.getLogFiles();
     if (logFilesFound.length === 0) {
       const result = this.getLogFileName(1);
-      this._lastFileShortName = this.getShortfileName(1);
+      this._lastFileShortName = this.getShortFileName(1);
       return [result, 0];
     }
 
@@ -127,7 +127,7 @@ export class RetentionStrategyMaxFiles implements RetentionStrategy {
       this._onRollOver?.(lastFile.filePath);
     }
 
-    return [newFileName, this.getShortfileName(numValue), 0];
+    return [newFileName, this.getShortFileName(numValue), 0];
   }
 
   /**
@@ -154,7 +154,7 @@ export class RetentionStrategyMaxFiles implements RetentionStrategy {
     return this._directory + p.sep + this._namePrefix + value + this._extension;
   }
 
-  private getShortfileName(value: number) {
+  private getShortFileName(value: number) {
     return this._namePrefix + value + this._extension;
   }
 

@@ -1,6 +1,7 @@
 import {fileSizeToBytes, RetentionStrategy} from "../api/RetentionStrategy";
 import {NodeLogWriter, StreamCallBack} from "./NodeLogWriter";
 import * as fs from "fs";
+import {NodeChannelOptions} from "../api/NodeChannelOptions";
 
 /**
  * Base class for node channels which contains all the logic around retention and where to write to.
@@ -8,6 +9,8 @@ import * as fs from "fs";
 export abstract class AbstractNodeChannel {
 
   private readonly _retentionStrategy: RetentionStrategy;
+
+  private readonly _onRollOver: ((path: fs.PathLike) => void) | undefined;
   private readonly _maxSizeBytes: number;
   private _streamCallBacks: StreamCallBack | undefined;
 
@@ -15,8 +18,18 @@ export abstract class AbstractNodeChannel {
   private _writer: NodeLogWriter | undefined;
   private _currentSize: number = 0;
 
-  protected constructor(retentionStrategy: RetentionStrategy) {
+  /**
+   * We track them here until a "close" event occurs for these files, then we call the rollover function the user set.
+   * We track a unique number for them, because if it didn't close a minute *after* rollover occurred something went wrong and
+   * we just purge them from this array to not create a silent memory leak over time.
+   * @private
+   */
+  private readonly _rollOverFiles: { path: fs.PathLike, rollOverId: number, timer?: NodeJS.Timer } [] = [];
+  private _rollOverId: number = 0;
+
+  protected constructor(retentionStrategy: RetentionStrategy, options?: NodeChannelOptions) {
     this._retentionStrategy = retentionStrategy;
+    this._onRollOver = options && options.onRollOver ? options.onRollOver : undefined;
     const maxFileSize = retentionStrategy.maxFileSize;
     if (maxFileSize) {
       this._maxSizeBytes = fileSizeToBytes(maxFileSize);
@@ -26,17 +39,29 @@ export abstract class AbstractNodeChannel {
       this._maxSizeBytes = fileSizeToBytes({value: 100, unit: "MegaBytes"});
     }
     this.onStreamError = this.onStreamError.bind(this);
-    this.onFinished = this.onFinished.bind(this);
-    this.onClose = this.onClose.bind(this);
+    this.onStreamFinished = this.onStreamFinished.bind(this);
+    this.onStreamClose = this.onStreamClose.bind(this);
+    this.onRetentionRollOver = this.onRetentionRollOver.bind(this);
+    this.removeRollOverFileArrayByPathAndRollOverId = this.removeRollOverFileArrayByPathAndRollOverId.bind(this);
   }
 
   /**
    * Forcefully close the underlying writer.
    */
   public close() {
-    if (this._writer) {
-      this._writer.close();
-      this._writer = undefined;
+    try {
+      if (this._writer) {
+        this._writer.close();
+        this._writer = undefined;
+      }
+    }
+    finally {
+      /* Make sure to remove any remaining timers from rollover */
+      this._rollOverFiles.forEach(v => {
+        if (v.timer) {
+          clearTimeout(v.timer);
+        }
+      });
     }
   }
 
@@ -83,7 +108,7 @@ export abstract class AbstractNodeChannel {
   }
 
   private initialize() {
-    this._retentionStrategy.initialize();
+    this._retentionStrategy.initialize(this.onRetentionRollOver);
     this._initialized = true;
   }
 
@@ -97,7 +122,7 @@ export abstract class AbstractNodeChannel {
     const [nextFile, newSize] = this._retentionStrategy.nextFile(mustRollOver);
     this._currentSize = newSize;
 
-    this._writer = new NodeLogWriter(nextFile, this._retentionStrategy.encoding, this.createStreamCallBack());
+    this._writer = new NodeLogWriter(nextFile, this._retentionStrategy.encoding, {onFinished: this.onStreamFinished, onError: this.onStreamError, onClose: this.onStreamClose});
   }
 
   private writeAndUpdateSize(msg: string, byteSize: number) {
@@ -111,23 +136,25 @@ export abstract class AbstractNodeChannel {
     }
   }
 
-  private createStreamCallBack(): StreamCallBack {
-    return {
-      onFinished: this.onFinished,
-      onError: this.onStreamError,
-      onClose: this.onClose,
-    };
-  }
-
-  private onFinished(path: fs.PathLike) {
+  private onStreamFinished(path: fs.PathLike) {
     if (this._streamCallBacks && this._streamCallBacks.onFinished) {
       this._streamCallBacks.onFinished(path);
     }
   }
 
-  private onClose(path: fs.PathLike) {
+  private onStreamClose(path: fs.PathLike) {
     if (this._streamCallBacks && this._streamCallBacks.onClose) {
       this._streamCallBacks.onClose(path);
+    }
+
+    if (this._onRollOver) {
+      const idx = this._rollOverFiles.findIndex(f => f.path === path);
+      if (idx === -1) {
+        return;
+      }
+
+      this._rollOverFiles.splice(idx, 1);
+      this._onRollOver(path);
     }
   }
 
@@ -141,6 +168,36 @@ export abstract class AbstractNodeChannel {
     finally {
       if (this._streamCallBacks && this._streamCallBacks.onError) {
         this._streamCallBacks.onError(error);
+      }
+    }
+  }
+
+  private onRetentionRollOver(path: fs.PathLike) {
+    /* We only care if there is a rollover specified by the end user. */
+    if (this._onRollOver) {
+      const nextRollOverId = this._rollOverId++;
+      /* Remove it after 60 seconds, as close should really have happened by then. */
+      const timer = setTimeout(() => this.removeRollOverFileArrayByPathAndRollOverId(path, nextRollOverId), 60000);
+      this._rollOverFiles.push({path, rollOverId: nextRollOverId, timer});
+    }
+  }
+
+  private removeRollOverFileArrayByPathAndRollOverId(path: fs.PathLike, rollOverId: number) {
+    const idx = this._rollOverFiles.findIndex(f => f.rollOverId === rollOverId && f.path === path);
+    if (idx === -1) {
+      return;
+    }
+    const value = this._rollOverFiles[idx];
+    value.timer = undefined; // The timer fired as we got here
+    this.deleteFromRollOverArrayAndResetTimer(idx);
+  }
+
+  private deleteFromRollOverArrayAndResetTimer(idx: number) {
+    const items = this._rollOverFiles.splice(idx, 1);
+    if (items.length > 0) {
+      const item = items[0];
+      if (item.timer) {
+        clearTimeout(item.timer);
       }
     }
   }

@@ -4,6 +4,7 @@ import {NodeLogChannel} from "../impl/NodeLogChannel";
 import {RetentionStrategyMaxFilesOptions} from "./RetentionStrategyMaxFilesOptions";
 import {RetentionStrategyMaxFiles} from "../impl/RetentionStrategyMaxFiles";
 import {NodeRawLogChannel} from "../impl/NodeRawLogChannel";
+import {NodeChannelOptions} from "./NodeChannelOptions";
 
 /**
  * Allows creation of various node channels that can be used to log for node to files.
@@ -14,9 +15,10 @@ export class NodeChannelFactory {
    * Create a new LogChannel which will use given RetentionStrategy, you can use NodeChannelFactory.createRetentionStrategyMaxFiles(..) to create
    * the RetentionStrategy (or implement a custom one).
    * @param retentionStrategy The retention type
+   * @param options Additional channel options
    */
-  public static createLogChannel(retentionStrategy: RetentionStrategy): LogChannel {
-    return new NodeLogChannel(retentionStrategy);
+  public static createLogChannel(retentionStrategy: RetentionStrategy, options?: NodeChannelOptions): LogChannel {
+    return new NodeLogChannel(retentionStrategy, options);
   }
 
   /**
@@ -24,9 +26,11 @@ export class NodeChannelFactory {
    * the RetentionStrategy (or implement a custom one).
    * @param retentionStrategy The retention type
    * @param writeRawLogMessage Function that does format the raw message and returns it as a string, this string is then logged in the file.
+   * @param options Additional channel options
    */
-  public static createRawLogChannel(retentionStrategy: RetentionStrategy, writeRawLogMessage: (msg: RawLogMessage, formatArg: (arg: any) => string) => string): RawLogChannel {
-    return new NodeRawLogChannel(retentionStrategy, writeRawLogMessage);
+  public static createRawLogChannel(retentionStrategy: RetentionStrategy, writeRawLogMessage: (msg: RawLogMessage, formatArg: (arg: any) => string) => string,
+                                    options?: NodeChannelOptions): RawLogChannel {
+    return new NodeRawLogChannel(retentionStrategy, writeRawLogMessage, options);
   }
 
   /**
@@ -41,7 +45,6 @@ export class NodeChannelFactory {
       encoding: options.encoding ? options.encoding : "utf-8",
       extension: options.extension ? options.extension : ".log",
       namePrefix: options.namePrefix ? options.namePrefix : "application",
-      onRollOver: options.onRollOver ? options.onRollOver : () => null, // We provide an empty rollover by default.
     });
   }
 }
