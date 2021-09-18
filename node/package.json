@@ -10,8 +10,8 @@
     "compile": "rollup -c",
     "compile-watch": "rollup -cw",
     "tslint": "tslint -c tslint.json -p tsconfig.json",
-    "test": "jest --no-cache",
-    "test-watch": "jest --watchAll",
+    "test": "jest --no-cache --detectOpenHandles",
+    "test-watch": "jest --watchAll --detectOpenHandles",
     "build": "npm run clean && npm run compile && npm run test && npm run tslint"
   },
   "files": [
