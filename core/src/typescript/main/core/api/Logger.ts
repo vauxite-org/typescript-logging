@@ -2,6 +2,8 @@ import {ExceptionType} from "./type/ExceptionType";
 import {LogLevel} from "./LogLevel";
 import {LogMessageType} from "./type/LogMessageType";
 import {ArgumentsType} from "./type/ArgumentsType";
+import {LogId} from "./LogId";
+import {LogRuntime} from "./runtime/LogRuntime";
 
 /**
  * Represents a Logger, should be used to log your messages (and errors).
@@ -14,12 +16,15 @@ export interface Logger {
    */
   readonly id: LogId;
 
-   * Returns current log level of this Logger instance.
+  /**
+   * The current log level of this logger (this is a convenience property, it returns runtimeSettings.logLevel).
    */
   readonly logLevel: LogLevel;
 
   /**
+   * The current runtime settings for this Logger.
    */
+  readonly runtimeSettings: LogRuntime;
 
   trace(message: LogMessageType, args?: ArgumentsType): void;
 
@@ -44,4 +49,6 @@ export interface Logger {
   fatal(message: LogMessageType, args?: ArgumentsType): void;
 
   fatal(message: LogMessageType, error: ExceptionType, args?: ArgumentsType): void;
+
+  log(logLevel: LogLevel, message: LogMessageType, exceptionOrArgs?: ExceptionType | ArgumentsType, args?: ArgumentsType): void;
 }

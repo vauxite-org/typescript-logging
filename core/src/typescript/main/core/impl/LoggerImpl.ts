@@ -12,7 +12,7 @@ import {ArgumentsType} from "../api/type/ArgumentsType";
  */
 export class LoggerImpl implements Logger {
 
-  private readonly _runtime: LogRuntime;
+  private _runtime: LogRuntime;
 
   public constructor(runtime: LogRuntime) {
     this._runtime = runtime;
@@ -22,43 +22,54 @@ export class LoggerImpl implements Logger {
     return this._runtime.id;
   }
 
-  public get logLevel() {
+  public get logLevel(): LogLevel {
     return this._runtime.level;
   }
 
+  public get runtimeSettings(): LogRuntime {
+    /* Return it as new literal, we don't want people to play with our internal state */
+    return {...this._runtime};
   }
 
-  public trace(message: LogMessageType, exceptionOrArgs?: ExceptionType | ArgumentsType, args?: ArgumentsType): void {
-    this.logMessage(LogLevel.Trace, message, exceptionOrArgs, args);
+  public set runtimeSettings(runtime: LogRuntime) {
+    this._runtime = runtime;
   }
 
-  public debug(message: LogMessageType, exceptionOrArgs?: ExceptionType | ArgumentsType, args?: ArgumentsType): void {
-    this.logMessage(LogLevel.Debug, message, exceptionOrArgs, args);
+  public trace(message: LogMessageType, errorOrArgs?: ExceptionType | ArgumentsType, args?: ArgumentsType): void {
+    this.logMessage(LogLevel.Trace, message, errorOrArgs, args);
   }
 
-  public info(message: LogMessageType, exceptionOrArgs?: ExceptionType | ArgumentsType, args?: ArgumentsType): void {
-    this.logMessage(LogLevel.Info, message, exceptionOrArgs, args);
+  public debug(message: LogMessageType, errorOrArgs?: ExceptionType | ArgumentsType, args?: ArgumentsType): void {
+    this.logMessage(LogLevel.Debug, message, errorOrArgs, args);
   }
 
-  public warn(message: LogMessageType, exceptionOrArgs?: ExceptionType | ArgumentsType, args?: ArgumentsType): void {
-    this.logMessage(LogLevel.Warn, message, exceptionOrArgs, args);
+  public info(message: LogMessageType, errorOrArgs?: ExceptionType | ArgumentsType, args?: ArgumentsType): void {
+    this.logMessage(LogLevel.Info, message, errorOrArgs, args);
   }
 
-  public error(message: LogMessageType, exceptionOrArgs?: ExceptionType | ArgumentsType, args?: ArgumentsType): void {
-    this.logMessage(LogLevel.Error, message, exceptionOrArgs, args);
+  public warn(message: LogMessageType, errorOrArgs?: ExceptionType | ArgumentsType, args?: ArgumentsType): void {
+    this.logMessage(LogLevel.Warn, message, errorOrArgs, args);
   }
 
-  public fatal(message: LogMessageType, exceptionOrArgs?: ExceptionType | ArgumentsType, args?: ArgumentsType): void {
-    this.logMessage(LogLevel.Fatal, message, exceptionOrArgs, args);
+  public error(message: LogMessageType, errorOrArgs?: ExceptionType | ArgumentsType, args?: ArgumentsType): void {
+    this.logMessage(LogLevel.Error, message, errorOrArgs, args);
   }
 
-  private logMessage(level: LogLevel, logMessageType: LogMessageType, exceptionOrArgs?: ExceptionType | ArgumentsType, argumentsType?: ArgumentsType) {
+  public fatal(message: LogMessageType, errorOrArgs?: ExceptionType | ArgumentsType, args?: ArgumentsType): void {
+    this.logMessage(LogLevel.Fatal, message, errorOrArgs, args);
+  }
+
+  public log(logLevel: LogLevel, message: LogMessageType, errorOrArgs?: ExceptionType | ArgumentsType, args?: ArgumentsType): void {
+    this.logMessage(logLevel, message, errorOrArgs, args);
+  }
+
+  private logMessage(level: LogLevel, logMessageType: LogMessageType, errorOrArgs?: ExceptionType | ArgumentsType, argumentsType?: ArgumentsType) {
     if (this._runtime.level > level) {
       return;
     }
     const nowMillis = Date.now();
     const message = typeof logMessageType === "string" ? logMessageType : logMessageType(this._runtime.messageFormatter);
-    const [realError, args] = LoggerImpl.determineErrorAndArgs(exceptionOrArgs, argumentsType);
+    const [realError, args] = LoggerImpl.determineErrorAndArgs(errorOrArgs, argumentsType);
 
     /*
      * Deal with raw message here.
@@ -112,17 +123,17 @@ export class LoggerImpl implements Logger {
     }
   }
 
-  private static determineErrorAndArgs(exceptionOrArgs?: ExceptionType | ArgumentsType, argumentsType?: ArgumentsType): [error?: Error, args?: ReadonlyArray<any>]  {
+  private static determineErrorAndArgs(errorOrArgs?: ExceptionType | ArgumentsType, argumentsType?: ArgumentsType): [error?: Error, args?: ReadonlyArray<any>] {
     let realError: Error | undefined;
     let args: ReadonlyArray<any> | undefined;
 
-    if (typeof exceptionOrArgs !== "undefined") {
+    if (typeof errorOrArgs !== "undefined") {
       let data: readonly any[] | Error;
-      if (typeof exceptionOrArgs === "function") {
-        data = exceptionOrArgs();
+      if (typeof errorOrArgs === "function") {
+        data = errorOrArgs();
       }
       else {
-        data = exceptionOrArgs;
+        data = errorOrArgs;
       }
 
       if (data instanceof Error) {
