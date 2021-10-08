@@ -42,6 +42,6 @@ export * from "./impl/DefaultFormatters";
  *
  * @internal
  */
-export function createLogProvider(settings: LogConfig): LogProvider {
-  return new LogProviderImpl(settings);
+export function createLogProvider(name: string, settings: LogConfig): LogProvider {
+  return new LogProviderImpl(name, settings);
 }

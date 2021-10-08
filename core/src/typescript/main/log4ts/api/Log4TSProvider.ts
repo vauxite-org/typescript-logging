@@ -52,7 +52,7 @@ export interface Log4TSProvider {
    *
    * To update all groups at once use 'updateRuntimeSettings' instead.
    */
-  readonly updateRuntimeSettingsGroup: (identifier: string, config: Omit<RuntimeSettings, "channel">) => void;
+  readonly updateRuntimeSettingsGroup: (identifier: string, settings: Omit<RuntimeSettings, "channel">) => void;
 
   /**
    * Applies given runtime settings to all registered groups of this provider as well as any already existing loggers, this function also allows changing the log channel.

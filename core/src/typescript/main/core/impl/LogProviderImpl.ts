@@ -3,13 +3,14 @@ import {LoggerNameType} from "../api/type/LoggerNameType";
 import {Logger} from "../api/Logger";
 import {LogConfig} from "../api/config/LogConfig";
 import {EnhancedMap} from "../../util/EnhancedMap";
-import {LogRuntimeImpl} from "./LogRuntimeImpl";
 import {LoggerImpl} from "./LoggerImpl";
 import {RuntimeSettings, RuntimeSettingsRequired} from "../api/runtime/RuntimeSettings";
 import {getInternalLogger} from "../../internal/InternalLogger";
 import {formatArgument, formatDate, formatMessage} from "./DefaultFormatters";
 import {DefaultChannels} from "./channel/DefaultChannels";
 import {LogLevel} from "../api/LogLevel";
+import {LogId} from "../api/LogId";
+import {LogRuntime} from "../api/runtime/LogRuntime";
 
 /**
  * Implementation for {@link LogProvider}
@@ -18,26 +19,40 @@ export class LogProviderImpl implements LogProvider {
 
   private readonly _log = getInternalLogger("core.impl.LogProviderImpl");
 
+  private readonly _name: string;
   /**
    * Default settings that were taken on creation.
    * @private
    */
   private readonly _settings: LogConfig;
-  private readonly _loggers: EnhancedMap<string, { logger: Logger, runtimeSettings: RuntimeSettingsRequired }>;
-  private readonly _idToKeyMap: EnhancedMap<number, string>;
+  private readonly _loggers: EnhancedMap<string, LoggerImpl>;
+  private readonly _idToKeyMap: EnhancedMap<LogId, string>;
 
-  private _globalRuntimeSettings: RuntimeSettingsRequired | undefined;
+  /**
+   * Current runtime settings (same as _settings on creation), but may be different if runtime settings are changed.
+   * Creation of loggers always use this.
+   * @private
+   */
+  private _globalRuntimeSettings: RuntimeSettingsRequired;
   private _nextLoggerId: number;
 
-  public constructor(settings: LogConfig) {
+  public constructor(name: string, settings: LogConfig) {
+    this._name = name;
     this._settings = settings;
     this._loggers = new EnhancedMap();
     this._idToKeyMap = new EnhancedMap();
+    this._globalRuntimeSettings = {level: settings.level, channel: settings.channel};
     this._nextLoggerId = 1;
 
     this._log.trace(() => `Created LogProviderImpl with settings: ${JSON.stringify(this._settings)}`);
+  }
 
-    this.getCurrentRuntimeSettings = this.getCurrentRuntimeSettings.bind(this);
+  public get runtimeSettings(): LogConfig {
+    return {
+      ...this._settings,
+      level: this._globalRuntimeSettings.level,
+      channel: this._globalRuntimeSettings.channel,
+    };
   }
 
   public getLogger(name: LoggerNameType): Logger {
@@ -54,10 +69,7 @@ export class LogProviderImpl implements LogProvider {
     }
 
     this._loggers.computeIfPresent(key, (currentKey, currentValue) => {
-      currentValue.runtimeSettings = {
-        level: settings.level ? settings.level : currentValue.runtimeSettings.level,
-        channel: settings.channel ? settings.channel : currentValue.runtimeSettings.channel,
-      };
+      currentValue.runtimeSettings = LogProviderImpl.mergeRuntimeSettingsIntoLogRuntime(currentValue.runtimeSettings, settings);
       return currentValue;
     });
 
@@ -68,15 +80,12 @@ export class LogProviderImpl implements LogProvider {
     this._log.debug(() => `Updating global runtime settings and updating existing loggers runtime settings using: '${JSON.stringify(settings)}'`);
 
     this._globalRuntimeSettings = {
-      level: settings.level ? settings.level : this._settings.level,
-      channel: settings.channel ? settings.channel : this._settings.channel,
+      /* It's unclear, but not checking explicitly on undefined here makes the test fail, it makes no sense as level is a number | undefined essentially. */
+      level: settings.level !== undefined ? settings.level : this._globalRuntimeSettings.level,
+      channel: settings.channel !== undefined ? settings.channel : this._globalRuntimeSettings.channel,
     };
-    [...this._loggers.values()].forEach(logData => {
-      logData.runtimeSettings = {
-        level: settings.level ? settings.level : logData.runtimeSettings.level,
-        channel: settings.channel ? settings.channel : logData.runtimeSettings.channel,
-      };
-    });
+
+    this._loggers.forEach(logger => logger.runtimeSettings = LogProviderImpl.mergeRuntimeSettingsIntoLogRuntime(logger.runtimeSettings, settings));
   }
 
   /**
@@ -85,46 +94,44 @@ export class LogProviderImpl implements LogProvider {
   public clear() {
     this._loggers.clear();
     this._idToKeyMap.clear();
-    this._globalRuntimeSettings = undefined;
+    this._globalRuntimeSettings = {...this._settings};
     this._nextLoggerId = 1;
   }
 
-  private getOrCreateLogger(name: LoggerNameType): Logger {
+  private getOrCreateLogger(name: LoggerNameType): LoggerImpl {
     const key = LogProviderImpl.createKey(name);
 
-    const result = this._loggers.computeIfAbsent(key, () => ({
-      logger: this.createNewLogger(name),
-      runtimeSettings: this._globalRuntimeSettings ? this._globalRuntimeSettings : {level: this._settings.level, channel: this._settings.channel},
-    }));
-    this._idToKeyMap.computeIfAbsent(result.logger.id, () => key);
-    return result.logger;
+    const logger = this._loggers.computeIfAbsent(key, () => {
+      const runtime: LogRuntime = {
+        level: this._globalRuntimeSettings.level,
+        channel: this._globalRuntimeSettings.channel,
+        id: this.nextLoggerId(),
+        name,
+        argumentFormatter: this._settings.argumentFormatter,
+        dateFormatter: this._settings.dateFormatter,
+        messageFormatter: this._settings.messageFormatter,
+      };
+      return new LoggerImpl(runtime);
+    });
+    this._idToKeyMap.computeIfAbsent(logger.id, () => key);
+    return logger;
   }
 
-  private createNewLogger(name: LoggerNameType): Logger {
-    const runtime = new LogRuntimeImpl(
-      this._nextLoggerId++,
-      name,
-      this._settings.argumentFormatter,
-      this._settings.dateFormatter,
-      this._settings.messageFormatter,
-      this.getCurrentRuntimeSettings,
-    );
-    return new LoggerImpl(runtime);
+  private nextLoggerId(): LogId {
+    const result = this._name + "_" + this._nextLoggerId;
+    this._nextLoggerId++;
+    return result;
   }
 
-  private getCurrentRuntimeSettings(logId: number): RuntimeSettingsRequired {
-    const key = this._idToKeyMap.get(logId);
-    if (key === undefined) {
-      return {level: this._settings.level, channel: this._settings.channel};
-    }
-    const value = this._loggers.get(key);
-    if (value === undefined) {
-      return {level: this._settings.level, channel: this._settings.channel};
-    }
-    return value.runtimeSettings;
+  private static mergeRuntimeSettingsIntoLogRuntime(currentSettings: LogRuntime, settings: RuntimeSettings): LogRuntime {
+    return {
+      ...currentSettings,
+      /* It's unclear, but not checking explicitly on undefined here makes the test fail, it makes no sense as level is a number | undefined essentially. */
+      level: settings.level !== undefined ? settings.level : currentSettings.level,
+      channel: settings.channel !== undefined ? settings.channel : currentSettings.channel,
+    };
   }
 
-  // TODO: Loggers need an id to be distinguishable!
   private static createKey(name: LoggerNameType) {
     if (typeof name === "string") {
       return name;
