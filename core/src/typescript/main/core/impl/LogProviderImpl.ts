@@ -44,13 +44,13 @@ export class LogProviderImpl implements LogProvider {
     return this.getOrCreateLogger(name);
   }
 
-  public updateLoggerRuntime(log: Logger, settings: RuntimeSettings): void {
+  public updateLoggerRuntime(log: Logger, settings: RuntimeSettings): boolean {
     this._log.debug(() => `Updating logger ${log.id} runtime settings using: '${JSON.stringify(settings)}'`);
 
     const key = this._idToKeyMap.get(log.id);
     if (key === undefined) {
       this._log.warn(() => `Cannot update logger with id: ${log.id}, it was not found.`);
-      return;
+      return false;
     }
 
     this._loggers.computeIfPresent(key, (currentKey, currentValue) => {
@@ -60,6 +60,8 @@ export class LogProviderImpl implements LogProvider {
       };
       return currentValue;
     });
+
+    return true;
   }
 
   public updateRuntimeSettings(settings: RuntimeSettings): void {
