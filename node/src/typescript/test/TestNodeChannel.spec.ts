@@ -36,7 +36,7 @@ describe("Test node logging", () => {
     const retention = NodeChannelFactory.createRetentionStrategyMaxFiles({directory: testDir, maxFiles: 3, maxFileSize: {value: 1, unit: "KiloBytes"}});
     channel = NodeChannelFactory.createRawLogChannel(retention, msg => msg.message + "\n", {onRollOver: streamCallBack.onRollOver}) as NodeRawLogChannel;
     channel.setStreamCallBacks(streamCallBack);
-    provider = Log4TSProvider.createLog4TSProvider("test", {channel, groups: [{expression: new RegExp("model.+"), level: LogLevel.Debug}]});
+    provider = Log4TSProvider.createProvider("test", {channel, groups: [{expression: new RegExp("model.+"), level: LogLevel.Debug}]});
   });
 
   afterEach(() => {

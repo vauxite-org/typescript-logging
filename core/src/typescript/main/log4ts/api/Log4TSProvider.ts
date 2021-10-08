@@ -6,7 +6,7 @@ import {Log4TSGroupConfig} from "./Log4TSGroupConfig";
 /**
  * Provider for Log4TS flavor, can be used to get loggers.
  *
- * To create a provider use: Log4TSProvider.createLog4TSProvider()
+ * To create a provider use: Log4TSProvider.createProvider(...)
  */
 export interface Log4TSProvider {
 
@@ -76,7 +76,7 @@ export namespace Log4TSProvider {
    * @param name Name for provider, must be unique
    * @param config The config for the provider
    */
-  export function createLog4TSProvider(name: string, config: Log4TSConfigOptional): Log4TSProvider {
+  export function createProvider(name: string, config: Log4TSConfigOptional): Log4TSProvider {
     return LOG4TS_PROVIDER_SERVICE.createLogProvider(name, config);
   }
 

@@ -12,21 +12,21 @@ describe("Test Log4TSProvider", () => {
     LOG4TS_PROVIDER_SERVICE.clear();
   });
 
-  test ("Test create provider with minimum config set", () => {
-    const provider = Log4TSProvider.createLog4TSProvider("test", {
+  test("Test create provider with minimum config set", () => {
+    const provider = Log4TSProvider.createProvider("test", {
       groups: [{
         expression: new RegExp("model.+"),
       }],
     });
 
     expect(provider.name).toEqual("test");
-    expect (provider.groupConfigs.length).toEqual(1);
+    expect(provider.groupConfigs.length).toEqual(1);
 
     const groupConfig = provider.groupConfigs[0];
     expect(groupConfig.level).toEqual(LogLevel.Error);
   });
 
-  test ("Test create provider with modified config", () => {
+  test("Test create provider with modified config", () => {
     const customChannel: LogChannel = {
       type: "LogChannel",
       write: () => null,
@@ -37,8 +37,8 @@ describe("Test Log4TSProvider", () => {
     const messageFormatter: MessageFormatterType = () => "";
     const groupExpression = new RegExp("model.+");
 
-    const provider = Log4TSProvider.createLog4TSProvider("test", {
-      groups: [{ expression: groupExpression }],
+    const provider = Log4TSProvider.createProvider("test", {
+      groups: [{expression: groupExpression}],
       level: LogLevel.Info,
       channel: customChannel,
       messageFormatter,
@@ -56,7 +56,7 @@ describe("Test Log4TSProvider", () => {
     expect(config.level).toEqual(LogLevel.Info);
 
     /* Group config must use the main config of the provider when none were provided for the group */
-    expect (provider.groupConfigs.length).toEqual(1);
+    expect(provider.groupConfigs.length).toEqual(1);
     const groupConfig = provider.groupConfigs[0];
     expect(groupConfig.channel).toEqual(customChannel);
     expect(groupConfig.expression).toEqual(groupExpression);
@@ -66,13 +66,13 @@ describe("Test Log4TSProvider", () => {
     expect(groupConfig.level).toEqual(LogLevel.Info);
   });
 
-  test ("Test create provider and group custom config", () => {
+  test("Test create provider and group custom config", () => {
     const argumentFormatter: ArgumentFormatterType = () => "";
     const dateFormatter: DateFormatterType = () => "";
     const messageFormatter: MessageFormatterType = () => "";
     const groupExpression = new RegExp("model.+");
 
-    const provider = Log4TSProvider.createLog4TSProvider("test", {
+    const provider = Log4TSProvider.createProvider("test", {
       groups: [{
         expression: groupExpression,
         level: LogLevel.Debug,
@@ -91,7 +91,7 @@ describe("Test Log4TSProvider", () => {
     expect(config.level).toEqual(LogLevel.Error);
 
     /* Group config must use it's own settings as configured */
-    expect (provider.groupConfigs.length).toEqual(1);
+    expect(provider.groupConfigs.length).toEqual(1);
     const groupConfigs = provider.groupConfigs;
     expect(groupConfigs.length).toEqual(1);
     const groupConfig = groupConfigs[0];
@@ -102,12 +102,12 @@ describe("Test Log4TSProvider", () => {
     expect(groupConfig.level).toEqual(LogLevel.Debug);
   });
 
-  test ("Provider creates correct loggers", () => {
+  test("Provider creates correct loggers", () => {
     const channel = new ArrayRawLogChannel();
     const groupExpressionModel = new RegExp("model.+");
     const groupExpressionService = new RegExp("service.+");
 
-    const provider = Log4TSProvider.createLog4TSProvider("test", {
+    const provider = Log4TSProvider.createProvider("test", {
       channel,
       groups: [
         {
@@ -121,7 +121,7 @@ describe("Test Log4TSProvider", () => {
       level: LogLevel.Info,
     });
 
-    expect (provider.groupConfigs.length).toEqual(2);
+    expect(provider.groupConfigs.length).toEqual(2);
     const groupConfigs = provider.groupConfigs;
     expect(groupConfigs.length).toEqual(2);
     expect(groupConfigs[0].expression).toEqual(groupExpressionModel);
@@ -136,7 +136,7 @@ describe("Test Log4TSProvider", () => {
     logger.debug("debug");
     logger.info("info");
     logger.trace("trace"); // Should not appear
-    expect(channel.messages).toEqual(["debug","info"]);
+    expect(channel.messages).toEqual(["debug", "info"]);
     channel.clear();
 
     // Logger must match second group expression, level will be provider's one.
@@ -148,7 +148,7 @@ describe("Test Log4TSProvider", () => {
     logger.fatal(() => "fatal");
     logger.info("info");
     logger.trace(() => "trace");
-    expect(channel.messages).toEqual(["warn","error","fatal","info"]);
+    expect(channel.messages).toEqual(["warn", "error", "fatal", "info"]);
     channel.clear();
 
     // Logger does not match any group, and will fallback to default and use provider's defaults.
@@ -166,15 +166,15 @@ describe("Test Log4TSProvider", () => {
     expect(logger === provider.getLogger("notMatching")).toEqual(true);
   });
 
-  test ("Test log level can be changed dynamically", () => {
+  test("Test log level can be changed dynamically", () => {
     const channel = new ArrayRawLogChannel();
     /* Default logs to error */
-    const provider = Log4TSProvider.createLog4TSProvider("test", {
+    const provider = Log4TSProvider.createProvider("test", {
       channel,
       groups: [{
         expression: new RegExp("model.+"),
         identifier: "model",
-      },{
+      }, {
         expression: new RegExp("service.+"),
       }],
     });
@@ -186,7 +186,7 @@ describe("Test Log4TSProvider", () => {
     expect(channel.size).toEqual(0);
 
     /* Changes level to info for all groups */
-    provider.updateRuntimeSettings({ level: LogLevel.Info });
+    provider.updateRuntimeSettings({level: LogLevel.Info});
     logProduct.info("product");
     logAccountService.info("accountService");
     expect(channel.messages).toEqual(["product", "accountService"]);
@@ -200,7 +200,7 @@ describe("Test Log4TSProvider", () => {
     channel.clear();
 
     /* Change only 1 group */
-    provider.updateRuntimeSettingsGroup("model", { level: LogLevel.Error });
+    provider.updateRuntimeSettingsGroup("model", {level: LogLevel.Error});
     logProduct.warn("product");
     logCustomer.warn("customer");
     logAccountService.info("accountService");
@@ -217,16 +217,16 @@ describe("Test Log4TSProvider", () => {
     expect(channel.messages).toEqual(["appleError", "fruitInfo"]);
   });
 
-  test ("Test channel can be changed dynamically", () => {
+  test("Test channel can be changed dynamically", () => {
     const channel1 = new ArrayRawLogChannel();
     const channel2 = new ArrayRawLogChannel();
     /* Default logs to error */
-    const provider = Log4TSProvider.createLog4TSProvider("test", {
+    const provider = Log4TSProvider.createProvider("test", {
       level: LogLevel.Info,
       channel: channel1,
       groups: [{
         expression: new RegExp("model.+"),
-      },{
+      }, {
         expression: new RegExp("service.+"),
         identifier: "service"
       }],
@@ -243,7 +243,7 @@ describe("Test Log4TSProvider", () => {
     channel2.clear();
 
     /* Change channel for all */
-    provider.updateRuntimeSettings({ channel: channel2 });
+    provider.updateRuntimeSettings({channel: channel2});
     logProduct.info("product");
     logService.info("productService");
     expect(channel2.messages).toEqual(["product", "productService"]);
@@ -252,7 +252,7 @@ describe("Test Log4TSProvider", () => {
     channel2.clear();
 
     const logFruit = provider.getLogger("model.Fruit");
-    const logFruitService  = provider.getLogger("service.FruitService");
+    const logFruitService = provider.getLogger("service.FruitService");
     logFruit.info("fruit");
     logFruitService.info("fruitService");
     logProduct.info("product");
@@ -265,18 +265,18 @@ describe("Test Log4TSProvider", () => {
 
   /* Tests that must fail follow */
   test("Test create provider config is missing group", () => {
-    expect(() => Log4TSProvider.createLog4TSProvider("test", { groups: [] }))
+    expect(() => Log4TSProvider.createProvider("test", {groups: []}))
       .toThrowError(new Error("Invalid configuration, 'groups' on configuration is empty, at least 1 group config must be specified."));
   });
 
   test("Test cannot create provider with same name twice", () => {
-    Log4TSProvider.createLog4TSProvider("test", {
+    Log4TSProvider.createProvider("test", {
       groups: [{
         expression: new RegExp("model.+"),
       }],
     });
 
-    expect (() => Log4TSProvider.createLog4TSProvider("test", {
+    expect(() => Log4TSProvider.createProvider("test", {
       groups: [{
         expression: new RegExp("model.+"),
       }],
