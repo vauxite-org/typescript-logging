@@ -11,7 +11,7 @@ import {LogProvider} from "../LogProvider";
  * Represents runtime settings that are created for a {@link LogProvider} instance.
  */
 export interface LogRuntime {
-  readonly id: number;
+  readonly id: LogId;
   readonly name: LoggerNameType;
   readonly level: LogLevel;
   readonly channel: LogChannel | RawLogChannel;

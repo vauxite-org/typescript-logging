@@ -18,12 +18,14 @@ export class LoggerImpl implements Logger {
     this._runtime = runtime;
   }
 
+  public get id() {
+    return this._runtime.id;
+  }
+
   public get logLevel() {
     return this._runtime.level;
   }
 
-  public get id() {
-    return this._runtime.id;
   }
 
   public trace(message: LogMessageType, exceptionOrArgs?: ExceptionType | ArgumentsType, args?: ArgumentsType): void {

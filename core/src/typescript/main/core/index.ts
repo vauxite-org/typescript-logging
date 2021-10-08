@@ -9,6 +9,7 @@ import {LogChannel} from "./api/LogChannel";
 /* Export the API */
 export {LogChannel} from "./api/LogChannel";
 export {Logger} from "./api/Logger";
+export {LogId} from "./api/LogId";
 export {LogLevel} from "./api/LogLevel";
 export {LogMessage} from "./api/LogMessage";
 export {LogProvider} from "./api/LogProvider";
