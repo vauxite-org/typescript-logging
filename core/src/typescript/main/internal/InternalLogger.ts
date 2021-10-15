@@ -151,7 +151,10 @@ class InternalProviderImpl implements InternalProvider {
 
   private static logConsole(msg: string) {
     // tslint:disable-next-line:no-console
-    console.log(msg);
+    if (console && console.log) {
+      // tslint:disable-next-line:no-console
+      console.log(msg);
+    }
   }
 }
 

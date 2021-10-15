@@ -20,12 +20,12 @@ export class Log4TSProviderImpl implements Log4TSProvider {
     this._name = name;
 
     /* The default config, used as fallback if a logger does not match any group */
-    this._defaultConfig = [{...defaultConfig, identifier: defaultConfig.identifier}, createLogProvider(defaultConfig)];
+    this._defaultConfig = [{...defaultConfig, identifier: defaultConfig.identifier}, createLogProvider("log4ts_" + name + "_" + defaultConfig.identifier, defaultConfig)];
 
     /* Create various providers for the different groups so each will have the correct config */
     this._logProviders = new Map(groupConfigs.map(config => {
       const updatedConfig: Mutable<Log4TSGroupConfig> = {...config};
-      const provider = createLogProvider(config);
+      const provider = createLogProvider("log4ts_" + name + "_" + config.identifier, config);
       return [config.identifier, {groupConfig: updatedConfig, provider}];
     }));
 

@@ -16,7 +16,7 @@ describe("Test Log4TSControlProvider", () => {
 
   test("Test fetching non-existing provider fails", () => {
     const control = LOG4TS_LOG_CONTROL(message.write);
-    Log4TSProvider.createLog4TSProvider("test", {
+    Log4TSProvider.createProvider("test", {
       groups: [{
         expression: new RegExp("model.+"),
       }],
@@ -32,12 +32,12 @@ describe("Test Log4TSControlProvider", () => {
 
   test("Test fetching existing provider succeeds", () => {
     const control = LOG4TS_LOG_CONTROL(message.write);
-    Log4TSProvider.createLog4TSProvider("test", {
+    Log4TSProvider.createProvider("test", {
       groups: [{
         expression: new RegExp("model.+"),
       }],
     });
-    Log4TSProvider.createLog4TSProvider("another", {
+    Log4TSProvider.createProvider("another", {
       groups: [{
         expression: new RegExp("another.+"),
       }],
@@ -55,7 +55,7 @@ describe("Test Log4TSControlProvider", () => {
 
   test("Test control provider shows settings", () => {
     const control = LOG4TS_LOG_CONTROL(message.write);
-    Log4TSProvider.createLog4TSProvider("test", {
+    Log4TSProvider.createProvider("test", {
       groups: [{
         expression: new RegExp("model.+"),
       }],
@@ -67,18 +67,18 @@ describe("Test Log4TSControlProvider", () => {
 
   test("Test control provider shows settings with multiple groups", () => {
     const control = LOG4TS_LOG_CONTROL(message.write);
-    Log4TSProvider.createLog4TSProvider("test", {
+    Log4TSProvider.createProvider("test", {
       groups: [{
-          expression: new RegExp("model.+"),
-        }, {
-          expression: new RegExp("advanced.+"),
-          level: LogLevel.Warn,
-        }, {
-          expression: new RegExp("ignored.+"),
-          identifier: "my awesome identifier",
-        }, {
-          expression: new RegExp("blaat.blaat.+"),
-        },
+        expression: new RegExp("model.+"),
+      }, {
+        expression: new RegExp("advanced.+"),
+        level: LogLevel.Warn,
+      }, {
+        expression: new RegExp("ignored.+"),
+        identifier: "my awesome identifier",
+      }, {
+        expression: new RegExp("blaat.blaat.+"),
+      },
       ],
     });
     const controlProvider = control.getProvider("test");
@@ -97,10 +97,10 @@ describe("Test Log4TSControlProvider", () => {
   test("Test control provider updates log level of group configs", () => {
     const channel = new ArrayRawLogChannel();
     const control = LOG4TS_LOG_CONTROL(message.write);
-    const provider = Log4TSProvider.createLog4TSProvider("test", {
+    const provider = Log4TSProvider.createProvider("test", {
       groups: [{
         expression: new RegExp("model.+"),
-      },{
+      }, {
         expression: new RegExp("sample.+"),
       }],
       channel,
@@ -146,7 +146,7 @@ describe("Test Log4TSControlProvider", () => {
   test("Test control provider can reset back to levels when it was created", () => {
     const channel = new ArrayRawLogChannel();
     const control = LOG4TS_LOG_CONTROL(message.write);
-    const provider = Log4TSProvider.createLog4TSProvider("test", {
+    const provider = Log4TSProvider.createProvider("test", {
       groups: [{
         expression: new RegExp("model.+"),
       }],
@@ -173,14 +173,14 @@ describe("Test Log4TSControlProvider", () => {
     expect(channel.size).toEqual(0);
   });
 
-  test ("Test control provider can use save and restore", () => {
+  test("Test control provider can use save and restore", () => {
     const channel = new ArrayRawLogChannel();
     const control = LOG4TS_LOG_CONTROL(message.write);
-    let provider = Log4TSProvider.createLog4TSProvider("test", {
+    let provider = Log4TSProvider.createProvider("test", {
       groups: [{
         expression: new RegExp("model.+"),
         identifier: "model",
-      },{
+      }, {
         expression: new RegExp("service.+"),
         identifier: "service",
       }],
@@ -190,13 +190,13 @@ describe("Test Log4TSControlProvider", () => {
     let controlProvider = control.getProvider("test");
     let logModel = provider.getLogger("model.Sample");
     const expectedLevels = [{identifier: "model", level: LogLevel.Error}, {identifier: "service", level: LogLevel.Error}];
-    expect(provider.groupConfigs.map(v => ({ identifier: v.identifier,  level: v.level }))).toStrictEqual(expectedLevels);
+    expect(provider.groupConfigs.map(v => ({identifier: v.identifier, level: v.level}))).toStrictEqual(expectedLevels);
     controlProvider.update("info", "model");
 
     expectedLevels[0].level = LogLevel.Info;
     expect(logModel.logLevel).toEqual(LogLevel.Info);
     expect(message.messages).toEqual(["Updated group config with id 'model' successfully."]);
-    expect(provider.groupConfigs.map(v => ({ identifier: v.identifier,  level: v.level }))).toStrictEqual(expectedLevels);
+    expect(provider.groupConfigs.map(v => ({identifier: v.identifier, level: v.level}))).toStrictEqual(expectedLevels);
     message.clear();
 
     controlProvider.save();
@@ -206,11 +206,11 @@ describe("Test Log4TSControlProvider", () => {
     LOG4TS_PROVIDER_SERVICE.clear();
 
     /* Redo, we should start with error, and then restore should return to previous state */
-    provider = Log4TSProvider.createLog4TSProvider("test", {
+    provider = Log4TSProvider.createProvider("test", {
       groups: [{
         expression: new RegExp("model.+"),
         identifier: "model",
-      },{
+      }, {
         expression: new RegExp("service.+"),
         identifier: "service",
       }],
@@ -220,11 +220,11 @@ describe("Test Log4TSControlProvider", () => {
     logModel = provider.getLogger("model.Sample");
     expect(logModel.logLevel).toEqual(LogLevel.Error);
     expectedLevels[0].level = LogLevel.Error;
-    expect(provider.groupConfigs.map(v => ({ identifier: v.identifier,  level: v.level }))).toStrictEqual(expectedLevels);
+    expect(provider.groupConfigs.map(v => ({identifier: v.identifier, level: v.level}))).toStrictEqual(expectedLevels);
     controlProvider.restore();
 
     expect(message.messages).toEqual(
-      ["Log4TSControlProvider 'test' - restored log level of group 'model' to 'Info'.","Log4TSControlProvider 'test' - restored log level of group 'service' to 'Error'."]
+      ["Log4TSControlProvider 'test' - restored log level of group 'model' to 'Info'.", "Log4TSControlProvider 'test' - restored log level of group 'service' to 'Error'."]
     );
     expect(logModel.logLevel).toEqual(LogLevel.Info);
   });

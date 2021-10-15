@@ -38,7 +38,7 @@ export interface LogConfig {
   /**
    * The message formatter to use, is provided in log statement when
    * using a lambda, which allows formatting of a message if needed.
-   * For example: log.debug(fmt => fmt("My name is a {}, and I am from {}", "secret","a country"));
+   * For example: log.debug(fmt => fmt("My name is a {}, and I am from {}", "secret", "a country"));
    */
   readonly messageFormatter: MessageFormatterType;
 }

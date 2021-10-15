@@ -13,14 +13,14 @@ describe("Test Log4TSControl", () => {
     message.clear();
   });
 
-  test ("Test is empty (none registered)", () => {
+  test("Test is empty (none registered)", () => {
     const control = LOG4TS_LOG_CONTROL(message.write);
     control.showSettings();
     expect(message.messages).toEqual(["Available Log4TSProviders:\n"]);
   });
 
   test("Test showSettings lists provider", () => {
-    Log4TSProvider.createLog4TSProvider("test", {
+    Log4TSProvider.createProvider("test", {
       groups: [{
         expression: new RegExp("model.+"),
       }],
@@ -32,17 +32,17 @@ describe("Test Log4TSControl", () => {
   });
 
   test("Test showSettings lists multiple providers", () => {
-    Log4TSProvider.createLog4TSProvider("test", {
+    Log4TSProvider.createProvider("test", {
       groups: [{
         expression: new RegExp("short.+"),
       }],
     });
-    Log4TSProvider.createLog4TSProvider("Provider with a long name", {
+    Log4TSProvider.createProvider("Provider with a long name", {
       groups: [{
         expression: new RegExp("long.+"),
       }],
     });
-    Log4TSProvider.createLog4TSProvider("Some medium name", {
+    Log4TSProvider.createProvider("Some medium name", {
       groups: [{
         expression: new RegExp("medium.+"),
       }],
@@ -61,7 +61,7 @@ describe("Test Log4TSControl", () => {
   });
 
   test("Test can get provider by either index or name", () => {
-    Log4TSProvider.createLog4TSProvider("test", {
+    Log4TSProvider.createProvider("test", {
       groups: [{
         expression: new RegExp("model.+"),
       }],

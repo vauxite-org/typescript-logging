@@ -187,18 +187,6 @@ export abstract class AbstractNodeChannel {
     if (idx === -1) {
       return;
     }
-    const value = this._rollOverFiles[idx];
-    value.timer = undefined; // The timer fired as we got here
-    this.deleteFromRollOverArrayAndResetTimer(idx);
-  }
-
-  private deleteFromRollOverArrayAndResetTimer(idx: number) {
-    const items = this._rollOverFiles.splice(idx, 1);
-    if (items.length > 0) {
-      const item = items[0];
-      if (item.timer) {
-        clearTimeout(item.timer);
-      }
-    }
+    this._rollOverFiles.splice(idx, 1);
   }
 }
