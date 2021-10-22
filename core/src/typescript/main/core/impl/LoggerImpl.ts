@@ -93,7 +93,7 @@ export class LoggerImpl implements Logger {
         }, this._runtime.argumentFormatter);
         return;
       case "LogChannel":
-        this._runtime.channel.write(this.createLogMessage(message, errorAndArgs, nowMillis));
+        this._runtime.channel.write(this.createLogMessage(message, level, errorAndArgs, nowMillis));
         break;
     }
   }
@@ -108,7 +108,7 @@ export class LoggerImpl implements Logger {
     }
   }
 
-  private createLogMessage(message: string, errorAndArgs: ErrorAndArgs, nowMillis: number): LogMessage {
+  private createLogMessage(message: string, level: LogLevel, errorAndArgs: ErrorAndArgs, nowMillis: number): LogMessage {
     let errorResult: string | undefined;
     const error = errorAndArgs.error;
     const args = errorAndArgs.args;
@@ -124,9 +124,13 @@ export class LoggerImpl implements Logger {
      * Finally we also need to format any additional arguments and append after the message.
      */
     const dateFormatted = this._runtime.dateFormatter(nowMillis);
+    let levelAsStr = LogLevel[level].toUpperCase();
+    if (levelAsStr.length < 5) {
+      levelAsStr += " ";
+    }
     const names = typeof this._runtime.name === "string" ? this._runtime.name : this._runtime.name.join(", ");
     const argsFormatted = typeof args !== "undefined" ? (" [" + (args.map(arg => this.formatArgValue(arg))).join(", ") + "]") : "";
-    const completedMessage = dateFormatted + " [" + names + "] " + message + argsFormatted;
+    const completedMessage = dateFormatted + " " + levelAsStr + " [" + names + "] " + message + argsFormatted;
 
     return {
       message: completedMessage,
