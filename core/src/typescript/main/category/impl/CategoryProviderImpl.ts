@@ -6,6 +6,11 @@ import {CategoryImpl} from "./CategoryImpl";
 import {CategoryRuntimeSettings} from "../api/CategoryRuntimeSettings";
 
 /**
+ * The separator we use in a path for a category, this cannot be used in a name for a category.
+ */
+export const CATEGORY_PATH_SEPARATOR = "#";
+
+/**
  * Implementation for CategoryProvider.
  */
 export class CategoryProviderImpl implements CategoryProvider {
@@ -43,6 +48,16 @@ export class CategoryProviderImpl implements CategoryProvider {
   public updateRuntimeSettings(settings: RuntimeSettings): void {
     this._categoryStorage.updateRuntimeSettings(settings);
   }
+
+  /** Returns all currently registered categories */
+  public getRegisteredCategories(): ReadonlyArray<Category> {
+    return this._categoryStorage.getRegisteredCategories();
+  }
+
+  /** Get a category by path, note that paths must be separated by #, e.g. root#child1#child1_1 */
+  public getCategoryByPath(path: string): Category | undefined {
+    return this._categoryStorage.getCategoryByPath(path);
+  }
 }
 
 class CategoryStorage {
@@ -62,8 +77,8 @@ class CategoryStorage {
   }
 
   public getOrCreateCategory(name: string, parent?: LogId | Category): Category {
-    if (name.indexOf("#") !== -1) {
-      throw new Error(`Cannot create category '${name}', name cannot contain a '#'.`);
+    if (name.indexOf(CATEGORY_PATH_SEPARATOR) !== -1) {
+      throw new Error(`Cannot create category '${name}', name cannot contain a '${CATEGORY_PATH_SEPARATOR}'.`);
     }
 
     const parentCategory = parent !== undefined ? this.getParentCategory(parent) : undefined;
@@ -104,6 +119,16 @@ class CategoryStorage {
       ...this._logProvider.runtimeSettings,
       allowSameCategoryName: this._allowSameCategoryName
     };
+  }
+
+  /** Returns all currently registered categories */
+  public getRegisteredCategories(): ReadonlyArray<Category> {
+    return [...this._categoriesById.values()];
+  }
+
+  /** Get a category by path, note that paths must be separated by #, e.g. root#child1#child1_1 */
+  public getCategoryByPath(path: string): Category | undefined {
+    return this._categoriesByPath.get(path);
   }
 
   private getParentCategory(parent: LogId | Category): CategoryImpl {
@@ -148,7 +173,7 @@ class CategoryStorage {
     }
 
     /* Create full path, parent path and child next */
-    const path = [...parentCategory.path, name].join("#");
+    const path = [...parentCategory.path, name].join(CATEGORY_PATH_SEPARATOR);
 
     const existingChildCategory = this._categoriesByPath.get(path);
     if (existingChildCategory) {
@@ -169,7 +194,7 @@ class CategoryStorage {
 
     const childCategory = new CategoryImpl(logger, name, parentCategory, this.getOrCreateCategory);
     this._categoriesById.set(childCategory.id, childCategory);
-    this._categoriesByPath.set(name, childCategory);
+    this._categoriesByPath.set(childCategory.path.join(CATEGORY_PATH_SEPARATOR), childCategory);
     parentCategory.addChild(childCategory);
     return childCategory;
   }
