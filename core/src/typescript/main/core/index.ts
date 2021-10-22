@@ -22,7 +22,6 @@ export {LogConfig} from "./api/config/LogConfig";
 export {RuntimeSettings} from "./api/runtime/RuntimeSettings";
 
 export {ArgumentFormatterType} from "./api/type/ArgumentFormatterType";
-export {ArgumentsType} from "./api/type/ArgumentsType";
 export {DateFormatterType} from "./api/type/DateFormatterType";
 export {ExceptionType} from "./api/type/ExceptionType";
 export {LogChannelType} from "./api/type/LogChannelType";
