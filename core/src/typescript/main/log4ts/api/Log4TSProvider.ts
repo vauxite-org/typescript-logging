@@ -38,7 +38,7 @@ export interface Log4TSProvider {
   readonly getLogger: (name: string) => Logger;
 
   /**
-   * Can be used to update the runtime settings for one group.
+   * Can be used to update the runtime settings for one group (for both existing loggers of this group as well future loggers).
    *
    * The identifier must be the Log4TSGroupConfig identifier if set, otherwise
    * it falls back to the expression.toString() instead (for convenience

@@ -105,11 +105,14 @@ class Log4TSProviderService {
 
   private static help(): string {
     const msg =
-      `You can use the following commands:\n` +
-      "  showSettings()                                            => Shows the current configuration settings.\n" +
-      "  getProvider: (id: number | string): Log4TSControlProvider => Get access to a Log4TSControlProvider to change log levels.\n" +
-      "    id: The id (use showSettings to see) or name of the provider\n" +
-      "  help()                                                    => Shows this help.\n";
+      "You can use the following commands:\n" +
+      "  showSettings()\n" +
+      "    Shows the current configuration settings.\n" +
+      "  getProvider: (id: number | string): Log4TSControlProvider\n" +
+      "    Get access to a Log4TSControlProvider to change log levels.\n" +
+      "      @param id The id (use showSettings to see) or name of the provider\n" +
+      "  help()\n" +
+      "    Shows this help.\n";
     return msg;
   }
 }
