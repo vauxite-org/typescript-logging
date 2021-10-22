@@ -1,11 +1,9 @@
 import {Logger} from "../api/Logger";
 import {ExceptionType} from "../api/type/ExceptionType";
 import {LogLevel} from "../api/LogLevel";
-import {LogMessage} from "../api/LogMessage";
-import {LogChannel} from "../api/LogChannel";
 import {LogMessageType} from "../api/type/LogMessageType";
 import {LogRuntime} from "../api/runtime/LogRuntime";
-import {ArgumentsType} from "../api/type/ArgumentsType";
+import {LogMessage} from "../api/LogMessage";
 
 /**
  * Standard logger implementation that provides the basis for all loggers.
@@ -35,41 +33,50 @@ export class LoggerImpl implements Logger {
     this._runtime = runtime;
   }
 
-  public trace(message: LogMessageType, errorOrArgs?: ExceptionType | ArgumentsType, args?: ArgumentsType): void {
-    this.logMessage(LogLevel.Trace, message, errorOrArgs, args);
+  public trace(message: LogMessageType, ...args: unknown[]): void;
+  public trace(message: LogMessageType, error: ExceptionType, ...args: unknown[]): void;
+  public trace(message: LogMessageType, ...args: unknown[]): void {
+    this.logMessage(LogLevel.Trace, message, args);
   }
 
-  public debug(message: LogMessageType, errorOrArgs?: ExceptionType | ArgumentsType, args?: ArgumentsType): void {
-    this.logMessage(LogLevel.Debug, message, errorOrArgs, args);
+  public debug(message: LogMessageType, ...args: unknown[]): void;
+  public debug(message: LogMessageType, error: ExceptionType, ...args: unknown[]): void;
+  public debug(message: LogMessageType, ...args: unknown[]): void {
+    this.logMessage(LogLevel.Debug, message, args);
   }
 
-  public info(message: LogMessageType, errorOrArgs?: ExceptionType | ArgumentsType, args?: ArgumentsType): void {
-    this.logMessage(LogLevel.Info, message, errorOrArgs, args);
+  public info(message: LogMessageType, ...args: unknown[]): void;
+  public info(message: LogMessageType, error: ExceptionType, ...args: unknown[]): void;
+  public info(message: LogMessageType, ...args: unknown[]): void {
+    this.logMessage(LogLevel.Info, message, args);
   }
 
-  public warn(message: LogMessageType, errorOrArgs?: ExceptionType | ArgumentsType, args?: ArgumentsType): void {
-    this.logMessage(LogLevel.Warn, message, errorOrArgs, args);
+  public warn(message: LogMessageType, ...args: unknown[]): void;
+  public warn(message: LogMessageType, error: ExceptionType, ...args: unknown[]): void;
+  public warn(message: LogMessageType, ...args: unknown[]): void {
+    this.logMessage(LogLevel.Warn, message, args);
   }
 
-  public error(message: LogMessageType, errorOrArgs?: ExceptionType | ArgumentsType, args?: ArgumentsType): void {
-    this.logMessage(LogLevel.Error, message, errorOrArgs, args);
+  public error(message: LogMessageType, ...args: unknown[]): void;
+  public error(message: LogMessageType, error: ExceptionType, ...args: unknown[]): void;
+  public error(message: LogMessageType, ...args: unknown[]): void {
+    this.logMessage(LogLevel.Error, message, args);
   }
 
-  public fatal(message: LogMessageType, errorOrArgs?: ExceptionType | ArgumentsType, args?: ArgumentsType): void {
-    this.logMessage(LogLevel.Fatal, message, errorOrArgs, args);
+  public fatal(message: LogMessageType, ...args: unknown[]): void;
+  public fatal(message: LogMessageType, error: ExceptionType, ...args: unknown[]): void;
+  public fatal(message: LogMessageType, ...args: unknown[]): void {
+    this.logMessage(LogLevel.Fatal, message, args);
   }
 
-  public log(logLevel: LogLevel, message: LogMessageType, errorOrArgs?: ExceptionType | ArgumentsType, args?: ArgumentsType): void {
-    this.logMessage(logLevel, message, errorOrArgs, args);
-  }
-
-  private logMessage(level: LogLevel, logMessageType: LogMessageType, errorOrArgs?: ExceptionType | ArgumentsType, argumentsType?: ArgumentsType) {
+  private logMessage(level: LogLevel, logMessageType: LogMessageType, args: unknown[]) {
     if (this._runtime.level > level) {
       return;
     }
+
     const nowMillis = Date.now();
     const message = typeof logMessageType === "string" ? logMessageType : logMessageType(this._runtime.messageFormatter);
-    const [realError, args] = LoggerImpl.determineErrorAndArgs(errorOrArgs, argumentsType);
+    const errorAndArgs = LoggerImpl.getErrorAndArgs(args);
 
     /*
      * Deal with raw message here.
@@ -78,37 +85,15 @@ export class LoggerImpl implements Logger {
       case "RawLogChannel":
         this._runtime.channel.write({
           message,
-          exception: realError,
-          args,
+          exception: errorAndArgs.error,
+          args: errorAndArgs.args,
           timeInMillis: nowMillis,
           level,
           logNames: this._runtime.name,
         }, this._runtime.argumentFormatter);
         return;
       case "LogChannel":
-        let errorResult: string | undefined;
-        if (realError) {
-          errorResult = `${realError.name}: ${realError.message}`;
-          if (realError.stack) {
-            errorResult += `@\n${realError.stack}`;
-          }
-        }
-
-        /*
-         * We need to add the date, and log names (in front of the now formatted message).
-         * Finally we also need to format any additional arguments and append after the message.
-         */
-        const dateFormatted = this._runtime.dateFormatter(nowMillis);
-        const names = typeof this._runtime.name === "string" ? this._runtime.name : this._runtime.name.join(", ");
-        const argsFormatted = typeof args !== "undefined" ? (" [" + (args.map(arg => this.formatArgValue(arg))).join(", ") + "]") : "";
-        const completedMessage = dateFormatted + " [" + names + "] " + message + argsFormatted;
-
-        const logMessage: LogMessage = {
-          message: completedMessage,
-          error: errorResult,
-        };
-
-        this._runtime.channel.write(logMessage);
+        this._runtime.channel.write(this.createLogMessage(message, errorAndArgs, nowMillis));
         break;
     }
   }
@@ -123,36 +108,92 @@ export class LoggerImpl implements Logger {
     }
   }
 
-  private static determineErrorAndArgs(errorOrArgs?: ExceptionType | ArgumentsType, argumentsType?: ArgumentsType): [error?: Error, args?: ReadonlyArray<any>] {
-    let realError: Error | undefined;
-    let args: ReadonlyArray<any> | undefined;
-
-    if (typeof errorOrArgs !== "undefined") {
-      let data: readonly any[] | Error;
-      if (typeof errorOrArgs === "function") {
-        data = errorOrArgs();
+  private createLogMessage(message: string, errorAndArgs: ErrorAndArgs, nowMillis: number): LogMessage {
+    let errorResult: string | undefined;
+    const error = errorAndArgs.error;
+    const args = errorAndArgs.args;
+    if (error) {
+      errorResult = `${error.name}: ${error.message}`;
+      if (error.stack) {
+        errorResult += `@\n${error.stack}`;
       }
-      else {
-        data = errorOrArgs;
+    }
+
+    /*
+     * We need to add the date, and log names (in front of the now formatted message).
+     * Finally we also need to format any additional arguments and append after the message.
+     */
+    const dateFormatted = this._runtime.dateFormatter(nowMillis);
+    const names = typeof this._runtime.name === "string" ? this._runtime.name : this._runtime.name.join(", ");
+    const argsFormatted = typeof args !== "undefined" ? (" [" + (args.map(arg => this.formatArgValue(arg))).join(", ") + "]") : "";
+    const completedMessage = dateFormatted + " [" + names + "] " + message + argsFormatted;
+
+    return {
+      message: completedMessage,
+      error: errorResult,
+    };
+  }
+
+  private static getErrorAndArgs(args: unknown[]): ErrorAndArgs {
+
+    /*
+      The args are optional, but the first entry may be an Error or a function to an Error, or finally be a function to extra arguments.
+      The last is only true, if the length of args === 1, otherwise we expect args starting at pos 1 and further to be just that - args.
+     */
+    if (args.length === 0) {
+      return {};
+    }
+
+    let error: Error | undefined;
+    let actualArgs: unknown[] | undefined;
+    const value0 = args[0];
+
+    /* If the first argument is an Error, we can stop straight away, the rest are additional arguments then if any */
+    if (value0 instanceof Error) {
+      error = value0;
+      actualArgs = args.length > 1 ? args.slice(1) : undefined;
+
+      return {error, args: actualArgs};
+    }
+
+    /* If the first argument is a function, it means either it will return the Error, or if the array length === 1 a function, returning the arguments */
+    if (typeof value0 === "function") {
+      const errorOrArgs = value0();
+
+      if (errorOrArgs instanceof Error) {
+        error = errorOrArgs;
+        actualArgs = args.length > 1 ? args.slice(1) : undefined;
+        return {error, args: actualArgs};
       }
 
-      if (data instanceof Error) {
-        realError = data;
-
-        // The additional args may be set now.
-        if (typeof argumentsType !== "undefined") {
-          if (typeof argumentsType === "function") {
-            args = argumentsType();
-          }
-          else {
-            args = argumentsType;
-          }
+      if (args.length === 1) {
+        /* The first argument was a function, we assume it returned the extra argument(s) */
+        if (Array.isArray(errorOrArgs)) {
+          return {args: errorOrArgs.length > 0 ? errorOrArgs : undefined};
+        }
+        else {
+          /* No idea what was returned we just assume a single value */
+          return {args: errorOrArgs};
         }
       }
       else {
-        args = data;
+        /*
+          This is a weird situation but there's no way to avoid it, the first argument was a function but did not return an Error and the args are > 1,
+          so just add the args returned, as well as any remaining.
+        */
+        if (Array.isArray(errorOrArgs)) {
+          return {args: [...errorOrArgs, ...args.slice(1)]};
+        }
+        return {args: [errorOrArgs, ...args.slice(1)]};
       }
     }
-    return [realError, args];
+
+    /* All args are ordinary arguments, or at least the first arg was not an Error or a Function, so we add all as args */
+    return {args};
   }
+}
+
+interface ErrorAndArgs {
+  error?: Error;
+  args?: unknown[];
 }

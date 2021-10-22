@@ -1,5 +1,5 @@
 import {Category} from "../api/Category";
-import {ArgumentsType, ExceptionType, Logger, LogLevel, LogMessageType} from "../../core";
+import {ExceptionType, Logger, LogLevel, LogMessageType} from "../../core";
 
 /**
  * Implementation for Category.
@@ -75,31 +75,39 @@ export class CategoryImpl implements Category {
     return this._logger;
   }
 
-  public trace(message: LogMessageType, errorOrArgs?: ArgumentsType | ExceptionType, args?: ArgumentsType): void {
-    this._logger.log(LogLevel.Trace, message, errorOrArgs, args);
+  public trace(message: LogMessageType, ...args: unknown[]): void;
+  public trace(message: LogMessageType, error: ExceptionType, ...args: unknown[]): void;
+  public trace(message: LogMessageType, ...args: unknown[]): void {
+    this._logger.trace(message, args);
   }
 
-  public debug(message: LogMessageType, errorOrArgs?: ArgumentsType | ExceptionType, args?: ArgumentsType): void {
-    this._logger.log(LogLevel.Debug, message, errorOrArgs, args);
+  public debug(message: LogMessageType, ...args: unknown[]): void;
+  public debug(message: LogMessageType, error: ExceptionType, ...args: unknown[]): void;
+  public debug(message: LogMessageType, ...args: unknown[]): void {
+    this._logger.debug(message, args);
   }
 
-  public info(message: LogMessageType, errorOrArgs?: ArgumentsType | ExceptionType, args?: ArgumentsType): void {
-    this._logger.log(LogLevel.Info, message, errorOrArgs, args);
+  public info(message: LogMessageType, ...args: unknown[]): void;
+  public info(message: LogMessageType, error: ExceptionType, ...args: unknown[]): void;
+  public info(message: LogMessageType, ...args: unknown[]): void {
+    this._logger.info(message, args);
   }
 
-  public warn(message: LogMessageType, errorOrArgs?: ArgumentsType | ExceptionType, args?: ArgumentsType): void {
-    this._logger.log(LogLevel.Warn, message, errorOrArgs, args);
+  public warn(message: LogMessageType, ...args: unknown[]): void;
+  public warn(message: LogMessageType, error: ExceptionType, ...args: unknown[]): void;
+  public warn(message: LogMessageType, ...args: unknown[]): void {
+    this._logger.warn(message, args);
   }
 
-  public error(message: LogMessageType, errorOrArgs?: ArgumentsType | ExceptionType, args?: ArgumentsType): void {
-    this._logger.log(LogLevel.Error, message, errorOrArgs, args);
+  public error(message: LogMessageType, ...args: unknown[]): void;
+  public error(message: LogMessageType, error: ExceptionType, ...args: unknown[]): void;
+  public error(message: LogMessageType, ...args: unknown[]): void {
+    this._logger.error(message, args);
   }
 
-  public fatal(message: LogMessageType, errorOrArgs?: ArgumentsType | ExceptionType, args?: ArgumentsType): void {
-    this._logger.log(LogLevel.Fatal, message, errorOrArgs, args);
-  }
-
-  public log(logLevel: LogLevel, message: LogMessageType, errorOrArgs?: ExceptionType | ArgumentsType, args?: ArgumentsType): void {
-    this._logger.log(logLevel, message, errorOrArgs, args);
+  public fatal(message: LogMessageType, ...args: unknown[]): void;
+  public fatal(message: LogMessageType, error: ExceptionType, ...args: unknown[]): void;
+  public fatal(message: LogMessageType, ...args: unknown[]): void {
+    this._logger.fatal(message, args);
   }
 }
