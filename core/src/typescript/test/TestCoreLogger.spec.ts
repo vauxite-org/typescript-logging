@@ -23,28 +23,28 @@ describe("Test core logger", () => {
     logger.debug(() => "message6", () => new Error("error3"));
     logger.debug(() => "message7", new Error("error4"));
     logger.debug("message8", "arg1");
-    logger.debug("message9", "arg1", 2);
+    logger.info("message9", "arg1", 2);
     logger.debug("message10", () => ["arg1", 2]);
     logger.debug(() => "message11", new Error("error5"), {a: "bla"});
     logger.debug(() => "message12", () => new Error("error6"), {a: "bla"});
-    logger.debug(() => "message13", () => ["a", 500]);
+    logger.warn(() => "message13", () => ["a", 500]);
     logger.debug(() => "message14", () => ["a", 500], "unexpected", 250.51);
 
     expect(channel.messages).toEqual([
-      "XXX [Main] message1",
-      "XXX [Main] message2",
-      "XXX [Main] message'3'",
-      "XXX [Main] message4",
-      "XXX [Main] message5",
-      "XXX [Main] message6",
-      "XXX [Main] message7",
-      `XXX [Main] message8 ["arg1"]`,
-      `XXX [Main] message9 ["arg1", 2]`,
-      `XXX [Main] message10 ["arg1", 2]`,
-      `XXX [Main] message11 [{"a":"bla"}]`,
-      `XXX [Main] message12 [{"a":"bla"}]`,
-      `XXX [Main] message13 ["a", 500]`,
-      `XXX [Main] message14 ["a", 500, "unexpected", 250.51]`,
+      "XXX DEBUG [Main] message1",
+      "XXX DEBUG [Main] message2",
+      "XXX DEBUG [Main] message'3'",
+      "XXX DEBUG [Main] message4",
+      "XXX DEBUG [Main] message5",
+      "XXX DEBUG [Main] message6",
+      "XXX DEBUG [Main] message7",
+      `XXX DEBUG [Main] message8 ["arg1"]`,
+      `XXX INFO  [Main] message9 ["arg1", 2]`,
+      `XXX DEBUG [Main] message10 ["arg1", 2]`,
+      `XXX DEBUG [Main] message11 [{"a":"bla"}]`,
+      `XXX DEBUG [Main] message12 [{"a":"bla"}]`,
+      `XXX WARN  [Main] message13 ["a", 500]`,
+      `XXX DEBUG [Main] message14 ["a", 500, "unexpected", 250.51]`,
     ]);
 
     const errors = channel.logMessages.map(m => m.error);
@@ -103,12 +103,11 @@ describe("Test core logger", () => {
     log.debug("Hello!", "A", 4, undefined, null, ["dance", "again"]);
     log.debug("Hello!", new Error("fail"), "A", 4, undefined, null, ["dance", "again"]);
 
-    expect(channel.messages).toEqual(
-      [`XXX [Main] Hello! ["A"]`,
-        `XXX [Main] Hello! ["A", 4, undefined, null, ["dance","again"]]`,
-        `XXX [Main] Hello! ["A", 4, undefined, null, ["dance","again"]]`,
-      ]
-    );
+    expect(channel.messages).toEqual([
+      `XXX DEBUG [Main] Hello! ["A"]`,
+      `XXX DEBUG [Main] Hello! ["A", 4, undefined, null, ["dance","again"]]`,
+      `XXX DEBUG [Main] Hello! ["A", 4, undefined, null, ["dance","again"]]`,
+    ]);
   });
 
   function assertLogLevels(logLevel: LogLevel) {
@@ -122,7 +121,13 @@ describe("Test core logger", () => {
     log.fatal(input[5]);
 
     const idx: number = logLevel;
-    const expected = input.slice(idx).map(v => "XXX [Main] " + v);
+    const expected = input.slice(idx).map(v => {
+      let levelStr = v.toUpperCase();
+      if (levelStr.length < 5) {
+        levelStr += " ";
+      }
+      return "XXX " + levelStr + " [Main] " + v;
+    });
     expect(channel.messages).toEqual(expected);
   }
 });
