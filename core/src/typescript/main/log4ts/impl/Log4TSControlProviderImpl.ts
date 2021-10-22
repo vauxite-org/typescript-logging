@@ -39,7 +39,7 @@ export class Log4TSControlProviderImpl implements Log4TSControlProvider {
     }));
     const maxWidthIndex = groupConfigs.length.toString().length;
     const maxWidthIdentifier = maxLengthStringValueInArray(groupConfigs.map(cfg => cfg.identifier));
-    const maxWidthLevel = maxLengthStringValueInArray(groupConfigs.map(cfg => cfg.level));
+    const maxWidthLevel = 5;
 
     /*
       We create this kind of output:
@@ -97,7 +97,7 @@ export class Log4TSControlProviderImpl implements Log4TSControlProvider {
 
   public reset(): void {
     this._originalLogLevels.forEach((value, key) => {
-      this._provider.updateRuntimeSettingsGroup(key, { level: value});
+      this._provider.updateRuntimeSettingsGroup(key, {level: value});
     });
     this._messageChannel("Successfully reset log levels back to original state (from when this Log4TSControlProvider was created).");
   }
@@ -156,14 +156,21 @@ export class Log4TSControlProviderImpl implements Log4TSControlProvider {
   public help(): void {
     const msg =
       `You can use the following commands (Log4TSProvider ${this._provider.name}):\n` +
-      "  showSettings()                              => Shows the current configuration settings.\n" +
-      "  update(logLevel, groupId?: number | string) => Change the log level for one or all config groups.\n" +
-      "    level:   The log level to set - must be one of 'trace', 'debug', 'info', 'warn', 'error' or 'fatal'\n" +
-      "    groupId: Optional group config to update by either index or identifier, when omitted updates all groups.\n" +
-      "  reset()                                     => Resets the log levels of the config groups back to when this control provider was created.\n" +
-      "  save()                                      => Saves the current log levels for all config groups of this provider. Use restore() to load last saved state.\n" +
-      "  restore()                                   => Restore stored saved state, if any. Log levels will be set according to saved state.\n" +
-      "  help()                                      => Shows this help.\n";
+      "  showSettings()\n" +
+      "    Shows the current configuration settings.\n" +
+      "  update(logLevel: Log4TSControlProviderLogLevel, groupId?: number | string)\n" +
+      "    Change the log level for one or all config groups.\n" +
+      "      @param level   The log level to set - must be one of 'trace', 'debug', 'info', 'warn', 'error' or 'fatal'\n" +
+      "      @param groupId Optional group config to update by either index or identifier, when omitted updates all groups.\n" +
+      "                     Use showSettings() to find details about index and/or identifier.\n" +
+      "  reset()\n" +
+      "    Resets the log levels of the config groups back to when this control provider was created.\n" +
+      "  save()\n" +
+      "    Saves the current log levels for all config groups of this provider. Use restore() to load last saved state.\n" +
+      "  restore()\n" +
+      "    Restore stored saved state, if any. Log levels will be set according to saved state.\n" +
+      "  help()\n" +
+      "    Shows this help.\n";
     this._messageChannel(msg);
   }
 
@@ -193,12 +200,12 @@ export class Log4TSControlProviderImpl implements Log4TSControlProvider {
     return `Log4TSProvider-${this._provider.name}`;
   }
 
-  private static loadCurrentGroupLogLevels(provider: Log4TSProvider):  Map<string, LogLevel> {
+  private static loadCurrentGroupLogLevels(provider: Log4TSProvider): Map<string, LogLevel> {
     return new Map<string, LogLevel>(provider.groupConfigs.map(cfg => [cfg.identifier, cfg.level]));
   }
 }
 
 interface SaveData {
   name: string;
-  groups: ReadonlyArray<{identifier: string, level: string}>;
+  groups: ReadonlyArray<{ identifier: string, level: string }>;
 }
