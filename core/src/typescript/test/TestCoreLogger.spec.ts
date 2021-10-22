@@ -13,6 +13,57 @@ describe("Test core logger", () => {
     assertLogLevels(LogLevel.Fatal);
   });
 
+  test("Test with various supported arguments", () => {
+    const [logger, channel] = createDefaultLogger(LogLevel.Debug);
+    logger.debug("message1");
+    logger.debug(() => "message2");
+    logger.debug(fmt => fmt("message{}", [3]));
+    logger.debug("message4", new Error("error1"));
+    logger.debug("message5", () => new Error("error2"));
+    logger.debug(() => "message6", () => new Error("error3"));
+    logger.debug(() => "message7", new Error("error4"));
+    logger.debug("message8", "arg1");
+    logger.debug("message9", "arg1", 2);
+    logger.debug("message10", () => ["arg1", 2]);
+    logger.debug(() => "message11", new Error("error5"), {a: "bla"});
+    logger.debug(() => "message12", () => new Error("error6"), {a: "bla"});
+    logger.debug(() => "message13", () => ["a", 500]);
+    logger.debug(() => "message14", () => ["a", 500], "unexpected", 250.51);
+
+    expect(channel.messages).toEqual([
+      "XXX [Main] message1",
+      "XXX [Main] message2",
+      "XXX [Main] message'3'",
+      "XXX [Main] message4",
+      "XXX [Main] message5",
+      "XXX [Main] message6",
+      "XXX [Main] message7",
+      `XXX [Main] message8 ["arg1"]`,
+      `XXX [Main] message9 ["arg1", 2]`,
+      `XXX [Main] message10 ["arg1", 2]`,
+      `XXX [Main] message11 [{"a":"bla"}]`,
+      `XXX [Main] message12 [{"a":"bla"}]`,
+      `XXX [Main] message13 ["a", 500]`,
+      `XXX [Main] message14 ["a", 500, "unexpected", 250.51]`,
+    ]);
+
+    const errors = channel.logMessages.map(m => m.error);
+    expect(errors[0]).toBeUndefined();
+    expect(errors[1]).toBeUndefined();
+    expect(errors[2]).toBeUndefined();
+    expect(errors[3]).toContain("error1");
+    expect(errors[4]).toContain("error2");
+    expect(errors[5]).toContain("error3");
+    expect(errors[6]).toContain("error4");
+    expect(errors[7]).toBeUndefined();
+    expect(errors[8]).toBeUndefined();
+    expect(errors[9]).toBeUndefined();
+    expect(errors[10]).toContain("error5");
+    expect(errors[11]).toContain("error6");
+    expect(errors[12]).toBeUndefined();
+    expect(errors[13]).toBeUndefined();
+  });
+
   test("Test formatting", () => {
     const channel = new ArrayRawLogChannel();
     const log = new LoggerImpl({
@@ -48,9 +99,9 @@ describe("Test core logger", () => {
   test("Test arguments formatting", () => {
     const [log, channel] = createDefaultLogger(LogLevel.Debug);
 
-    log.debug("Hello!", ["A"]);
-    log.debug("Hello!", ["A", 4, undefined, null, ["dance", "again"]]);
-    log.debug("Hello!", new Error("fail"), ["A", 4, undefined, null, ["dance", "again"]]);
+    log.debug("Hello!", "A");
+    log.debug("Hello!", "A", 4, undefined, null, ["dance", "again"]);
+    log.debug("Hello!", new Error("fail"), "A", 4, undefined, null, ["dance", "again"]);
 
     expect(channel.messages).toEqual(
       [`XXX [Main] Hello! ["A"]`,
