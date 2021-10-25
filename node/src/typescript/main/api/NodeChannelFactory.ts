@@ -28,7 +28,7 @@ export class NodeChannelFactory {
    * @param writeRawLogMessage Function that does format the raw message and returns it as a string, this string is then logged in the file.
    * @param options Additional channel options
    */
-  public static createRawLogChannel(retentionStrategy: RetentionStrategy, writeRawLogMessage: (msg: RawLogMessage, formatArg: (arg: any) => string) => string,
+  public static createRawLogChannel(retentionStrategy: RetentionStrategy, writeRawLogMessage: (msg: RawLogMessage, formatArg: (arg: unknown) => string) => string,
                                     options?: NodeChannelOptions): RawLogChannel {
     return new NodeRawLogChannel(retentionStrategy, writeRawLogMessage, options);
   }

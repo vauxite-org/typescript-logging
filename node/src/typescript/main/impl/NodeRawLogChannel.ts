@@ -8,9 +8,9 @@ import {NodeChannelOptions} from "../api/NodeChannelOptions";
  */
 export class NodeRawLogChannel extends AbstractNodeChannel implements RawLogChannel {
 
-  private readonly _writeRawLogMessage: (msg: RawLogMessage, formatArg: (arg: any) => string) => string;
+  private readonly _writeRawLogMessage: (msg: RawLogMessage, formatArg: (arg: unknown) => string) => string;
 
-  public constructor(retentionStrategy: RetentionStrategy, writeRawLogMessage: (msg: RawLogMessage, formatArg: (arg: any) => string) => string, options?: NodeChannelOptions) {
+  public constructor(retentionStrategy: RetentionStrategy, writeRawLogMessage: (msg: RawLogMessage, formatArg: (arg: unknown) => string) => string, options?: NodeChannelOptions) {
     super(retentionStrategy, options);
     this._writeRawLogMessage = writeRawLogMessage;
   }
@@ -19,7 +19,7 @@ export class NodeRawLogChannel extends AbstractNodeChannel implements RawLogChan
     return "RawLogChannel";
   }
 
-  public write(msg: RawLogMessage, formatArg: (arg: any) => string): void {
+  public write(msg: RawLogMessage, formatArg: (arg: unknown) => string): void {
     const result = this._writeRawLogMessage(msg, formatArg);
     this.writeMessage(result);
   }

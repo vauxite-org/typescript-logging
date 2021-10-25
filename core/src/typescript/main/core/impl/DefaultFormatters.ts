@@ -12,7 +12,7 @@ import {padStart} from "../../util/StringUtil";
  * @param messageArgumentFormatter The argument formatter, optional. When set uses that formatter, otherwise the default argument formatter instead.
  * @returns string
  */
-export function formatMessage(message: string, messageArgs: ReadonlyArray<any>, messageArgumentFormatter?: MessageArgumentFormatterType): string {
+export function formatMessage(message: string, messageArgs: ReadonlyArray<unknown>, messageArgumentFormatter?: MessageArgumentFormatterType): string {
   let result = "";
   let indexArg = 0;
   for (let i = 0; i < message.length;) {
@@ -30,7 +30,7 @@ export function formatMessage(message: string, messageArgs: ReadonlyArray<any>, 
      */
     const c = message.charAt(i);
     if ((i + 1) < message.length && c === "{" && message.charAt(i + 1) === "}") {
-      result +=  messageArgumentFormatter ? messageArgumentFormatter(messageArgs[indexArg++]) : formatMessageArgument(messageArgs[indexArg++]);
+      result += messageArgumentFormatter ? messageArgumentFormatter(messageArgs[indexArg++]) : formatMessageArgument(messageArgs[indexArg++]);
       i += 2;
     }
     else {
@@ -47,11 +47,17 @@ export function formatMessage(message: string, messageArgs: ReadonlyArray<any>, 
  * @param arg Argument to format
  * @returns Message argument as single quoted string, (returns "undefined" for undefined).
  */
-export function formatMessageArgument(arg: any): string {
+export function formatMessageArgument(arg: unknown): string {
   if (typeof arg === "undefined") {
     return "undefined";
   }
-  return `'${arg.toString()}'`;
+
+  const argAny = arg as any;
+
+  if (argAny.toString) {
+    return `'${argAny.toString()}'`;
+  }
+  return `${arg}`;
 }
 
 /**
@@ -60,7 +66,7 @@ export function formatMessageArgument(arg: any): string {
  * @param arg The argument to format
  * @returns argument stringified to string (JSON.stringify), if arg is undefined returns "undefined" (without quotes).
  */
-export function formatArgument(arg: any): string {
+export function formatArgument(arg: unknown): string {
   if (arg === undefined) {
     return "undefined";
   }

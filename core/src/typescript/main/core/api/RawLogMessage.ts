@@ -36,5 +36,5 @@ export interface RawLogMessage {
   /**
    * Additional arguments when they were logged, else undefined.
    */
-  readonly args?: ReadonlyArray<any>;
+  readonly args?: ReadonlyArray<unknown>;
 }

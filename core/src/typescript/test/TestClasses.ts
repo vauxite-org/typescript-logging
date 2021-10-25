@@ -28,7 +28,7 @@ export class ArrayRawLogChannel implements RawLogChannel {
   private _buffer: RawLogMessage[] = [];
   public readonly type = "RawLogChannel";
 
-  public write(msg: RawLogMessage, _: (arg: any) => string): void {
+  public write(msg: RawLogMessage, _: (arg: unknown) => string): void {
     this._buffer.push(msg);
   }
 
