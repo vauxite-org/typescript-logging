@@ -7,4 +7,4 @@
  *
  * An example: log.debug(fmt => fmt("My name is a {}, and I am from {}.", "secret", "a country"));
  */
-export type MessageFormatterType = (message: string, messageArgs: ReadonlyArray<any>) => string;
+export type MessageFormatterType = (message: string, messageArgs: ReadonlyArray<unknown>) => string;
