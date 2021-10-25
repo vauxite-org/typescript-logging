@@ -25,27 +25,83 @@ export interface Logger {
    */
   readonly runtimeSettings: LogRuntime;
 
+  /**
+   * Log a message on trace, for details please see {@link debug}.
+   */
   trace(message: LogMessageType, ...args: unknown[]): void;
 
+  /**
+   * Log a message on info, for details please see {@link debug}.
+   */
   trace(message: LogMessageType, error: ExceptionType, ...args: unknown[]): void;
 
+  /**
+   * Log a message on debug. Followed by an optional Error, and optional arguments.
+   * @example
+   * ```
+   * log.debug("Hello");
+   * log.debug(() => "Hello");
+   * log.debug(() => "Hello", new Error("SomeError"));
+   * log.debug("Hello", "Some", "Random", "Arguments", [], 123);
+   * log.debug("Hello", new Error("AnotherError"), "Some", "Random", "Arguments", [], 123);
+   * ```
+   * @param message Message
+   * @param args Optional arguments (note the first argument can be a (caught) Error which is treated as such then)
+   */
   debug(message: LogMessageType, ...args: unknown[]): void;
 
+  /**
+   * Log a message on debug. Followed by an optional Error, and optional arguments.
+   * @example
+   * ```
+   * log.debug("Hello");
+   * log.debug(() => "Hello");
+   * log.debug(() => "Hello", new Error("SomeError"));
+   * log.debug("Hello", "Some", "Random", "Arguments", [], 123);
+   * log.debug("Hello", new Error("AnotherError"), "Some", "Random", "Arguments", [], 123);
+   * ```
+   * @param message Message
+   * @param args Optional arguments (note the first argument can be a (caught) Error which is treated as such then)
+   */
   debug(message: LogMessageType, error: ExceptionType, ...args: unknown[]): void;
 
+  /**
+   * Log a message on info, for details please see {@link debug}.
+   */
   info(message: LogMessageType, ...args: unknown[]): void;
 
+  /**
+   * Log a message on info, for details please see {@link debug}.
+   */
   info(message: LogMessageType, error: ExceptionType, ...args: unknown[]): void;
 
+  /**
+   * Log a message on warn, for details please see {@link debug}.
+   */
   warn(message: LogMessageType, ...args: unknown[]): void;
 
+  /**
+   * Log a message on warn, for details please see {@link debug}.
+   */
   warn(message: LogMessageType, error: ExceptionType, ...args: unknown[]): void;
 
+  /**
+   * Log a message on error, for details please see {@link debug}.
+   */
   error(message: LogMessageType, ...args: unknown[]): void;
 
+  /**
+   * Log a message on error, for details please see {@link debug}.
+   */
   error(message: LogMessageType, error: ExceptionType, ...args: unknown[]): void;
 
+  /**
+   * Log a message on fatal, for details please see {@link debug}.
+   */
   fatal(message: LogMessageType, ...args: unknown[]): void;
 
+  /**
+   * Log a message on fatal, for details please see {@link debug}.
+   */
   fatal(message: LogMessageType, error: ExceptionType, ...args: unknown[]): void;
 }
