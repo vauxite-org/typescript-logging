@@ -6,7 +6,7 @@ import {LogMessage} from "../../api/LogMessage";
 /**
  * Default standard LogChannel which logs to console.
  */
-export class ConsoleChannel implements LogChannel {
+export class ConsoleLogChannel implements LogChannel {
 
   public readonly type: "LogChannel" = "LogChannel";
 
