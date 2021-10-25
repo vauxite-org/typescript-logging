@@ -30,7 +30,7 @@ export {LogMessageType} from "./api/type/LogMessageType";
 export {MessageArgumentFormatterType} from "./api/type/MessageArgumentFormatterType";
 export {MessageFormatterType} from "./api/type/MessageFormatterType";
 
-/* Export default channels and few utilities from impl, only what we deem convenient for end users */
+/* Export default channels and a few utilities from impl, only what we deem convenient for end users */
 export * from "./impl/channel/DefaultChannels";
 export * from "./impl/DefaultFormatters";
 

@@ -1,5 +1,5 @@
 import {LogChannel} from "../../api/LogChannel";
-import {ConsoleChannel} from "./ConsoleChannel";
+import {ConsoleLogChannel} from "./ConsoleLogChannel";
 
 /* tslint:disable:no-namespace */
 
@@ -11,6 +11,6 @@ export namespace DefaultChannels {
    * Create a new standard LogChannel that logs to the console.
    */
   export function createConsoleChannel(): LogChannel {
-    return new ConsoleChannel();
+    return new ConsoleLogChannel();
   }
 }
