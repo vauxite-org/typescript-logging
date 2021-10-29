@@ -1,6 +1,7 @@
 {
   "workspaces": [
     "core",
-    "node"
+    "node",
+    "tests-integration/rollup"
   ]
 }

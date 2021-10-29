@@ -6,6 +6,7 @@ import pkg from "./package.json";
 
 export default {
   input: "src/typescript/main/typescript-logging.ts",
+  // Note commonjs is for jest currently.
   output: [
     {
       file: pkg.main,
