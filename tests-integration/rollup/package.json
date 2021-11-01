@@ -1,0 +1,42 @@
+{
+  "name": "typescript-logging-integration-test-rollup",
+  "version": "2.0.0",
+  "private": "true",
+  "description": "Test with rollup",
+  "scripts": {
+    "clean": "shx rm -rf ./dist",
+    "compile": "rollup -c",
+    "compile-watch": "rollup -cw",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "start-server": "http-server ./dist/app -c-1 -p 8080",
+    "test": "shx cp -R src/web/* ./dist/app && start-server-and-test start-server 8080 'npm run cypress:run'",
+    "test-watch": "shx cp -R src/web/* ./dist/app && start-server-and-test start-server 8080 'npm run cypress:open'",
+    "tslint": "tslint -c tslint.json -p tsconfig.json",
+    "build": "npm run clean && npm run compile && npm run test && npm run tslint"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vauxite-org/typescript-logging.git"
+  },
+  "author": "Martijn Reuvers <martijnr.work@gmail.com>",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/vauxite-org/typescript-logging/issues"
+  },
+  "homepage": "https://github.com/vauxite-org/typescript-logging/core/#readme",
+  "dependencies": {
+    "typescript-logging": "2.0.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "13.0.6",
+    "cypress": "8.7.0",
+    "http-server": "14.0.0",
+    "rollup": "2.58.3",
+    "rollup-plugin-typescript2": "0.30.0",
+    "shx": "0.3.3",
+    "start-server-and-test": "1.14.0",
+    "tslint": "6.1.3",
+    "typescript": "4.4.4"
+  }
+}
