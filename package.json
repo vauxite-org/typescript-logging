@@ -2,6 +2,7 @@
   "workspaces": [
     "core",
     "node",
-    "tests-integration/rollup"
+    "tests-integration/rollup",
+    "tests-integration/webpack"
   ]
 }
