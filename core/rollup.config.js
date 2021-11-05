@@ -5,8 +5,9 @@ import resolve from "@rollup/plugin-node-resolve";
 import pkg from "./package.json";
 
 export default {
-  input: "src/typescript/main/typescript-logging.ts",
-  // Note commonjs is for jest currently.
+  input: "src/typescript/main/typescript-logging-core.ts",
+
+  // Note commonjs is for jest as its not very good with esm modules.
   output: [
     {
       file: pkg.main,

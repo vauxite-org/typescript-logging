@@ -1,33 +1,33 @@
 {
-  "name": "typescript-logging",
+  "name": "typescript-logging-core",
   "version": "2.0.0",
-  "description": "TypeScript Logging written in and to be used by TypeScript.",
-  "main": "dist/bundle/typescript-logging.js",
-  "module": "dist/bundle/typescript-logging.esm.js",
-  "typings": "dist/bundle/src/typescript/main/typescript-logging.d.ts",
+  "private": true,
+  "description": "TypeScript Logging core written in and to be used by TypeScript.",
+  "main": "dist/bundle/typescript-logging-core.js",
+  "module": "dist/bundle/typescript-logging-core.esm.js",
+  "typings": "dist/bundle/src/typescript/main/typescript-logging-core.d.ts",
   "scripts": {
     "clean": "shx rm -rf ./dist",
     "compile": "rollup -c",
     "compile-watch": "rollup -cw",
-    "tslint": "tslint -c tslint.json -p tsconfig.json",
+    "tslint": "tslint -c tslint.base.json -p tsconfig.json",
     "test": "jest --no-cache",
     "test-watch": "jest --watchAll",
     "build": "npm run clean && npm run compile && npm run test && npm run tslint"
   },
-  "files": [
-    "dist/",
-    "LICENSE",
-    "README.md"
-  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/vauxite-org/typescript-logging.git"
   },
   "keywords": [
     "typescript-logging",
+    "typescript logging",
+    "typescript-logging core",
     "typescript logger",
     "log4ts",
-    "log4js-like",
+    "log4ts-like",
+    "category",
+    "category-like",
     "logging",
     "log",
     "logger"
@@ -37,7 +37,7 @@
   "bugs": {
     "url": "https://github.com/vauxite-org/typescript-logging/issues"
   },
-  "homepage": "https://github.com/vauxite-org/typescript-logging/core/#readme",
+  "homepage": "https://github.com/vauxite-org/typescript-logging/#readme",
   "devDependencies": {
     "@rollup/plugin-commonjs": "21.0.1",
     "@rollup/plugin-node-resolve": "13.0.6",

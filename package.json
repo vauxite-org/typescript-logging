@@ -1,8 +1,7 @@
 {
+  "private": true,
   "workspaces": [
     "core",
-    "node",
-    "tests-integration/rollup",
-    "tests-integration/webpack"
+    "log4ts-style"
   ]
 }
