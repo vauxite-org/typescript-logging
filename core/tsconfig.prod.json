@@ -11,6 +11,6 @@
     // We don't want jest types, as that enables esXXXX version, way newer than what we want (see lib), instead compile must fail.
   },
   "include": [
-    "./src/typescript/main/**/*"
+    "./src/typescript/**/*"
   ]
 }
