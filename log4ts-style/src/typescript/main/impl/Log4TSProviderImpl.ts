@@ -1,16 +1,14 @@
 import {Log4TSProvider} from "../api/Log4TSProvider";
-import {createLogProvider, Logger, LogProvider, RuntimeSettings} from "../../core";
+import {$internal, createLogProvider, Logger, LogProvider, Mutable, RuntimeSettings} from "typescript-logging-core";
 import {Log4TSGroupConfig} from "../api/Log4TSGroupConfig";
-import {getInternalLogger} from "../../internal/InternalLogger";
-import {log4TSGroupConfigDebug} from "../../util/DebugUtil";
-import {Mutable} from "../../util/TypeUtils";
+import {log4TSGroupConfigDebug} from "../util/DebugUtil";
 
 /**
  * Implementation class for Log4TSProvider.
  */
 export class Log4TSProviderImpl implements Log4TSProvider {
 
-  private readonly _log = getInternalLogger("log4ts.impl.Log4TSProviderImpl");
+  private readonly _log = $internal.getInternalLogger("log4ts.impl.Log4TSProviderImpl");
 
   private readonly _name: string;
   private readonly _defaultConfig: [Log4TSGroupConfig, LogProvider];

@@ -1,10 +1,9 @@
-import {ArrayRawLogChannel, TestControlMessage} from "./TestClasses";
-import {LOG4TS_LOG_CONTROL, LOG4TS_PROVIDER_SERVICE} from "../main/log4ts/impl/Log4TSProviderService";
-import {Log4TSProvider} from "../main/log4ts";
-import {LogLevel} from "../main/core";
+import {LOG4TS_LOG_CONTROL, LOG4TS_PROVIDER_SERVICE} from "../main/impl/Log4TSProviderService";
+import {Log4TSProvider} from "../main/api/Log4TSProvider";
+import {$test, LogLevel} from "typescript-logging-core";
 
 describe("Test Log4TSControlProvider", () => {
-  const message = new TestControlMessage();
+  const message = new $test.TestControlMessage();
 
   beforeEach(() => {
     /*
@@ -95,7 +94,7 @@ describe("Test Log4TSControlProvider", () => {
   });
 
   test("Test control provider updates log level of group configs", () => {
-    const channel = new ArrayRawLogChannel();
+    const channel = new $test.ArrayRawLogChannel();
     const control = LOG4TS_LOG_CONTROL(message.write);
     const provider = Log4TSProvider.createProvider("test", {
       groups: [{
@@ -144,7 +143,7 @@ describe("Test Log4TSControlProvider", () => {
   });
 
   test("Test control provider can reset back to levels when it was created", () => {
-    const channel = new ArrayRawLogChannel();
+    const channel = new $test.ArrayRawLogChannel();
     const control = LOG4TS_LOG_CONTROL(message.write);
     const provider = Log4TSProvider.createProvider("test", {
       groups: [{
@@ -174,7 +173,7 @@ describe("Test Log4TSControlProvider", () => {
   });
 
   test("Test control provider can use save and restore", () => {
-    const channel = new ArrayRawLogChannel();
+    const channel = new $test.ArrayRawLogChannel();
     const control = LOG4TS_LOG_CONTROL(message.write);
     let provider = Log4TSProvider.createProvider("test", {
       groups: [{

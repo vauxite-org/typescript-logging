@@ -1,0 +1,58 @@
+{
+  "name": "typescript-logging-log4ts-style",
+  "version": "2.0.0",
+  "description": "TypeScript Logging log4ts style written in and to be used by TypeScript.",
+  "main": "dist/bundle/typescript-logging-log4ts.js",
+  "module": "dist/bundle/typescript-logging-log4ts.esm.js",
+  "typings": "dist/bundle/src/typescript/main/typescript-logging-log4ts.d.ts",
+  "scripts": {
+    "clean": "shx rm -rf ./dist",
+    "compile": "rollup -c",
+    "compile-watch": "rollup -cw",
+    "tslint": "tslint -c tslint.json -p tsconfig.json",
+    "test": "jest --no-cache",
+    "test-watch": "jest --watchAll",
+    "build": "npm run clean && npm run compile && npm run test && npm run tslint"
+  },
+  "files": [
+    "dist/",
+    "LICENSE",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vauxite-org/typescript-logging.git"
+  },
+  "keywords": [
+    "typescript-logging",
+    "typescript logging",
+    "typescript-logging log4ts",
+    "typescript logging log4ts",
+    "typescript logger",
+    "log4ts",
+    "log4ts-like",
+    "logging",
+    "log",
+    "logger"
+  ],
+  "author": "Martijn Reuvers <martijnr.work@gmail.com>",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/vauxite-org/typescript-logging/issues"
+  },
+  "homepage": "https://github.com/vauxite-org/typescript-logging/#readme",
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "21.0.1",
+    "@rollup/plugin-node-resolve": "13.0.6",
+    "@types/jest": "27.0.2",
+    "jest": "27.3.1",
+    "rollup": "2.58.3",
+    "rollup-plugin-typescript2": "0.30.0",
+    "shx": "0.3.3",
+    "ts-jest": "27.0.7",
+    "ts-loader": "9.2.6",
+    "ts-node": "10.4.0",
+    "tslint": "6.1.3",
+    "typescript": "4.4.4"
+  }
+}
