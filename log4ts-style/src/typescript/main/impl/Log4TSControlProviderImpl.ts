@@ -1,7 +1,6 @@
 import {Log4TSControlProvider, Log4TSControlProviderLogLevel} from "../api/Log4TSControlProvider";
-import {LogLevel, RuntimeSettings} from "../../core";
+import {LogLevel, RuntimeSettings, util} from "typescript-logging-core";
 import {Log4TSProvider} from "../api/Log4TSProvider";
-import {maxLengthStringValueInArray, padEnd, padStart} from "../../util/StringUtil";
 
 /**
  * Implementation for Log4TSControlProvider.
@@ -38,7 +37,7 @@ export class Log4TSControlProviderImpl implements Log4TSControlProvider {
       identifier: cfg.identifier,
     }));
     const maxWidthIndex = groupConfigs.length.toString().length;
-    const maxWidthIdentifier = maxLengthStringValueInArray(groupConfigs.map(cfg => cfg.identifier));
+    const maxWidthIdentifier = util.maxLengthStringValueInArray(groupConfigs.map(cfg => cfg.identifier));
     const maxWidthLevel = 5;
 
     /*
@@ -51,7 +50,7 @@ export class Log4TSControlProviderImpl implements Log4TSControlProvider {
         [3, /blaat.blaat.+/:       level=Error]
      */
     const providerLines = groupConfigs
-      .map((cfg, index) => `  [${padStart(index.toString(), maxWidthIndex)}, ${padEnd(cfg.identifier, maxWidthIdentifier)} (level=${padEnd(cfg.level, maxWidthLevel)})]`)
+      .map((cfg, index) => `  [${util.padStart(index.toString(), maxWidthIndex)}, ${util.padEnd(cfg.identifier, maxWidthIdentifier)} (level=${util.padEnd(cfg.level, maxWidthLevel)})]`)
       .join("\n");
     result += providerLines + "\n";
 

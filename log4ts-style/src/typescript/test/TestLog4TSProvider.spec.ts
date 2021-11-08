@@ -1,7 +1,6 @@
-import {LOG4TS_PROVIDER_SERVICE} from "../main/log4ts/impl/Log4TSProviderService";
-import {Log4TSProvider} from "../main/log4ts";
-import {ArgumentFormatterType, DateFormatterType, LogChannel, LogLevel, MessageFormatterType} from "../main/core";
-import {ArrayRawLogChannel} from "./TestClasses";
+import {LOG4TS_PROVIDER_SERVICE} from "../main/impl/Log4TSProviderService";
+import {Log4TSProvider} from "../main/api/Log4TSProvider";
+import {$test, ArgumentFormatterType, DateFormatterType, LogChannel, LogLevel, MessageFormatterType} from "typescript-logging-core";
 
 describe("Test Log4TSProvider", () => {
 
@@ -103,7 +102,7 @@ describe("Test Log4TSProvider", () => {
   });
 
   test("Provider creates correct loggers", () => {
-    const channel = new ArrayRawLogChannel();
+    const channel = new $test.ArrayRawLogChannel();
     const groupExpressionModel = new RegExp("model.+");
     const groupExpressionService = new RegExp("service.+");
 
@@ -167,7 +166,7 @@ describe("Test Log4TSProvider", () => {
   });
 
   test("Test log level can be changed dynamically", () => {
-    const channel = new ArrayRawLogChannel();
+    const channel = new $test.ArrayRawLogChannel();
     /* Default logs to error */
     const provider = Log4TSProvider.createProvider("test", {
       channel,
@@ -218,8 +217,8 @@ describe("Test Log4TSProvider", () => {
   });
 
   test("Test channel can be changed dynamically", () => {
-    const channel1 = new ArrayRawLogChannel();
-    const channel2 = new ArrayRawLogChannel();
+    const channel1 = new $test.ArrayRawLogChannel();
+    const channel2 = new $test.ArrayRawLogChannel();
     /* Default logs to error */
     const provider = Log4TSProvider.createProvider("test", {
       level: LogLevel.Info,

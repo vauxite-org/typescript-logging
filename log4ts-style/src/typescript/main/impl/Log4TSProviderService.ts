@@ -1,15 +1,12 @@
-import {EnhancedMap} from "../../util/EnhancedMap";
 import {Log4TSProviderImpl} from "./Log4TSProviderImpl";
 import {Log4TSProvider} from "../api/Log4TSProvider";
-import {DefaultChannels, formatArgument, formatDate, formatMessage, LogLevel} from "../../core";
+import {$internal, DefaultChannels, formatArgument, formatDate, formatMessage, LogLevel, util} from "typescript-logging-core";
 import {Log4TSGroupConfig, Log4TSGroupConfigOptional} from "../api/Log4TSGroupConfig";
 import {Log4TSConfig, Log4TSConfigOptional} from "../api/Log4TSConfig";
-import {getInternalLogger} from "../../internal/InternalLogger";
-import {log4TSConfigDebug} from "../../util/DebugUtil";
 import {Log4TSControl} from "../api/Log4TSControl";
-import {maxLengthStringValueInArray, padEnd, padStart} from "../../util/StringUtil";
 import {Log4TSControlProvider} from "../api/Log4TSControlProvider";
 import {Log4TSControlProviderImpl} from "./Log4TSControlProviderImpl";
+import {log4TSConfigDebug} from "../util/DebugUtil";
 
 /**
  * Provider for the Log4TS flavor, each provider is a unique instance that can be used to
@@ -17,8 +14,8 @@ import {Log4TSControlProviderImpl} from "./Log4TSControlProviderImpl";
  */
 class Log4TSProviderService {
 
-  private readonly _log = getInternalLogger("log4ts.impl.Log4TSProviderService");
-  private readonly _providers = new EnhancedMap<string, Log4TSProviderImpl>();
+  private readonly _log = $internal.getInternalLogger("log4ts.impl.Log4TSProviderService");
+  private readonly _providers = new util.EnhancedMap<string, Log4TSProviderImpl>();
 
   public createLogProvider(name: string, config: Log4TSConfigOptional): Log4TSProvider {
     const result = this._providers.compute(name, (key, currentValue) => {
@@ -75,12 +72,12 @@ class Log4TSProviderService {
   private showSettings() {
     let result = "Available Log4TSProviders:\n";
     const maxWidthIndex = this._providers.size.toString().length;
-    const maxWidthName: number = maxLengthStringValueInArray([...this._providers.keys()]);
+    const maxWidthName: number = util.maxLengthStringValueInArray([...this._providers.keys()]);
 
     const lines = [...this._providers.entries()].map((entry, index) => {
       const name = entry[0];
       /* [idx, name] */
-      return `  [${padStart(index.toString(), maxWidthIndex)}, ${padEnd(name, maxWidthName)}]`;
+      return `  [${util.padStart(index.toString(), maxWidthIndex)}, ${util.padEnd(name, maxWidthName)}]`;
     });
 
     result += lines.join("\n") + (lines.length > 0 ? "\n" : "");
@@ -104,8 +101,7 @@ class Log4TSProviderService {
   }
 
   private static help(): string {
-    const msg =
-      "You can use the following commands:\n" +
+    return "You can use the following commands:\n" +
       "  showSettings()\n" +
       "    Shows the current configuration settings.\n" +
       "  getProvider: (id: number | string): Log4TSControlProvider\n" +
@@ -113,7 +109,6 @@ class Log4TSProviderService {
       "      @param id The id (use showSettings to see) or name of the provider\n" +
       "  help()\n" +
       "    Shows this help.\n";
-    return msg;
   }
 }
 
