@@ -1,14 +1,11 @@
 import {CategoryConfig, CategoryConfigOptional} from "../api/CategoryConfig";
 import {CategoryProvider} from "../api/CategoryProvider";
-import {getInternalLogger} from "../../internal/InternalLogger";
 import {CategoryProviderImpl} from "./CategoryProviderImpl";
-import {DefaultChannels, formatArgument, formatDate, formatMessage, LogLevel} from "../../core";
-import {EnhancedMap} from "../../util/EnhancedMap";
-import {categoryConfigDebug} from "../../util/DebugUtil";
+import {$internal, DefaultChannels, formatArgument, formatDate, formatMessage, LogLevel, util} from "typescript-logging-core";
 import {CategoryControl} from "../api/CategoryControl";
 import {CategoryControlProvider} from "../api/CategoryControlProvider";
 import {CategoryControlProviderImpl} from "./CategoryControlProviderImpl";
-import {maxLengthStringValueInArray, padEnd, padStart} from "../../util/StringUtil";
+import {categoryConfigDebug} from "../util/DebugUtil";
 
 /**
  * Provider for the category flavor, each provider is a unique instance that can be used to
@@ -16,8 +13,8 @@ import {maxLengthStringValueInArray, padEnd, padStart} from "../../util/StringUt
  */
 class CategoryProviderService {
 
-  private readonly _log = getInternalLogger("category.impl.CategoryProviderService");
-  private readonly _providers = new EnhancedMap<string, CategoryProviderImpl>();
+  private readonly _log = $internal.getInternalLogger("category.impl.CategoryProviderService");
+  private readonly _providers = new util.EnhancedMap<string, CategoryProviderImpl>();
 
   public createLogProvider(name: string, config?: CategoryConfigOptional): CategoryProvider {
     const result = this._providers.compute(name, (key, currentValue) => {
@@ -66,12 +63,12 @@ class CategoryProviderService {
   private showSettings(): string {
     let result = "Available CategoryProviders:\n";
     const maxWidthIndex = this._providers.size.toString().length;
-    const maxWidthName: number = maxLengthStringValueInArray([...this._providers.keys()]);
+    const maxWidthName: number = util.maxLengthStringValueInArray([...this._providers.keys()]);
 
     const lines = [...this._providers.entries()].map((entry, index) => {
       const name = entry[0];
       /* [idx, name] */
-      return `  [${padStart(index.toString(), maxWidthIndex)}, ${padEnd(name, maxWidthName)}]`;
+      return `  [${util.padStart(index.toString(), maxWidthIndex)}, ${util.padEnd(name, maxWidthName)}]`;
     });
 
     result += lines.join("\n") + (lines.length > 0 ? "\n" : "");
@@ -126,7 +123,7 @@ function mergeWithDefaults(config?: CategoryConfigOptional): CategoryConfig {
     return defaultConfig;
   }
 
-  const result: CategoryConfig = {
+  return {
     channel: config.channel ? config.channel : defaultConfig.channel,
     allowSameCategoryName: config.allowSameCategoryName !== undefined ? config.allowSameCategoryName : defaultConfig.allowSameCategoryName,
     level: config.level ? config.level : defaultConfig.level,
@@ -134,5 +131,4 @@ function mergeWithDefaults(config?: CategoryConfigOptional): CategoryConfig {
     dateFormatter: config.dateFormatter ? config.dateFormatter : defaultConfig.dateFormatter,
     argumentFormatter: config.argumentFormatter ? config.argumentFormatter : defaultConfig.argumentFormatter,
   };
-  return result;
 }

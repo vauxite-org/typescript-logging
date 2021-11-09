@@ -1,4 +1,4 @@
-/* Re-exports from core, api and necessary functions */
+/* Re-exports from core, api and necessary functions - must match the ones in typescript-logging-category.ts */
 export {
   LogChannel,
   Logger,

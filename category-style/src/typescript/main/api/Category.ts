@@ -1,4 +1,4 @@
-import {Logger} from "../../core";
+import {Logger} from "typescript-logging-core";
 
 /**
  * Represents a Category for the category style of logging.

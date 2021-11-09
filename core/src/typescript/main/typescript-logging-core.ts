@@ -5,6 +5,6 @@ export * as $internal from "./internal/InternalLogger";
 export * from "./core/index";
 
 export * as util from "./util/index";
-export * from "./category/index";
 
+/* Exports some test utilities */
 export * as $test from "../test/TestClasses";

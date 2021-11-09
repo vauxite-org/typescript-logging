@@ -2,6 +2,7 @@
   "private": true,
   "workspaces": [
     "core",
+    "category-style",
     "log4ts-style"
   ]
 }
