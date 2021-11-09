@@ -1,4 +1,4 @@
-import {LogConfig} from "../../core";
+import {LogConfig} from "typescript-logging-core";
 
 /**
  * Configuration for the category flavor (used by CategoryProvider).

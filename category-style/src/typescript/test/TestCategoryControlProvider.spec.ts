@@ -1,10 +1,9 @@
-import {TestControlMessage} from "./TestClasses";
-import {CATEGORY_LOG_CONTROL, CATEGORY_PROVIDER_SERVICE} from "../main/category/impl/CategoryProviderService";
-import {CategoryProvider} from "../main/category";
-import {LogLevel} from "../main/core";
+import {$test, LogLevel} from "typescript-logging-core";
+import {CATEGORY_LOG_CONTROL, CATEGORY_PROVIDER_SERVICE} from "../main/impl/CategoryProviderService";
+import {CategoryProvider} from "../main/api/CategoryProvider";
 
 describe("Test CategoryControlProvider", () => {
-  const message = new TestControlMessage();
+  const message = new $test.TestControlMessage();
 
   beforeEach(() => {
     /*

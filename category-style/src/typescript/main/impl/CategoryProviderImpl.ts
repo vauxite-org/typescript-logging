@@ -1,7 +1,7 @@
 import {CategoryProvider} from "../api/CategoryProvider";
 import {CategoryConfig} from "../api/CategoryConfig";
 import {Category} from "../api/Category";
-import {createLogProvider, LogId, LogProvider, RuntimeSettings} from "../../core";
+import {createLogProvider, LogId, LogProvider, RuntimeSettings} from "typescript-logging-core";
 import {CategoryImpl} from "./CategoryImpl";
 import {CategoryRuntimeSettings} from "../api/CategoryRuntimeSettings";
 

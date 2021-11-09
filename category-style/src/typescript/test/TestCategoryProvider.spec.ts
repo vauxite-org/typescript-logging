@@ -1,7 +1,6 @@
-import {CATEGORY_PROVIDER_SERVICE} from "../main/category/impl/CategoryProviderService";
-import {CategoryProvider} from "../main/category";
-import {ArgumentFormatterType, DateFormatterType, LogLevel, MessageFormatterType, RawLogChannel} from "../main/core";
-import {ArrayRawLogChannel} from "./TestClasses";
+import {CATEGORY_PROVIDER_SERVICE} from "../main/impl/CategoryProviderService";
+import {$test, ArgumentFormatterType, DateFormatterType, LogLevel, MessageFormatterType, RawLogChannel} from "typescript-logging-core";
+import {CategoryProvider} from "../main/api/CategoryProvider";
 
 describe("Test CategoryProvider", () => {
 
@@ -51,7 +50,7 @@ describe("Test CategoryProvider", () => {
   });
 
   test("Test provider creates correct loggers", () => {
-    const channel = new ArrayRawLogChannel();
+    const channel = new $test.ArrayRawLogChannel();
 
     const provider = CategoryProvider.createProvider("test1", {
       channel,
@@ -83,7 +82,7 @@ describe("Test CategoryProvider", () => {
   });
 
   test("Test that runtime for category can be updated", () => {
-    const channel = new ArrayRawLogChannel();
+    const channel = new $test.ArrayRawLogChannel();
 
     const provider = CategoryProvider.createProvider("test", {
       channel,
@@ -167,8 +166,8 @@ describe("Test CategoryProvider", () => {
   });
 
   test("Test that channel can be changed", () => {
-    const channel1 = new ArrayRawLogChannel();
-    const channel2 = new ArrayRawLogChannel();
+    const channel1 = new $test.ArrayRawLogChannel();
+    const channel2 = new $test.ArrayRawLogChannel();
 
     const provider = CategoryProvider.createProvider("test", {
       level: LogLevel.Info,

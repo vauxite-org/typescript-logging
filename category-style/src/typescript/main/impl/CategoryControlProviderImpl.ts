@@ -1,7 +1,6 @@
 import {CategoryControlProvider, CategoryControlProviderLogLevel} from "../api/CategoryControlProvider";
-import {LogId, LogLevel} from "../../core";
+import {LogId, LogLevel, util} from "typescript-logging-core";
 import {CATEGORY_PATH_SEPARATOR, CategoryProviderImpl} from "./CategoryProviderImpl";
-import {maxLengthStringValueInArray, padEnd, padStart} from "../../util/StringUtil";
 import {Category} from "../api/Category";
 
 /**
@@ -45,7 +44,7 @@ export class CategoryControlProviderImpl implements CategoryControlProvider {
     const categories = this.createCategoryInfoHierarchy();
     const maxWidthIndex = categories.size.toString().length;
     /* Note depth means on how deeply nested a child is, each depth is multiplied by 1 spaces (length) */
-    const maxWidthIdentifier = maxLengthStringValueInArray([...categories.values()].map(value => value.category.name + " ".repeat(value.depth)));
+    const maxWidthIdentifier = util.maxLengthStringValueInArray([...categories.values()].map(value => value.category.name + " ".repeat(value.depth)));
 
     const providerLines = [...categories.values()]
       .map((category, idx) => CategoryControlProviderImpl.createSettingLineCategory(category, idx, maxWidthIndex, maxWidthIdentifier));
@@ -259,7 +258,7 @@ export class CategoryControlProviderImpl implements CategoryControlProvider {
   private static createSettingLineCategory(categoryInfo: CategoryInfo, index: number, maxWidthIndex: number, maxWidthIdentifier: number): string {
     const prefix = " ".repeat(categoryInfo.depth);
     const catName = prefix + categoryInfo.category.name;
-    return `  [${padStart(index.toString(), maxWidthIndex)}, ${padEnd(catName, maxWidthIdentifier)} (level=${padEnd(categoryInfo.logLevel, 5)})]`;
+    return `  [${util.padStart(index.toString(), maxWidthIndex)}, ${util.padEnd(catName, maxWidthIdentifier)} (level=${util.padEnd(categoryInfo.logLevel, 5)})]`;
   }
 
   private static addCategoryInfoHierarchy(category: Category, currentDepth: number, result: Map<LogId, CategoryInfo>) {
