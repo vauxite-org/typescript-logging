@@ -22,7 +22,8 @@
     "@types/react-dom": "17.0.10",
     "react": "17.0.2",
     "react-dom": "17.0.2",
-    "typescript-logging": "2.0.0"
+    "typescript-logging-log4ts-style": "file:../../log4ts-style/dist/typescript-logging-log4ts-style-2.0.0.tgz",
+    "typescript-logging-category-style": "file:../../category-style/dist/typescript-logging-category-style-2.0.0.tgz"
   },
   "devDependencies": {
     "cypress": "8.7.0",
