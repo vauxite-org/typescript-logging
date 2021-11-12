@@ -13,7 +13,7 @@
     "test": "shx cp -R src/web/* ./dist/app && start-server-and-test start-server 8080 'npm run cypress:run'",
     "test-watch": "shx cp -R src/web/* ./dist/app && start-server-and-test start-server 8080 'npm run cypress:open'",
     "tslint": "tslint -c tslint.json -p tsconfig.json",
-    "build": "npm run clean && npm run compile && npm run test && npm run tslint"
+    "build": "npm run clean && npm run compile && npm run tslint && npm run test"
   },
   "repository": {
     "type": "git",
@@ -26,7 +26,8 @@
   },
   "homepage": "https://github.com/vauxite-org/typescript-logging/core/#readme",
   "dependencies": {
-    "typescript-logging": "2.0.0"
+    "typescript-logging-log4ts-style": "file:../../log4ts-style/dist/typescript-logging-log4ts-style-2.0.0.tgz",
+    "typescript-logging-category-style": "file:../../category-style/dist/typescript-logging-category-style-2.0.0.tgz"
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "13.0.6",

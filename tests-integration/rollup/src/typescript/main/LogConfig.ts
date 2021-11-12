@@ -1,4 +1,5 @@
-import {CategoryProvider, Log4TSProvider, LogLevel} from "typescript-logging";
+import {Log4TSProvider, LogLevel} from "typescript-logging-log4ts-style";
+import {CategoryProvider} from "typescript-logging-category-style";
 import {LogToIdRawLogChannel} from "./LogToIdRawLogChannel";
 
 export const categoryProvider = CategoryProvider.createProvider("AwesomeCategoryProvider", {
