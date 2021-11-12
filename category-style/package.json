@@ -12,10 +12,10 @@
     "tslint": "tslint -c tslint.json -p tsconfig.json",
     "test": "jest --no-cache",
     "test-watch": "jest --watchAll",
-    "build": "npm run clean && npm run compile && npm run test && npm run tslint"
+    "build": "npm run clean && npm run compile && npm run test && npm run tslint && npm pack --pack-destination dist"
   },
   "files": [
-    "dist/",
+    "dist/bundle",
     "LICENSE",
     "README.md"
   ],
