@@ -10,7 +10,7 @@
     "clean": "shx rm -rf ./dist",
     "compile": "rollup -c",
     "compile-watch": "rollup -cw",
-    "tslint": "tslint -c tslint.base.json -p tsconfig.json",
+    "tslint": "tslint -c tslint.json -p tsconfig.json",
     "test": "jest --no-cache",
     "test-watch": "jest --watchAll",
     "build": "npm run clean && npm run compile && npm run test && npm run tslint"
