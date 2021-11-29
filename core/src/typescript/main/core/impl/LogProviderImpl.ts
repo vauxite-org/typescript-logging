@@ -6,7 +6,7 @@ import {EnhancedMap} from "../../util/EnhancedMap";
 import {LoggerImpl} from "./LoggerImpl";
 import {RuntimeSettings, RuntimeSettingsRequired} from "../api/runtime/RuntimeSettings";
 import {getInternalLogger} from "../../internal/InternalLogger";
-import {formatArgument, formatDate, formatMessage} from "./DefaultFormatters";
+import {formatArgument, formatDate} from "./DefaultFormatters";
 import {DefaultChannels} from "./channel/DefaultChannels";
 import {LogLevel} from "../api/LogLevel";
 import {LogId} from "../api/LogId";
@@ -109,7 +109,6 @@ export class LogProviderImpl implements LogProvider {
         name,
         argumentFormatter: this._settings.argumentFormatter,
         dateFormatter: this._settings.dateFormatter,
-        messageFormatter: this._settings.messageFormatter,
       };
       return new LoggerImpl(runtime);
     });
@@ -149,6 +148,5 @@ export function createDefaultLogConfig(): LogConfig {
     channel: DefaultChannels.createConsoleChannel(),
     dateFormatter: formatDate,
     level: LogLevel.Error,
-    messageFormatter: formatMessage,
   };
 }

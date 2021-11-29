@@ -1,5 +1,5 @@
 import {CATEGORY_PROVIDER_SERVICE} from "../main/impl/CategoryProviderService";
-import {$test, ArgumentFormatterType, DateFormatterType, LogLevel, MessageFormatterType, RawLogChannel} from "typescript-logging-core";
+import {$test, ArgumentFormatterType, DateFormatterType, LogLevel, RawLogChannel} from "typescript-logging-core";
 import {CategoryProvider} from "../main/api/CategoryProvider";
 
 describe("Test CategoryProvider", () => {
@@ -27,7 +27,6 @@ describe("Test CategoryProvider", () => {
     };
 
     const argumentFormatter: ArgumentFormatterType = () => "";
-    const messageFormatter: MessageFormatterType = () => "";
     const dateFormatter: DateFormatterType = () => "";
 
     const provider = CategoryProvider.createProvider("test1", {
@@ -35,7 +34,6 @@ describe("Test CategoryProvider", () => {
       level: LogLevel.Debug,
       argumentFormatter,
       dateFormatter,
-      messageFormatter,
       allowSameCategoryName: false,
     });
 
@@ -43,7 +41,6 @@ describe("Test CategoryProvider", () => {
     const config = provider.runtimeConfig;
     expect(config.channel).toEqual(channel);
     expect(config.argumentFormatter).toEqual(argumentFormatter);
-    expect(config.messageFormatter).toEqual(messageFormatter);
     expect(config.dateFormatter).toEqual(dateFormatter);
     expect(config.level).toEqual(LogLevel.Debug);
     expect(config.allowSameCategoryName).toEqual(false);

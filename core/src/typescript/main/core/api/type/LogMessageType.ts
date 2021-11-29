@@ -1,5 +1,3 @@
-import {MessageFormatterType} from "./MessageFormatterType";
-
 /**
  * The LogMessage type represents the message that is logged. Either a string, or a lambda
  * function returning a string. Note that the lambda function has a formatter
@@ -7,4 +5,4 @@ import {MessageFormatterType} from "./MessageFormatterType";
  *
  * For example: log.debug(fmt => fmt("My name is a {}, and I am from {}.", "secret", "a country"));
  */
-export type LogMessageType = string | ((formatter: MessageFormatterType) => string);
+export type LogMessageType = string | (() => string);

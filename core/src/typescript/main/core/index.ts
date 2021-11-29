@@ -24,8 +24,6 @@ export {ExceptionType} from "./api/type/ExceptionType";
 export {LogChannelType} from "./api/type/LogChannelType";
 export {LoggerNameType} from "./api/type/LoggerNameType";
 export {LogMessageType} from "./api/type/LogMessageType";
-export {MessageArgumentFormatterType} from "./api/type/MessageArgumentFormatterType";
-export {MessageFormatterType} from "./api/type/MessageFormatterType";
 export * from "./api/type/TypeUtils";
 
 /* Export default channels and a few utilities from impl, only what we deem convenient for end users */
