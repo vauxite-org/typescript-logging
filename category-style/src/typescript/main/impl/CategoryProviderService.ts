@@ -1,7 +1,7 @@
 import {CategoryConfig, CategoryConfigOptional} from "../api/CategoryConfig";
 import {CategoryProvider} from "../api/CategoryProvider";
 import {CategoryProviderImpl} from "./CategoryProviderImpl";
-import {$internal, DefaultChannels, formatArgument, formatDate, formatMessage, LogLevel, util} from "typescript-logging-core";
+import {$internal, DefaultChannels, formatArgument, formatDate, LogLevel, util} from "typescript-logging-core";
 import {CategoryControl} from "../api/CategoryControl";
 import {CategoryControlProvider} from "../api/CategoryControlProvider";
 import {CategoryControlProviderImpl} from "./CategoryControlProviderImpl";
@@ -114,7 +114,6 @@ function mergeWithDefaults(config?: CategoryConfigOptional): CategoryConfig {
     channel: DefaultChannels.createConsoleChannel(),
     allowSameCategoryName: true,
     level: LogLevel.Error,
-    messageFormatter: formatMessage,
     dateFormatter: formatDate,
     argumentFormatter: formatArgument,
   };
@@ -127,7 +126,6 @@ function mergeWithDefaults(config?: CategoryConfigOptional): CategoryConfig {
     channel: config.channel ? config.channel : defaultConfig.channel,
     allowSameCategoryName: config.allowSameCategoryName !== undefined ? config.allowSameCategoryName : defaultConfig.allowSameCategoryName,
     level: config.level ? config.level : defaultConfig.level,
-    messageFormatter: config.messageFormatter ? config.messageFormatter : defaultConfig.messageFormatter,
     dateFormatter: config.dateFormatter ? config.dateFormatter : defaultConfig.dateFormatter,
     argumentFormatter: config.argumentFormatter ? config.argumentFormatter : defaultConfig.argumentFormatter,
   };

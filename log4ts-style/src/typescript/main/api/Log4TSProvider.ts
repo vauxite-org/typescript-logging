@@ -82,9 +82,9 @@ export namespace Log4TSProvider {
 
   /**
    * Resets and clears *all* created Log4TSProviders, every logger that was retrieved previously
-   * will be invalid afterwards.
+   * through any of them will be invalid afterwards.
    *
-   * This call essentially reverts the Log4TSProvider back to it's initial state. This should normally not be used
+   * This call essentially reverts the created Log4TSProviders back to their initial state. This should normally not be used
    * unless absolutely necessary.
    */
   export function clear() {

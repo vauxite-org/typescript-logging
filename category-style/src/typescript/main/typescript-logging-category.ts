@@ -17,12 +17,9 @@ export {
   LogChannelType,
   LoggerNameType,
   LogMessageType,
-  MessageArgumentFormatterType,
   PartialExcept,
   Mutable,
   DefaultChannels,
-  formatMessage,
-  formatMessageArgument,
   formatArgument,
   formatDate
 } from "typescript-logging-core";

@@ -75,7 +75,7 @@ export class LoggerImpl implements Logger {
     }
 
     const nowMillis = Date.now();
-    const message = typeof logMessageType === "string" ? logMessageType : logMessageType(this._runtime.messageFormatter);
+    const message = typeof logMessageType === "string" ? logMessageType : logMessageType();
     const errorAndArgs = LoggerImpl.getErrorAndArgs(args);
 
     /*

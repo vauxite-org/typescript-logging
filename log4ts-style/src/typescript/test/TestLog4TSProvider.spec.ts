@@ -1,6 +1,6 @@
 import {LOG4TS_PROVIDER_SERVICE} from "../main/impl/Log4TSProviderService";
 import {Log4TSProvider} from "../main/api/Log4TSProvider";
-import {$test, ArgumentFormatterType, DateFormatterType, LogChannel, LogLevel, MessageFormatterType} from "typescript-logging-core";
+import {$test, ArgumentFormatterType, DateFormatterType, LogChannel, LogLevel} from "typescript-logging-core";
 
 describe("Test Log4TSProvider", () => {
 
@@ -33,14 +33,12 @@ describe("Test Log4TSProvider", () => {
 
     const argumentFormatter: ArgumentFormatterType = () => "";
     const dateFormatter: DateFormatterType = () => "";
-    const messageFormatter: MessageFormatterType = () => "";
     const groupExpression = new RegExp("model.+");
 
     const provider = Log4TSProvider.createProvider("test", {
       groups: [{expression: groupExpression}],
       level: LogLevel.Info,
       channel: customChannel,
-      messageFormatter,
       argumentFormatter,
       dateFormatter,
     });
@@ -51,7 +49,6 @@ describe("Test Log4TSProvider", () => {
     expect(config.channel).toEqual(customChannel);
     expect(config.dateFormatter).toEqual(dateFormatter);
     expect(config.argumentFormatter).toEqual(argumentFormatter);
-    expect(config.messageFormatter).toEqual(messageFormatter);
     expect(config.level).toEqual(LogLevel.Info);
 
     /* Group config must use the main config of the provider when none were provided for the group */
@@ -61,14 +58,12 @@ describe("Test Log4TSProvider", () => {
     expect(groupConfig.expression).toEqual(groupExpression);
     expect(groupConfig.dateFormatter).toEqual(dateFormatter);
     expect(groupConfig.argumentFormatter).toEqual(argumentFormatter);
-    expect(groupConfig.messageFormatter).toEqual(messageFormatter);
     expect(groupConfig.level).toEqual(LogLevel.Info);
   });
 
   test("Test create provider and group custom config", () => {
     const argumentFormatter: ArgumentFormatterType = () => "";
     const dateFormatter: DateFormatterType = () => "";
-    const messageFormatter: MessageFormatterType = () => "";
     const groupExpression = new RegExp("model.+");
 
     const provider = Log4TSProvider.createProvider("test", {
@@ -77,7 +72,6 @@ describe("Test Log4TSProvider", () => {
         level: LogLevel.Debug,
         argumentFormatter,
         dateFormatter,
-        messageFormatter,
       }],
     });
 
@@ -86,7 +80,6 @@ describe("Test Log4TSProvider", () => {
     const config = provider.config;
     expect(config.dateFormatter).not.toEqual(dateFormatter);
     expect(config.argumentFormatter).not.toEqual(argumentFormatter);
-    expect(config.messageFormatter).not.toEqual(messageFormatter);
     expect(config.level).toEqual(LogLevel.Error);
 
     /* Group config must use it's own settings as configured */
@@ -97,7 +90,6 @@ describe("Test Log4TSProvider", () => {
     expect(groupConfig.expression).toEqual(groupExpression);
     expect(groupConfig.dateFormatter).toEqual(dateFormatter);
     expect(groupConfig.argumentFormatter).toEqual(argumentFormatter);
-    expect(groupConfig.messageFormatter).toEqual(messageFormatter);
     expect(groupConfig.level).toEqual(LogLevel.Debug);
   });
 

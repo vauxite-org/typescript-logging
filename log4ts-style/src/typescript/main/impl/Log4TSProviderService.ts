@@ -1,6 +1,6 @@
 import {Log4TSProviderImpl} from "./Log4TSProviderImpl";
 import {Log4TSProvider} from "../api/Log4TSProvider";
-import {$internal, DefaultChannels, formatArgument, formatDate, formatMessage, LogLevel, util} from "typescript-logging-core";
+import {$internal, DefaultChannels, formatArgument, formatDate, LogLevel, util} from "typescript-logging-core";
 import {Log4TSGroupConfig, Log4TSGroupConfigOptional} from "../api/Log4TSGroupConfig";
 import {Log4TSConfig, Log4TSConfigOptional} from "../api/Log4TSConfig";
 import {Log4TSControl} from "../api/Log4TSControl";
@@ -31,7 +31,6 @@ class Log4TSProviderService {
         channel: mainConfig.channel,
         level: mainConfig.level,
         expression: defaultExpression, // Not really used but set it to match * as that what it entails anyway as fallback
-        messageFormatter: mainConfig.messageFormatter,
         dateFormatter: mainConfig.dateFormatter,
         argumentFormatter: mainConfig.argumentFormatter,
         identifier: defaultExpression.toString(),
@@ -125,7 +124,6 @@ function createDefaultLog4TSConfig(): Log4TSConfig {
     dateFormatter: formatDate,
     groups: [],
     level: LogLevel.Error,
-    messageFormatter: formatMessage,
   };
 }
 
@@ -136,7 +134,6 @@ function mergeLog4TSConfigs(lhs: Log4TSConfig, rhs: Log4TSConfigOptional): Log4T
     dateFormatter: rhs.dateFormatter ? rhs.dateFormatter : lhs.dateFormatter,
     groups: [] as Log4TSGroupConfig[], // Just so we can assign below
     level: rhs.level ? rhs.level : lhs.level,
-    messageFormatter: rhs.messageFormatter ? rhs.messageFormatter : lhs.messageFormatter,
   };
 
   /*
@@ -153,7 +150,6 @@ function mergeLog4TSGroupConfigs(lhs: Log4TSConfig, rhs: Log4TSGroupConfigOption
     dateFormatter: rhs.dateFormatter ? rhs.dateFormatter : lhs.dateFormatter,
     expression: rhs.expression,
     level: rhs.level ? rhs.level : lhs.level,
-    messageFormatter: rhs.messageFormatter ? rhs.messageFormatter : lhs.messageFormatter,
     identifier: rhs.identifier ? rhs.identifier : rhs.expression.toString(),
   };
 }

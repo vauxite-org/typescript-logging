@@ -1,7 +1,6 @@
 import {ArgumentFormatterType} from "../type/ArgumentFormatterType";
 import {DateFormatterType} from "../type/DateFormatterType";
 import {LogLevel} from "../LogLevel";
-import {MessageFormatterType} from "../type/MessageFormatterType";
 import {LogChannel} from "../LogChannel";
 import {RawLogChannel} from "../RawLogChannel";
 
@@ -34,11 +33,4 @@ export interface LogConfig {
    * The date formatter to use to format a timestamp in the log line.
    */
   readonly dateFormatter: DateFormatterType;
-
-  /**
-   * The message formatter to use, is provided in log statement when
-   * using a lambda, which allows formatting of a message if needed.
-   * For example: log.debug(fmt => fmt("My name is a {}, and I am from {}", "secret", "a country"));
-   */
-  readonly messageFormatter: MessageFormatterType;
 }
