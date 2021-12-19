@@ -6,7 +6,7 @@ export default {
   output: [
     {
       file: "dist/app/js/gen/app.js",
-      name: "app",
+      name: "myapp",
       format: "iife",
       sourcemap: true,
     },

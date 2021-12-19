@@ -1,0 +1,38 @@
+{
+  "name": "typescript-logging",
+  "version": "2.0.0",
+  "description": "TypeScript Logging written in and to be used by TypeScript, multiple flavors available.",
+  "scripts": {
+    "prepack": "shx cp ../README.md ./README.md"
+  },
+  "files": [
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vauxite-org/typescript-logging.git"
+  },
+  "keywords": [
+    "typescript-logging",
+    "typescript logging",
+    "typescript-logging log4ts",
+    "typescript logging log4ts",
+    "typescript-logging category",
+    "typescript logging category",
+    "typescript logger",
+    "log4ts",
+    "log4ts-like",
+    "logging",
+    "log",
+    "logger"
+  ],
+  "author": "Martijn Reuvers <martijnr.work@gmail.com>",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/vauxite-org/typescript-logging/issues"
+  },
+  "homepage": "https://github.com/vauxite-org/typescript-logging/#readme",
+  "devDependencies": {
+    "shx": "0.3.3"
+  }
+}

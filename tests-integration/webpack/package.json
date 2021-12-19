@@ -16,7 +16,7 @@
     "test": "npm run compile && start-server-and-test 'npm run start-server' 8080 'npm run cypress:run'",
     "test-watch": "npm run compile && start-server-and-test 'npm run start-server' 8080 'npm run cypress:open'"
   },
-  "author": "Martijn Reuvers <martijnr.work@gmail.com> (http://www.javalid.org)",
+  "author": "Martijn Reuvers <martijnr.work@gmail.com>",
   "dependencies": {
     "@types/react": "17.0.33",
     "@types/react-dom": "17.0.10",

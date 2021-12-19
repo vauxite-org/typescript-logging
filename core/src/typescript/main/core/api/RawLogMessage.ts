@@ -24,7 +24,7 @@ export interface RawLogMessage {
   readonly logNames: string | ReadonlyArray<string>;
 
   /**
-   * Formatted message, but only that. No log level, no timestamp etc. Only the log message formatted.
+   * Original user message, and only that. No log level, no timestamp etc.
    */
   readonly message: string;
 

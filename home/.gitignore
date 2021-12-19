@@ -1,0 +1,4 @@
+node_modules
+
+# This file is copied from the parent before packaging (and publishing), so we ignore it here.
+README.md
