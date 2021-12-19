@@ -58,7 +58,7 @@ export interface CategoryProvider {
   /**
    * Applies given runtime settings to all registered categories of this provider, this function also allows changing the log channel.
    * Any newly created category afterwards will have these settings applied as well. This will *also* update the runtime configuration
-   * for this provider, meaning that new root loggers will given settings from now on.
+   * for this provider, meaning that new root loggers will use given settings from now on.
    *
    * <pre>
    *   provider.updateRuntimeSettings({

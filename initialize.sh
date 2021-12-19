@@ -10,6 +10,7 @@ rm -rf tests-integration/rollup/node_modules
 rm -rf tests-integration/rollup/dist
 rm -rf tests-integration/webpack/node_modules
 rm -rf tests-integration/webpack/dist
+rm -rf home/node_modules
 
 echo "Installing packages for core and style flavors..."
 npm ci
@@ -20,7 +21,13 @@ cd tests-integration/rollup
 npm ci
 cd ../webpack
 npm ci
-cd ../../
+
+echo ""
+echo "Installing packages for home..."
+cd ../../home
+npm ci
+
+cd ..
 
 echo ""
 echo "Installation success."

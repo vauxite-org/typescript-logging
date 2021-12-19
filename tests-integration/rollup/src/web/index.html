@@ -5,7 +5,7 @@
   <title>Rollup test app</title>
   <script type="text/javascript">
     function doLogCategory() {
-      const root = app.categoryProvider.getCategory("root");
+      const root = myapp.categoryProvider.getCategory("root");
       root.debug(() => "This is root at debug");
       root.info("This is root at info");
       root.trace("This is root and should not be visible");
@@ -14,18 +14,18 @@
     }
 
     function doLogLog4TS() {
-      const loggerTest = app.log4TSProvider.getLogger("model.Test");
+      const loggerTest = myapp.log4TSProvider.getLogger("model.Test");
       loggerTest.debug("This is a test at debug");
       loggerTest.info("This is a test at info");
       loggerTest.trace(() => "This is a test at trace and should not be visible");
-      const loggerExample = app.log4TSProvider.getLogger("model.Example");
+      const loggerExample = myapp.log4TSProvider.getLogger("model.Example");
       loggerExample.error("This is an an example at error")
     }
   </script>
 </head>
 <body>
-<textarea id="logIdCategory"></textarea>
-<textarea id="logIdLog4TS"></textarea>
+<textarea id="logIdCategory" rows="10" cols="80"></textarea>
+<textarea id="logIdLog4TS" rows="10" cols="80"></textarea>
 <button id="buttonLogCategory" onclick="doLogCategory()">Log category style</button>
 <button id="buttonLogLog4TS" onclick="doLogLog4TS()">Log log4ts style</button>
 <script type="text/javascript" src="js/gen/app.js"></script>
