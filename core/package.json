@@ -1,12 +1,12 @@
 {
-  "name": "typescript-logging-core",
+  "name": "typescript-logging",
   "version": "2.0.0",
-  "private": true,
-  "description": "TypeScript Logging core written in and to be used by TypeScript.",
-  "main": "dist/bundle/typescript-logging-core.js",
-  "module": "dist/bundle/typescript-logging-core.esm.js",
-  "typings": "dist/bundle/src/typescript/main/typescript-logging-core.d.ts",
+  "description": "TypeScript Logging core written in and to be used by TypeScript (this is the core project, you want to use a flavor instead).",
+  "main": "dist/bundle/typescript-logging.js",
+  "module": "dist/bundle/typescript-logging.esm.js",
+  "typings": "dist/bundle/src/typescript/main/typescript-logging.d.ts",
   "scripts": {
+    "prepack": "shx cp ../README.md ./README.md",
     "clean": "shx rm -rf ./dist",
     "compile": "rollup -c",
     "compile-watch": "rollup -cw",
@@ -15,6 +15,11 @@
     "test-watch": "jest --watchAll",
     "build": "npm run clean && npm run compile && npm run test && npm run tslint"
   },
+  "files": [
+    "dist/bundle",
+    "LICENSE",
+    "README.md"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/vauxite-org/typescript-logging.git"
