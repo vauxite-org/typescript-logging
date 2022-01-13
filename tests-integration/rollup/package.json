@@ -26,6 +26,7 @@
   },
   "homepage": "https://github.com/vauxite-org/typescript-logging/core/#readme",
   "dependencies": {
+    "typescript-logging": "file:../../core/dist/typescript-logging-2.0.0.tgz",
     "typescript-logging-log4ts-style": "file:../../log4ts-style/dist/typescript-logging-log4ts-style-2.0.0.tgz",
     "typescript-logging-category-style": "file:../../category-style/dist/typescript-logging-category-style-2.0.0.tgz"
   },

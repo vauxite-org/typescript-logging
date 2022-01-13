@@ -1,7 +1,7 @@
 {
   "extends": "../../core/tsconfig.base.json",
   "compilerOptions": {
-    "composite": false,
+    "rootDir": ".",
     "jsx": "react",
     "lib": [
       "ES2015",
