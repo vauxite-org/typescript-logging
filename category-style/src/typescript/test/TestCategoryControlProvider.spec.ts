@@ -1,4 +1,4 @@
-import {$test, LogLevel} from "typescript-logging-core";
+import {$test, LogLevel} from "typescript-logging";
 import {CATEGORY_LOG_CONTROL, CATEGORY_PROVIDER_SERVICE} from "../main/impl/CategoryProviderService";
 import {CategoryProvider} from "../main/api/CategoryProvider";
 

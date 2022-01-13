@@ -1,5 +1,5 @@
 import {Category} from "./Category";
-import {LogId, RuntimeSettings} from "typescript-logging-core";
+import {LogId, RuntimeSettings} from "typescript-logging";
 import {CategoryConfig, CategoryConfigOptional} from "./CategoryConfig";
 import {CATEGORY_PROVIDER_SERVICE} from "../impl/CategoryProviderService";
 import {CategoryRuntimeSettings} from "./CategoryRuntimeSettings";

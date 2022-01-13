@@ -1,7 +1,7 @@
 import {CategoryConfig, CategoryConfigOptional} from "../api/CategoryConfig";
 import {CategoryProvider} from "../api/CategoryProvider";
 import {CategoryProviderImpl} from "./CategoryProviderImpl";
-import {$internal, DefaultChannels, formatArgument, formatDate, LogLevel, util} from "typescript-logging-core";
+import {$internal, DefaultChannels, formatArgument, formatDate, LogLevel, util} from "typescript-logging";
 import {CategoryControl} from "../api/CategoryControl";
 import {CategoryControlProvider} from "../api/CategoryControlProvider";
 import {CategoryControlProviderImpl} from "./CategoryControlProviderImpl";

@@ -1,29 +1,3 @@
-/* Re-exports from core, api and necessary functions - must match the ones in typescript-logging-log4ts.ts */
-export {
-  LogChannel,
-  Logger,
-  LogId,
-  LogLevel,
-  LogMessage,
-  LogProvider,
-  LogRuntime,
-  RawLogChannel,
-  RawLogMessage,
-  LogConfig,
-  RuntimeSettings,
-  ArgumentFormatterType,
-  DateFormatterType,
-  ExceptionType,
-  LogChannelType,
-  LoggerNameType,
-  LogMessageType,
-  PartialExcept,
-  Mutable,
-  DefaultChannels,
-  formatArgument,
-  formatDate
-} from "typescript-logging-core";
-
 /* category style api */
 export {Category} from "./api/Category";
 export {CategoryConfig, CategoryConfigOptional} from "./api/CategoryConfig";

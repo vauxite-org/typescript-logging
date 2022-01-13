@@ -1,5 +1,5 @@
 import {CategoryControlProvider, CategoryControlProviderLogLevel} from "../api/CategoryControlProvider";
-import {LogId, LogLevel, util} from "typescript-logging-core";
+import {LogId, LogLevel, util} from "typescript-logging";
 import {CATEGORY_PATH_SEPARATOR, CategoryProviderImpl} from "./CategoryProviderImpl";
 import {Category} from "../api/Category";
 
