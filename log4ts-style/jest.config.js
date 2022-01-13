@@ -1,4 +1,4 @@
-const sharedConfig = require("../jest.config.base");
+const sharedConfig = require("../core/jest.config.base");
 
 module.exports = {
   ...sharedConfig,

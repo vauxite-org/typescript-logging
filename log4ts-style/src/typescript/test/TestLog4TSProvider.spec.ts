@@ -1,6 +1,6 @@
 import {LOG4TS_PROVIDER_SERVICE} from "../main/impl/Log4TSProviderService";
 import {Log4TSProvider} from "../main/api/Log4TSProvider";
-import {$test, ArgumentFormatterType, DateFormatterType, LogChannel, LogLevel} from "typescript-logging-core";
+import {$test, ArgumentFormatterType, DateFormatterType, LogChannel, LogLevel} from "typescript-logging";
 
 describe("Test Log4TSProvider", () => {
 

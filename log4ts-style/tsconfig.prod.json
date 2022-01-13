@@ -1,5 +1,5 @@
 {
-  "extends": "../tsconfig.base.json",
+  "extends": "../core/tsconfig.base.json",
   "compilerOptions": {
     "rootDir": ".",
     "lib": [
@@ -9,11 +9,6 @@
     "types": []
     // We don't want jest types, as that enables esXXXX version, way newer than what we want (see lib), instead compile must fail.
   },
-  "references": [
-    {
-      "path": "../core"
-    }
-  ],
   "include": [
     "./src/typescript/main/**/*"
   ]

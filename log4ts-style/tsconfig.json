@@ -1,16 +1,11 @@
 {
-  "extends": "../tsconfig.base.json",
+  "extends": "../core/tsconfig.base.json",
   "compilerOptions": {
     "lib": [
       "ES2015",
       "DOM"
     ]
   },
-  "references": [
-    {
-      "path": "../core"
-    }
-  ],
   "include": [
     "./src/typescript/**/*"
   ]

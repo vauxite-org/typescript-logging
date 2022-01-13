@@ -1,6 +1,6 @@
 import {LOG4TS_LOG_CONTROL, LOG4TS_PROVIDER_SERVICE} from "../main/impl/Log4TSProviderService";
 import {Log4TSProvider} from "../main/api/Log4TSProvider";
-import {$test, LogLevel} from "typescript-logging-core";
+import {$test, LogLevel} from "typescript-logging";
 
 describe("Test Log4TSControlProvider", () => {
   const message = new $test.TestControlMessage();
