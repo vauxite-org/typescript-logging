@@ -1,10 +1,10 @@
-const sharedConfig = require("../rollup.config.base");
+const sharedConfig = require("./rollup.config.base");
 
 import pkg from "./package.json";
 
 module.exports = {
   ...sharedConfig,
-  input: "src/typescript/main/typescript-logging-core.ts",
+  input: "src/typescript/main/typescript-logging.ts",
   output: [
     {
       file: pkg.main,
