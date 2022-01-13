@@ -1,4 +1,4 @@
-import {LogLevel, RawLogChannel, RawLogMessage} from "typescript-logging-log4ts-style";
+import {LogLevel, RawLogChannel, RawLogMessage} from "typescript-logging";
 
 export class LogToIdRawLogChannel implements RawLogChannel {
 

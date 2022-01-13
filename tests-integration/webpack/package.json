@@ -22,6 +22,7 @@
     "@types/react-dom": "17.0.10",
     "react": "17.0.2",
     "react-dom": "17.0.2",
+    "typescript-logging": "file:../../core/dist/typescript-logging-2.0.0.tgz",
     "typescript-logging-log4ts-style": "file:../../log4ts-style/dist/typescript-logging-log4ts-style-2.0.0.tgz",
     "typescript-logging-category-style": "file:../../category-style/dist/typescript-logging-category-style-2.0.0.tgz"
   },
@@ -31,6 +32,7 @@
     "http-server": "14.0.0",
     "shx": "0.3.3",
     "start-server-and-test": "1.14.0",
+    "ts-loader": "9.2.6",
     "tslint": "6.1.3",
     "typescript": "4.4.4",
     "webpack": "5.60.0",

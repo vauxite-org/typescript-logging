@@ -1,6 +1,7 @@
 import {LogToIdRawLogChannel} from "./LogToIdRawLogChannel";
 import {CategoryProvider} from "typescript-logging-category-style";
-import {Log4TSProvider, LogLevel} from "typescript-logging-log4ts-style";
+import {Log4TSProvider} from "typescript-logging-log4ts-style";
+import {LogLevel} from "typescript-logging";
 
 export const logChannel: LogToIdRawLogChannel = new LogToIdRawLogChannel();
 

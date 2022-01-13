@@ -41,7 +41,7 @@
     "url": "https://github.com/vauxite-org/typescript-logging/issues"
   },
   "homepage": "https://github.com/vauxite-org/typescript-logging/#readme",
-  "dependencies": {
+  "peerDependencies": {
     "typescript-logging": "2.0.0"
   },
   "devDependencies": {
