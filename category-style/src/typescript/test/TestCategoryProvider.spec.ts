@@ -1,5 +1,5 @@
 import {CATEGORY_PROVIDER_SERVICE} from "../main/impl/CategoryProviderService";
-import {$test, ArgumentFormatterType, DateFormatterType, LogLevel, RawLogChannel} from "typescript-logging-core";
+import {$test, ArgumentFormatterType, DateFormatterType, LogLevel, RawLogChannel} from "typescript-logging";
 import {CategoryProvider} from "../main/api/CategoryProvider";
 
 describe("Test CategoryProvider", () => {

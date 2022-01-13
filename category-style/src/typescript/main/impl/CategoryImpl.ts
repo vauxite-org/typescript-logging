@@ -1,5 +1,5 @@
 import {Category} from "../api/Category";
-import {ExceptionType, Logger, LogLevel, LogMessageType} from "typescript-logging-core";
+import {ExceptionType, Logger, LogLevel, LogMessageType} from "typescript-logging";
 
 /**
  * Implementation for Category.

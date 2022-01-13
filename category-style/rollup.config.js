@@ -1,4 +1,4 @@
-const sharedConfig = require("../rollup.config.base");
+const sharedConfig = require("../core/rollup.config.base");
 
 import pkg from "./package.json";
 

@@ -1,4 +1,4 @@
-import {RuntimeSettings} from "typescript-logging-core";
+import {RuntimeSettings} from "typescript-logging";
 
 /**
  * RuntimeSettings for a category, by default is applied to all child categories as well unless disableRecursion is specified in which

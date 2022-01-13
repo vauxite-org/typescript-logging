@@ -1,4 +1,4 @@
-import {LogLevel} from "typescript-logging-core";
+import {LogLevel} from "typescript-logging";
 import {CategoryConfig} from "../api/CategoryConfig";
 
 export function categoryConfigDebug(config: CategoryConfig) {
