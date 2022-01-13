@@ -1,4 +1,4 @@
-import {$internal} from "typescript-logging-core";
+import {$internal} from "typescript-logging";
 import {LOG4TS_PROVIDER_SERVICE} from "../main/impl/Log4TSProviderService";
 import {Log4TSProvider} from "../main/api/Log4TSProvider";
 

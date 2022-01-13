@@ -1,4 +1,4 @@
-import {LogLevel} from "typescript-logging-core";
+import {LogLevel} from "typescript-logging";
 import {Log4TSGroupConfig} from "../api/Log4TSGroupConfig";
 import {Log4TSConfig} from "../api/Log4TSConfig";
 

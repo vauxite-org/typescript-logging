@@ -1,4 +1,4 @@
-import {LogConfig} from "typescript-logging-core";
+import {LogConfig} from "typescript-logging";
 import {Log4TSGroupConfig, Log4TSGroupConfigOptional} from "./Log4TSGroupConfig";
 
 /**

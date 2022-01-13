@@ -1,5 +1,5 @@
 import {Log4TSProvider} from "../api/Log4TSProvider";
-import {$internal, createLogProvider, Logger, LogProvider, Mutable, RuntimeSettings} from "typescript-logging-core";
+import {$internal, createLogProvider, Logger, LogProvider, Mutable, RuntimeSettings} from "typescript-logging";
 import {Log4TSGroupConfig} from "../api/Log4TSGroupConfig";
 import {log4TSGroupConfigDebug} from "../util/DebugUtil";
 

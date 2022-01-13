@@ -41,6 +41,9 @@
     "url": "https://github.com/vauxite-org/typescript-logging/issues"
   },
   "homepage": "https://github.com/vauxite-org/typescript-logging/#readme",
+  "dependencies": {
+    "typescript-logging": "2.0.0"
+  },
   "devDependencies": {
     "@rollup/plugin-commonjs": "21.0.1",
     "@rollup/plugin-node-resolve": "13.0.6",

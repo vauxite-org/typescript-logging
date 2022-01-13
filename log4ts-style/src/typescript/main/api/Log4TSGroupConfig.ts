@@ -1,5 +1,5 @@
 import {Log4TSConfig} from "./Log4TSConfig";
-import {PartialExcept} from "typescript-logging-core";
+import {PartialExcept} from "typescript-logging";
 
 /**
  * Group config for a Log4TSProvider.

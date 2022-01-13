@@ -1,6 +1,6 @@
 import {Log4TSProviderImpl} from "./Log4TSProviderImpl";
 import {Log4TSProvider} from "../api/Log4TSProvider";
-import {$internal, DefaultChannels, formatArgument, formatDate, LogLevel, util} from "typescript-logging-core";
+import {$internal, DefaultChannels, formatArgument, formatDate, LogLevel, util} from "typescript-logging";
 import {Log4TSGroupConfig, Log4TSGroupConfigOptional} from "../api/Log4TSGroupConfig";
 import {Log4TSConfig, Log4TSConfigOptional} from "../api/Log4TSConfig";
 import {Log4TSControl} from "../api/Log4TSControl";

@@ -1,5 +1,5 @@
 import {Log4TSControlProvider, Log4TSControlProviderLogLevel} from "../api/Log4TSControlProvider";
-import {LogLevel, RuntimeSettings, util} from "typescript-logging-core";
+import {LogLevel, RuntimeSettings, util} from "typescript-logging";
 import {Log4TSProvider} from "../api/Log4TSProvider";
 
 /**
