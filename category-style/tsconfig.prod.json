@@ -1,6 +1,7 @@
 {
   "extends": "../core/tsconfig.base.json",
   "compilerOptions": {
+    "rootDir": ".",
     "lib": [
       "ES2015",
       "DOM"

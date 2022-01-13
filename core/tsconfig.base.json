@@ -6,17 +6,18 @@
     "module": "ES2015",
     "moduleResolution": "Node",
     "target": "ES2015",
-    "outDir": "../dist/tsc",
+    "outDir": "./dist/tsc",
     "sourceMap": true,
     "strict": true,
     "esModuleInterop": true,
     "stripInternal": true,
     "composite": false,
     "declaration": true,
-    "declarationMap": true
+    "declarationMap": true,
+    "forceConsistentCasingInFileNames": true
   },
   "exclude": [
     "node_modules",
-    "../dist"
+    "dist"
   ]
 }
