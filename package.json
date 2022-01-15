@@ -43,7 +43,7 @@
     "jasmine": "2.8.0",
     "jasmine-node": "1.14.5",
     "markdown-to-html": "0.0.13",
-    "shelljs": "0.7.8",
+    "shelljs": "0.8.5",
     "source-map-loader": "0.2.3",
     "ts-loader": "3.1.1",
     "tslint": "5.8.0",
