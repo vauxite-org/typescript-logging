@@ -1,14 +1,14 @@
-import {Logger} from "typescript-logging";
+import {CoreLogger} from "typescript-logging";
 
 /**
  * Represents a Category for the category style of logging.
  *
- * The Category is a Logger and can be used for logging, as well as for
- * getting child category loggers from (use getChildCategory(..)).
+ * The Category is a CoreLogger and can be used for logging, as well as for
+ * getting child category loggers from (use getChildCategory(...)).
  *
  * To create a root category use a CategoryProvider.
  */
-export interface Category extends Logger {
+export interface Category extends CoreLogger {
 
   /**
    * Name of the category.
