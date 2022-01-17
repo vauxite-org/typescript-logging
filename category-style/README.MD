@@ -1,11 +1,16 @@
 # TypeScript Logging category style
 
-Logging library written in TypeScript and for use by TypeScript projects. This is one of the available flavors, please
-see [here](../README.md) for all available styles.
+Logging library for Typescript projects. This is one of the available flavors, please see [here](../README.md) for all
+available styles.
 
-This flavor is different from the standard type of loggers around these days. It's corner stone is the `Category` from
-which child categories can be created recursively (like a tree). Each category is a logger as well and can be used to
-log.
+This flavor differentiates itself from the alternatives by allowing applications to do topological logging. The corner
+stone is the `Category` from which child categories can be created recursively (like a tree/topology). Each category is
+a logger as well and can be used to log.
+
+As an example let's look at performance logging. We could use a `Category` named "Performance" which would be accessible
+throughout the application. Any messages logged by it will be categorized as to belong to "Performance"
+and all logging can easily be enabled/disabled for this Category. For more fine-grained control, child categories can be
+created if needed, creating a topology/tree of loggers.
 
 * [Getting started](#getting-started)
 * [Logging](#logging)
@@ -18,11 +23,15 @@ This section describes how to get started quickly.
 
 ### Installation
 
-To install this flavor issue the following command:
+To install this flavor issue the following commands:
 
 ```shell
+npm install --save typescript-logging
 npm install --save typescript-logging-category-style
 ```
+
+The first command installs the core for typescript logging. The second command installs the flavor (category) to use.
+The flavor requires the core.
 
 ### Quick start
 
@@ -32,7 +41,8 @@ below to either log directly or create child categories from.
 
 ```typescript
 /*--- config/LogConfig.ts ---*/
-import {CategoryProvider, Category, LogLevel} from "typescript-logging-category-style";
+import {LogLevel} from "typescript-logging";
+import {CategoryProvider, Category} from "typescript-logging-category-style";
 
 const provider = CategoryProvider.createProvider("ExampleProvider", {
   level: LogLevel.Warn,
@@ -94,13 +104,13 @@ import {saveAccount} from "./service/Account";
 /* Create an account and save it - log on success/error */
 const account = createAccount("My Account");
 saveAccount(account)
-        .then(() => {
-          /* Note we use the root category directly to log with here */
-          rootMain.debug("Successfully created account.", account.name);
-        })
-        .catch(e => {
-          rootMain.error("Ooops...", e);
-        });
+  .then(() => {
+    /* Note we use the root category directly to log with here */
+    rootMain.debug("Successfully created account.", account.name);
+  })
+  .catch(e => {
+    rootMain.error("Ooops...", e);
+  });
 ```
 
 Now let's assume Main.ts is executed above. It successfully creates and saves the account. The logging will then roughly
@@ -117,8 +127,9 @@ end up like below.
 The quick start above gives an overview on how to create a provider, get categories from it and then log using a
 category.
 
-To be clear about this from the beginning: a `Category` is a `Logger`. In fact a Category extends the Logger interface.
-Category has a few additional properties, such as a name an optional parent (category) and children (child categories).
+To be clear about this from the beginning: a `Category` is a `Logger`. In fact a Category extends the CoreLogger
+interface. Category has a few additional properties, such as a name an optional parent (category) and children (child
+categories).
 
 So a category in this flavor can be used to log.
 
@@ -135,7 +146,7 @@ Each level has a matching function on the Logger, for example `trace` for Trace 
 the function are the same for all of them. This shows the signatures for debug.
 
 ```typescript
-interface Logger {
+interface CoreLogger {
   debug(message: LogMessageType, ...args: unknown[]): void;
 
   debug(message: LogMessageType, error: ExceptionType, ...args: unknown[]): void;
@@ -227,7 +238,8 @@ With this knowledge we can create for example a provider that logs on a differen
 formatter and logs to a custom LogChannel like the following code snippet.
 
 ```typescript
-import {CategoryProvider, LogLevel} from "typescript-logging-category-style";
+import {LogLevel} from "typescript-logging";
+import {CategoryProvider} from "typescript-logging-category-style";
 
 const provider = CategoryProvider.createProvider("ProviderWithCustomSettings", {
   level: LogLevel.Info,
@@ -345,7 +357,8 @@ library does for a `LogChannel`.
 The following code snippet creates a provider which uses a `RawLogChannel`.
 
 ```typescript
-import {CategoryProvider, LogLevel} from "typescript-logging-category-style";
+import {LogLevel} from "typescript-logging";
+import {CategoryProvider} from "typescript-logging-category-style";
 
 const provider = CategoryProvider.createProvider("ProviderWithCustomSettings", {
   channel: {
