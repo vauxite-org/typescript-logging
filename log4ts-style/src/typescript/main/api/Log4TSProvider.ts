@@ -1,7 +1,8 @@
-import {Logger, RuntimeSettings} from "typescript-logging";
+import {RuntimeSettings} from "typescript-logging";
 import {Log4TSConfigOptional} from "./Log4TSConfig";
 import {LOG4TS_PROVIDER_SERVICE} from "../impl/Log4TSProviderService";
 import {Log4TSGroupConfig} from "./Log4TSGroupConfig";
+import {Logger} from "./Logger";
 
 /**
  * Provider for Log4TS flavor, can be used to get loggers.
