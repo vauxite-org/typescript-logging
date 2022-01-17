@@ -1,18 +1,18 @@
 import {Category} from "../api/Category";
-import {ExceptionType, Logger, LogLevel, LogMessageType} from "typescript-logging";
+import {CoreLogger, ExceptionType, LogLevel, LogMessageType} from "typescript-logging";
 
 /**
  * Implementation for Category.
  */
 export class CategoryImpl implements Category {
 
-  private readonly _logger: Logger;
+  private readonly _logger: CoreLogger;
   private readonly _name: string;
   private readonly _parent: Category | undefined;
   private readonly _fnGetOrCreateChildCategory: (name: string, parent: Category) => Category;
   private readonly _children: Category [] = [];
 
-  public constructor(logger: Logger, name: string, parent: Category | undefined, fnGetOrCreateChildCategory: (name: string, parent: Category) => Category) {
+  public constructor(logger: CoreLogger, name: string, parent: Category | undefined, fnGetOrCreateChildCategory: (name: string, parent: Category) => Category) {
     this._logger = logger;
     this._name = name;
     this._parent = parent;
