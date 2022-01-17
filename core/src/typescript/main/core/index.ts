@@ -4,8 +4,8 @@ import {LogProviderImpl} from "./impl/LogProviderImpl";
 import {LogChannel} from "./api/LogChannel";
 
 /* Export the API */
+export {CoreLogger} from "./api/CoreLogger";
 export {LogChannel} from "./api/LogChannel";
-export {Logger} from "./api/Logger";
 export {LogId} from "./api/LogId";
 export {LogLevel} from "./api/LogLevel";
 export {LogMessage} from "./api/LogMessage";

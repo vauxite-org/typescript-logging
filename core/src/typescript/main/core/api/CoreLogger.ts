@@ -8,7 +8,7 @@ import {LogRuntime} from "./runtime/LogRuntime";
  * Represents a Logger, should be used to log your messages (and errors).
  * All methods accept a message and optionally an error and additional arguments.
  */
-export interface Logger {
+export interface CoreLogger {
 
   /**
    * Id by which this logger is identified (not relevant for an end user).

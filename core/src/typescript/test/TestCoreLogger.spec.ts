@@ -1,5 +1,5 @@
 import {formatArgument, LogLevel,} from "../main/core";
-import {LoggerImpl} from "../main/core/impl/LoggerImpl";
+import {CoreLoggerImpl} from "../main/core/impl/CoreLoggerImpl";
 import {ArrayLogChannel} from "./TestClasses";
 
 describe("Test core logger", () => {
@@ -97,9 +97,9 @@ describe("Test core logger", () => {
   }
 });
 
-function createDefaultLogger(level: LogLevel): [logger: LoggerImpl, channel: ArrayLogChannel] {
+function createDefaultLogger(level: LogLevel): [logger: CoreLoggerImpl, channel: ArrayLogChannel] {
   const channel = new ArrayLogChannel();
-  return [new LoggerImpl({
+  return [new CoreLoggerImpl({
     level,
     id: "B",
     channel,
