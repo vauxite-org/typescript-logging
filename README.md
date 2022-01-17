@@ -86,7 +86,8 @@ The following section configures a provider and exposes a getLogger function for
 
 ```typescript
 /*--- LogConfig.ts ---*/
-import {Log4TSProvider, Logger, LogLevel} from "typescript-logging-log4ts-style";
+import {LogLevel} from "typescript-logging";
+import {Log4TSProvider, Logger} from "typescript-logging-log4ts-style";
 
 const provider = Log4TSProvider.createProvider("ExampleProvider", {
   /* Specify the various group expressions to match against */
@@ -127,20 +128,27 @@ function example(value: string) {
 
 ## Build
 
-To locally build the logging flavors.
+To locally build the logging flavors. The easiest is to run the ./initialize.sh script:
 
 ```shell
-npm run ci                 # If not installed yet
-npm run build --workspaces # Builds all flavors, going into respective directory doing just 'npm run build' works too.
+./initialize.sh # Clean, install and build everything.
+```
+
+This will cleanly install and build your branch from scratch.
+
+You can also manually install things, by going into the respective directories and manually type:
+
+```shell
+npm run ci # If not installed yet
 ```
 
 ## Tests
 
-To locally run the tests:
+To locally run the tests, in the respective subdirectories:
 
 ```shell
-npm run ci                # If not installed yet
-npm run test --workspaces # Tests all flavors, going into respective directory doing just 'npm run test' works too.
+npm run ci    # If not installed yet
+npm run test  # Tests all flavors, going into respective directory doing just 'npm run test' works too (npm run build also tests).
 ```
 
 ## Integration tests
@@ -152,14 +160,15 @@ as shown below.
 # Linux/MacOS only - Cleans everything and re-installs packages, including those for the integration projects.
 ./initialize.sh
 
-# Use when ./initialize.sh cannot be used
+# Use when ./initialize.sh cannot be used, note that the other projects must be built first (see above)
 npm run ci      # Run inside respective test-integration project, e.g. tests-integration/rollup
 npm run build   # Run inside respective test-integration project. Builds test webapp and runs cypress tests.
 ```
 
 ## Bugs
 
-If you encounter a bug please log it in the issue tracker of this repository.
+If you encounter a bug please log it in the issue tracker of this repository and make sure what flavor (style) you are
+using.
 
 ## Contributing
 

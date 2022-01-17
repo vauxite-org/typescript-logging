@@ -60,6 +60,6 @@ echo -e "To build a core/flavor module - get into a project directory, e.g. core
 echo -e "  npm run build (this applies to flavors too)\n"
 echo "To build a test-integration project (requires core and flavors built successfully), go in respective directory (e.g. tests-integration/rollup):"
 echo -e "  npm run build\n"
-echo "Be aware that the integration projects need to have their package-lock.json removed to have the dependent packages (tar.gz.) installed clean or a cached version is installed."
+echo "Be aware that the integration projects need to have their package-lock.json removed to have the dependent packages (tar.gz.) installed clean again or a cached version is installed/used."
 echo "Another option would be to link core and flavors both for each integration project (for development purposes this is faster)."
 
