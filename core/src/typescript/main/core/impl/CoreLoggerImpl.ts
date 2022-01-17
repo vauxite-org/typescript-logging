@@ -1,4 +1,4 @@
-import {Logger} from "../api/Logger";
+import {CoreLogger} from "../api/CoreLogger";
 import {ExceptionType} from "../api/type/ExceptionType";
 import {LogLevel} from "../api/LogLevel";
 import {LogMessageType} from "../api/type/LogMessageType";
@@ -8,7 +8,7 @@ import {LogMessage} from "../api/LogMessage";
 /**
  * Standard logger implementation that provides the basis for all loggers.
  */
-export class LoggerImpl implements Logger {
+export class CoreLoggerImpl implements CoreLogger {
 
   private _runtime: LogRuntime;
 
@@ -76,7 +76,7 @@ export class LoggerImpl implements Logger {
 
     const nowMillis = Date.now();
     const message = typeof logMessageType === "string" ? logMessageType : logMessageType();
-    const errorAndArgs = LoggerImpl.getErrorAndArgs(args);
+    const errorAndArgs = CoreLoggerImpl.getErrorAndArgs(args);
 
     /*
      * Deal with raw message here.

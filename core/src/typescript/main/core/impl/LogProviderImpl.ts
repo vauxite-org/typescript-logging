@@ -1,9 +1,9 @@
 import {LogProvider} from "../api/LogProvider";
 import {LoggerNameType} from "../api/type/LoggerNameType";
-import {Logger} from "../api/Logger";
+import {CoreLogger} from "../api/CoreLogger";
 import {LogConfig} from "../api/config/LogConfig";
 import {EnhancedMap} from "../../util/EnhancedMap";
-import {LoggerImpl} from "./LoggerImpl";
+import {CoreLoggerImpl} from "./CoreLoggerImpl";
 import {RuntimeSettings, RuntimeSettingsRequired} from "../api/runtime/RuntimeSettings";
 import {getInternalLogger} from "../../internal/InternalLogger";
 import {formatArgument, formatDate} from "./DefaultFormatters";
@@ -25,7 +25,7 @@ export class LogProviderImpl implements LogProvider {
    * @private
    */
   private readonly _settings: LogConfig;
-  private readonly _loggers: EnhancedMap<string, LoggerImpl>;
+  private readonly _loggers: EnhancedMap<string, CoreLoggerImpl>;
   private readonly _idToKeyMap: EnhancedMap<LogId, string>;
 
   /**
@@ -55,11 +55,11 @@ export class LogProviderImpl implements LogProvider {
     };
   }
 
-  public getLogger(name: LoggerNameType): Logger {
+  public getLogger(name: LoggerNameType): CoreLogger {
     return this.getOrCreateLogger(name);
   }
 
-  public updateLoggerRuntime(log: Logger, settings: RuntimeSettings): boolean {
+  public updateLoggerRuntime(log: CoreLogger, settings: RuntimeSettings): boolean {
     this._log.debug(() => `Updating logger ${log.id} runtime settings using: '${JSON.stringify(settings)}'`);
 
     const key = this._idToKeyMap.get(log.id);
@@ -98,7 +98,7 @@ export class LogProviderImpl implements LogProvider {
     this._nextLoggerId = 1;
   }
 
-  private getOrCreateLogger(name: LoggerNameType): LoggerImpl {
+  private getOrCreateLogger(name: LoggerNameType): CoreLoggerImpl {
     const key = LogProviderImpl.createKey(name);
 
     const logger = this._loggers.computeIfAbsent(key, () => {
@@ -110,7 +110,7 @@ export class LogProviderImpl implements LogProvider {
         argumentFormatter: this._settings.argumentFormatter,
         dateFormatter: this._settings.dateFormatter,
       };
-      return new LoggerImpl(runtime);
+      return new CoreLoggerImpl(runtime);
     });
     this._idToKeyMap.computeIfAbsent(logger.id, () => key);
     return logger;
