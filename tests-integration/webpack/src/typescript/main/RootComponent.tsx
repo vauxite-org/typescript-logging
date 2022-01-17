@@ -1,5 +1,7 @@
 import * as React from "react";
 import {categoryProvider, log4TSProvider} from "./LogConfig";
+import {Logger} from "typescript-logging-log4ts-style";
+import {Category} from "typescript-logging-category-style";
 
 interface RootComponentProps {
   initialize(setLogValue: (value: string) => void): void;
@@ -20,7 +22,7 @@ export const RootComponent = (props: RootComponentProps) => {
 };
 
 function testLog4TSStyle() {
-  const log = log4TSProvider.getLogger("model.Example");
+  const log: Logger = log4TSProvider.getLogger("model.Example");
   log.trace("trace");
   log.debug("debug!");
   log.info("info!");
@@ -30,7 +32,7 @@ function testLog4TSStyle() {
 }
 
 function testCategoryStyle() {
-  const root = categoryProvider.getCategory("root");
+  const root: Category = categoryProvider.getCategory("root");
   const child1 = root.getChildCategory("child1");
   root.trace("trace");
   root.debug("root");
