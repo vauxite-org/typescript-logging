@@ -1,5 +1,6 @@
 /* log4ts api */
 export {Log4TSConfig, Log4TSConfigOptional} from "./api/Log4TSConfig";
+export {Logger} from "./api/Logger";
 export {Log4TSControl} from "./api/Log4TSControl";
 export {Log4TSControlProvider, Log4TSControlProviderLogLevel} from "./api/Log4TSControlProvider";
 export {Log4TSProvider} from "./api/Log4TSProvider";

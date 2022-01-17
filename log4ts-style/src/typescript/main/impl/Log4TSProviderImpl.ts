@@ -1,7 +1,8 @@
 import {Log4TSProvider} from "../api/Log4TSProvider";
-import {$internal, createLogProvider, Logger, LogProvider, Mutable, RuntimeSettings} from "typescript-logging";
+import {$internal, createLogProvider, LogProvider, Mutable, RuntimeSettings} from "typescript-logging";
 import {Log4TSGroupConfig} from "../api/Log4TSGroupConfig";
 import {log4TSGroupConfigDebug} from "../util/DebugUtil";
+import {Logger} from "../api/Logger";
 
 /**
  * Implementation class for Log4TSProvider.
