@@ -2,3 +2,5 @@ dist
 cypress/screenshots
 cypress/videos
 node_modules
+# Yes on purpose for test project to not have cached things installed
+package-lock.json

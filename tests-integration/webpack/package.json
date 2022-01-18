@@ -5,7 +5,7 @@
   "description": "Test with webpack",
   "scripts": {
     "build": "npm run clean && npm run compile && npm run tslint && npm run test",
-    "clean": "shx rm -rf dist",
+    "clean": "shx rm -rf ./dist && shx rm -f package-lock.json",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
     "compile": "webpack",
