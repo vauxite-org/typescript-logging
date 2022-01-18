@@ -4,7 +4,7 @@
   "private": "true",
   "description": "Test with rollup",
   "scripts": {
-    "clean": "shx rm -rf ./dist",
+    "clean": "shx rm -rf ./dist && shx rm -f package-lock.json",
     "compile": "rollup -c",
     "compile-watch": "rollup -cw",
     "cypress:open": "cypress open",
