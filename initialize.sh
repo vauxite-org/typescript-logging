@@ -39,16 +39,18 @@ npm ci
 echo "Building log4ts-style..."
 npm run build
 
+# Note we do install, we don't checkin package-lock here as otherwise npm will use cache (so something old) for these if
+# they were previously installed, can't have that with tests, they need to be reliable.
 echo ""
 echo "Installing packages for tests-integration/rollup"
 cd ../tests-integration/rollup
-npm ci
+npm install
 echo "Building tests-integration/rollup..."
 npm run build
 
 echo "Installing packages for tests-integration/webpack"
 cd ../webpack
-npm ci
+npm install
 echo "Building tests-integration/webpack..."
 npm run build
 
