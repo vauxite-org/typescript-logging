@@ -64,14 +64,23 @@ describe("Test core logger", () => {
   test("Test arguments formatting", () => {
     const [log, channel] = createDefaultLogger(LogLevel.Debug);
 
+    const testValue = "world";
     log.debug("Hello!", "A");
     log.debug("Hello!", "A", 4, undefined, null, ["dance", "again"]);
     log.debug("Hello!", new Error("fail"), "A", 4, undefined, null, ["dance", "again"]);
+    log.debug(() => `Hello ${testValue}`);
+    log.debug(() => "Hello!", "B");
+    log.debug(() => "Hello!", undefined, null, "hello?");
+    log.debug(() => "Hello!", {test: "bla"}, [1, 2, 3]);
 
     expect(channel.messages).toEqual([
       `XXX DEBUG [Main] Hello! ["A"]`,
       `XXX DEBUG [Main] Hello! ["A", 4, undefined, null, ["dance","again"]]`,
       `XXX DEBUG [Main] Hello! ["A", 4, undefined, null, ["dance","again"]]`,
+      `XXX DEBUG [Main] Hello world`,
+      `XXX DEBUG [Main] Hello! ["B"]`,
+      `XXX DEBUG [Main] Hello! [undefined, null, "hello?"]`,
+      `XXX DEBUG [Main] Hello! [{\"test\":\"bla\"}, [1,2,3]]`,
     ]);
   });
 
