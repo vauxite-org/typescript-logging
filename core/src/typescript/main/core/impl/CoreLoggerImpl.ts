@@ -129,7 +129,7 @@ export class CoreLoggerImpl implements CoreLogger {
       levelAsStr += " ";
     }
     const names = typeof this._runtime.name === "string" ? this._runtime.name : this._runtime.name.join(", ");
-    const argsFormatted = typeof args !== "undefined" ? (" [" + (args.map(arg => this.formatArgValue(arg))).join(", ") + "]") : "";
+    const argsFormatted = typeof args !== "undefined" && args.length > 0 ? (" [" + (args.map(arg => this.formatArgValue(arg))).join(", ") + "]") : "";
     const completedMessage = dateFormatted + " " + levelAsStr + " [" + names + "] " + message + argsFormatted;
 
     return {

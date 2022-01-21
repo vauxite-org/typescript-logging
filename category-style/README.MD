@@ -3,9 +3,9 @@
 Logging library for Typescript projects. This is one of the available flavors, please see [here](../README.md) for all
 available styles.
 
-This flavor differentiates itself from the alternatives by allowing applications to do topological logging. The corner
-stone is the `Category` from which child categories can be created recursively (like a tree/topology). Each category is
-a logger as well and can be used to log.
+This flavor differentiates itself from the alternatives by allowing applications to do topological logging
+(by creating a tree structure of loggers). The corner stone is the `Category` from which child categories can be created
+recursively. Each category is a logger as well and can be used to log.
 
 As an example let's look at performance logging. We could use a `Category` named "Performance" which would be accessible
 throughout the application. Any messages logged by it will be categorized as to belong to "Performance"
@@ -30,8 +30,8 @@ npm install --save typescript-logging
 npm install --save typescript-logging-category-style
 ```
 
-The first command installs the core for typescript logging. The second command installs the flavor (category) to use.
-The flavor requires the core.
+The first command installs the "core" of typescript logging and is a required dependency. The second command installs
+the flavor (category) to use.
 
 ### Quick start
 
@@ -39,13 +39,17 @@ The following code defines a configuration file which creates a single `Category
 log level of `Debug` (default is `Error`). We also create a couple of root categories that will be used by the modules
 below to either log directly or create child categories from.
 
+Note that we give a CategoryProvider a unique name, this is useful for external control (
+see [Dynamic control](#dynamic-control))
+for more details about that.
+
 ```typescript
 /*--- config/LogConfig.ts ---*/
 import {LogLevel} from "typescript-logging";
 import {CategoryProvider, Category} from "typescript-logging-category-style";
 
 const provider = CategoryProvider.createProvider("ExampleProvider", {
-  level: LogLevel.Warn,
+  level: LogLevel.Debug,
 });
 
 /* Create some root categories for this example, you can also expose getLogger() from the provider instead e.g. */
@@ -58,10 +62,10 @@ The modules below use the categories created in LogConfig.ts in various ways.
 
 ```typescript
 /*--- model/Account.ts ---*/
-import {modelService} from "../config/LogConfig";
+import {rootService} from "../config/LogConfig";
 
 /* Creates a child category/logger called "Account" below "model" */
-const log = modelService.getChildCategory("Account");
+const log = rootService.getChildCategory("Account");
 
 export interface Account {
   name: string;

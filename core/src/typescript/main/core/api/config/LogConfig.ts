@@ -17,10 +17,13 @@ export interface LogConfig {
 
   /**
    * What kind of channel to log to (a normal or raw channel).
-   * This is the default channel. Can be overridden depending on the
-   * configuration options by the chosen logging solution.
+   * In some cases the flavor maybe it to be changed in a more
+   * fine-grained control where different channels can be used.
    *
-   * Default channel logs to console.
+   * However, by default this is the channel that is used without
+   * any specif configuration.
+   *
+   * The default channel logs to console.
    */
   readonly channel: LogChannel | RawLogChannel;
 
