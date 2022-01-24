@@ -1,5 +1,6 @@
 #!/bin/bash
-set -e
+set -euo pipefail
+IFS=$'\n\t'
 
 echo "Removing all node_modules directories and dist directories..."
 rm -rf core/node_modules
@@ -10,9 +11,10 @@ rm -rf log4ts-style/node_modules
 rm -rf log4ts-style/dist
 rm -rf tests-integration/rollup/node_modules
 rm -rf tests-integration/rollup/dist
+rm -f  tests-integration/rollup/package-lock.json
 rm -rf tests-integration/webpack/node_modules
 rm -rf tests-integration/webpack/dist
-rm -rf home/node_modules
+rm -f  tests-integration/rollup/package-lock.json
 
 echo "Installing packages for core..."
 cd core
