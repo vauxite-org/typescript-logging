@@ -5,6 +5,10 @@ import {PartialExcept} from "typescript-logging";
  * Group config for a Log4TSProvider.
  */
 export type Log4TSGroupConfig = Omit<Log4TSConfig, "groups"> & {
+  /**
+   * Expression to match a namespace (package/paths). For example new RegExp(".+") matches all, while
+   * new RegExp("service.+") matches all within the service namespace.
+   */
   readonly expression: RegExp;
 
   /**
