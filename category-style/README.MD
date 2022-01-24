@@ -17,6 +17,10 @@ created if needed, creating a topology/tree of loggers.
 * [Configuration](#configuration)
 * [Dynamic control](#dynamic-control)
 
+Using typescript-logging **_version 1_**? Please
+visit [https://github.com/vauxite-org/typescript-logging/tree/release-1.x](https://github.com/vauxite-org/typescript-logging/tree/release-1.x)
+for more details. Consider upgrading to the latest version.
+
 ## Getting started
 
 This section describes how to get started quickly.

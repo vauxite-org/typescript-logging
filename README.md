@@ -16,6 +16,10 @@ The following general sections are available:
 * [Migration](#migration)
 * [Changelog](#changelog)
 
+Using typescript-logging **_version 1_**? Please
+visit [https://github.com/vauxite-org/typescript-logging/tree/release-1.x](https://github.com/vauxite-org/typescript-logging/tree/release-1.x)
+for more details. Consider upgrading to the latest version.
+
 ## Getting started
 
 For all details and documentation please visit the links above. The following sections provide a quick start only for
@@ -23,9 +27,10 @@ both flavors.
 
 ### Category style flavor
 
-*To install the category-style flavor use the following npm command:*
+*To install the category-style flavor use the following npm commands:*
 
 ```shell
+npm install --save typescript-logging  # Core is required for any style
 npm install --save typescript-logging-category-style
 ```
 
@@ -74,9 +79,10 @@ function example(value: string) {
 
 ### Log4ts flavor
 
-*To install the log4ts-style flavor use the following npm command:*
+*To install the log4ts-style flavor use the following npm commands:*
 
 ```shell
+npm install --save typescript-logging  # Core is required for any style
 npm install --save typescript-logging-log4ts-style
 ```
 
@@ -139,29 +145,39 @@ This will cleanly install and build your branch from scratch.
 You can also manually install things, by going into the respective directories and manually type:
 
 ```shell
-npm run ci # If not installed yet
+# If not installed yet
+npm run ci
+# or for the test projects
+npm install
 ```
+
+Any project when you're in the respective directory can be built with:
+
+```shell
+npm run build
+```
+
+That will clean, build and test the project.
 
 ## Tests
 
-To locally run the tests, in the respective subdirectories:
+To locally run the tests, in the respective directories:
 
 ```shell
-npm run ci    # If not installed yet
-npm run test  # Tests all flavors, going into respective directory doing just 'npm run test' works too (npm run build also tests).
+npm run test
 ```
 
 ## Integration tests
 
-If you're on linux or mac-os, it's easiest to run initialize.sh first. Otherwise, skip that and run npm run ci manually
-as shown below.
+If you're on linux or mac-os, it's easiest to run initialize.sh first. Otherwise, skip that and run `npm run install`
+manually as shown below.
 
 ```shell
 # Linux/MacOS only - Cleans everything and re-installs packages, including those for the integration projects.
 ./initialize.sh
 
-# Use when ./initialize.sh cannot be used, note that the other projects must be built first (see above)
-npm run ci      # Run inside respective test-integration project, e.g. tests-integration/rollup
+# If not using ./initialize.sh, note that the dependent projects must be built first (core and the various styles, see above)
+npm run install # Run inside respective test-integration project, e.g. tests-integration/rollup
 npm run build   # Run inside respective test-integration project. Builds test webapp and runs cypress tests.
 ```
 
