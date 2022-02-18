@@ -229,7 +229,7 @@ All classes can be imported from "typescript-logging".
 This describes the more often used part of the typescript API. Keep in mind the javascript API is exactly the same (except you need to call things the javascript way).
 Finally it's recommended to just look in the relevant classes as they contain the most up to date documentation.
 
-The latest documentation also contains the classes below: Download [Documentation](https://github.com/mreuvers/typescript-logging/tree/master/downloads/bundle/latest).
+The full typescript API is bundled in the npm package, your editor will recognize the typings.
 
 ### LFService
 
@@ -376,7 +376,7 @@ export interface LogData {
 
 ## Browser
 
-To use in the browser with javascript directly, download the (minified) library from [here](https://github.com/mreuvers/typescript-logging/tree/master/downloads/bundle/latest).
+To use in the browser with javascript directly, download the correct release from github and extract the file (find the dist/bundle directory).
 The library is exposed by global variable TSL. See the example below.
 
 ~~~~

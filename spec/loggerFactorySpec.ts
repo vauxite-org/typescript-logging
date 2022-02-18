@@ -95,7 +95,7 @@ describe("LoggerFactory configuration", () => {
     expect(loggerHello).not.toBeNull();
 
     const rtSettings = factory.getLogGroupRuntimeSettingsByLoggerName(loggerHello.name) as LogGroupRuntimeSettings;
-    expect(rtSettings).not.toBeNull("Settings should be present");
+    expect(rtSettings).not.toBeNull();
     expect(rtSettings).not.toBeNull();
     expect(rtSettings.level).toEqual(LogLevel.Warn);
 
@@ -125,13 +125,13 @@ describe("LoggerFactory configuration", () => {
     const rule = new LogGroupRule(new RegExp(".+"), LogLevel.Info, new LogFormat(), LoggerType.Custom, (name, settings) => new CustomLogger(name, settings));
     // This not allowed now.
     expect(() => rule.formatterLogMessage = (message) => typeof(message.message) === "string" ? message.message : "nope should not happen!")
-      .toThrow("You cannot specify a formatter for log messages if your loggerType is Custom");
+      .toThrowError("You cannot specify a formatter for log messages if your loggerType is Custom");
   });
 
   it("Default LoggerFactory is available", () => {
-    expect(LFService.DEFAULT).not.toBeNull("Default loggerfactory should not be null");
+    expect(LFService.DEFAULT).not.toBeNull();
     const factory = LFService.DEFAULT;
-    expect(factory === LFService.DEFAULT).toBeTruthy("Should be same instance");
+    expect(factory === LFService.DEFAULT).toBeTruthy();
     factory.configure(new LoggerFactoryOptions().addLogGroupRule(new LogGroupRule(new RegExp(".+"), LogLevel.Warn, new LogFormat(), LoggerType.MessageBuffer)));
     const logger = factory.getLogger("test") as MessageBufferLoggerImpl;
     logger.warn("hello!");

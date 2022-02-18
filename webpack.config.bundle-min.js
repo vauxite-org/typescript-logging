@@ -1,8 +1,7 @@
-var webpack = require("webpack");
 const path = require("path");
 
 module.exports = {
-
+  mode: "production",
   entry: "./dist/commonjs/typescript-logging.js",
   devtool: "source-map",
   output: {
@@ -11,7 +10,5 @@ module.exports = {
     path: path.resolve(__dirname, "dist/bundle"),
     filename: "typescript-logging.bundle.min.js"
   },
-  plugins: [
-    new webpack.optimize.UglifyJsPlugin({minimize: true})
-  ]
+  plugins: []
 };

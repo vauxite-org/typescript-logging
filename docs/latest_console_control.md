@@ -53,8 +53,6 @@ factoryControl.reset();  // or factory.reset("all")
 
 Always use the help() on the objects for more details.
 
-Detailed documentation can be found in the docs.zip that can be downloaded from the main page, in particular you want to look at the LogGroupControl and LoggerFactory classes.
-
 ## Categorized console control
 
 This can be used if your application uses the categorized style of logging.
@@ -91,8 +89,6 @@ control.reset();
 ```
 
 Always use the help() on the objects for more details.
-
-Detailed documentation can be found in the docs.zip that can be downloaded from the main page, in particular you want to look at the CategoryServiceControl class.
 
 ## Expose Console control API with webpack
 

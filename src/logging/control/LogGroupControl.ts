@@ -148,7 +148,7 @@ export class LoggerControlImpl implements LoggerControl {
   }
 
   public showSettings(id: number | "all" = "all"): void {
-    const result: Array<TuplePair<number, LoggerFactoryRuntimeSettings>> = [];
+    const result: TuplePair<number, LoggerFactoryRuntimeSettings>[] = [];
 
     if (id === "all") {
       let idx = 0;

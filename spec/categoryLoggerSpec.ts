@@ -36,7 +36,7 @@ const getMessages = (logger: CategoryLogger | Category): string[] => {
   return (actualLogger as CategoryMessageBufferLoggerImpl).getMessages();
 };
 
-const logsAllLevels = (logger: CategoryLogger | Category): void => {
+const logsAllLevels = (logger: CategoryLogger | Category, done: DoneFn): void => {
   logger.trace("trace1");
   logger.trace({ msg: "trace2" });
   logger.trace(() => "trace3");
@@ -85,11 +85,11 @@ const logsAllLevels = (logger: CategoryLogger | Category): void => {
   logger.log(LogLevel.Fatal, () => ({msg : "random4"}), () => new Error("randomex4"));
   logger.log(LogLevel.Fatal, () => ({ msg: "random5" }), () => new Error("randomex5"));
 
-  const messages = getMessages(logger);
-  waitsFor(() => messages.length === 40, "Expected 40 messages in log", 5000);
-  runs(() => {
-    const result = getMessagesAsString(logger);
+  setTimeout(() => {
+    const messages = getMessages(logger);
+    expect(messages.length).toEqual(40);
 
+    const result = getMessagesAsString(logger);
     expect(result).toContain("trace1");
     expect(result).toContain("trace2");
     expect(result).toContain("trace3");
@@ -157,7 +157,8 @@ const logsAllLevels = (logger: CategoryLogger | Category): void => {
     expect(result).toContain("randomex4");
     expect(result).toContain("random5");
     expect(result).toContain("randomex5");
-  });
+    done();
+  }, 500);
 };
 
 describe("CategoryLogger...", () => {
@@ -306,7 +307,7 @@ describe("CategoryLogger...", () => {
 
       const messages: string[] = getMessages(logger);
       expect(messages.length).toEqual(1);
-      expect(messages[0]).toContain(msg + " [data]: hello " + data.key, "Failed message was: " + messages[0]);
+      expect(messages[0]).toContain(msg + " [data]: hello " + data.key);
     });
 
     it("Can handle LogData without custom ds", () => {
@@ -325,7 +326,7 @@ describe("CategoryLogger...", () => {
       expect(messages[0]).toContain(msg);
     });
 
-    it("Test we do not bail on invalid error object", () => {
+    it("Test we do not bail on invalid error object", (doneFn) => {
       CategoryServiceFactory.setDefaultConfiguration(new CategoryConfiguration(LogLevel.Info, LoggerType.MessageBuffer));
 
       // Invalid error passsed in, this case a literal object. We should not bail out.
@@ -338,12 +339,14 @@ describe("CategoryLogger...", () => {
 
       catRoot.error("Failed2", anotherInvalidError as any);
 
-      const messages = getMessages(logger);
-      waitsFor(() =>   messages.length === 2, "Expected 1 message in log", 1000);
-      runs(() => {
+      setTimeout(() => {
+        const messages = getMessages(logger);
+        expect(messages.length === 2);
+
         expect(messages[0]).toContain("Unexpected error object was passed in. Could not resolve it, stringified object: {\"invalid\":\"bla\"}");
         expect(messages[1]).toContain("Unexpected error object was passed in. Could not resolve it or stringify it");
-      });
+        doneFn();
+      }, 50)
     });
   });
 
@@ -357,13 +360,13 @@ describe("CategoryLogger...", () => {
       CategoryServiceFactory.setDefaultConfiguration(new CategoryConfiguration(LogLevel.Trace, LoggerType.MessageBuffer));
     });
 
-    it("Tests all log levels", () => {
+    it("Tests all log levels", (doneFn) => {
       logger = CategoryServiceFactory.getLogger(catRoot);
-      logsAllLevels(logger);
+      logsAllLevels(logger, doneFn);
     });
 
-    it("Tests all log levels when using category directly", () => {
-      logsAllLevels(catRoot);
+    it("Tests all log levels when using category directly", (doneFn) => {
+      logsAllLevels(catRoot, doneFn);
     });
 
     it("Doesn't matter which one to use", () => {

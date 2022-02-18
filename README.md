@@ -2,6 +2,8 @@
 
 TypeScript library for logging. Simple and flexible in usage.
 
+**This is version 1, TypeScript logging version 2 has been released. You're recommended to upgrade** 
+
 * The library is written in TypeScript, so it will easily integrate with other TypeScript projects.
 * Two styles are supported (either can be used or both):
   * Category style of logging
@@ -39,9 +41,7 @@ npm install --save typescript-logging
 ```
 No additional typings are required, these are included.
 
-Requires typescript 2.4.2+ (tested).
-
-Or download the (minified) javascript bundle and documentation from [here](https://github.com/mreuvers/typescript-logging/tree/master/downloads/bundle/latest).
+Requires typescript 4.5.x
 
 ### Promise
 

@@ -1,6 +1,10 @@
 # Changelog
 
 This page describes the relevant changes per version.
+* 1.0.1
+  * Maintenance release, patched and upgraded all developer dependencies.
+  * Requires typescript 4.5.5 or higher.
+  * Removed downloads (instead use releases from github to get source and/or bundles directly)
 * 1.0.0
   * No changes, 0.6.4 is as of now the official 1.0.0 release.
 * 0.6.4

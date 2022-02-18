@@ -25,15 +25,6 @@ abstract class JSONTypeImpl<T> implements JSONType<T> {
   public getValue(): T {
     return this._value;
   }
-
-  public toString(): string {
-    const value = this.getValue();
-    if (value != null) {
-      return value.toString();
-    }
-    return "null";
-  }
-
 }
 
 class JSONBooleanType extends JSONTypeImpl<boolean> {
@@ -209,7 +200,7 @@ export class JSONObject {
 
 export class JSONArray<T extends ArrayType> {
 
-  private objects: Array<JSONType<ArrayType>> = [];
+  private objects: JSONType<ArrayType>[] = [];
 
   public add(object: T): JSONArray<T> {
     if (object === undefined) {

@@ -244,7 +244,7 @@ describe("CategoryServiceFactory", () => {
       return typeof(message) === "string" ? message : "";
     };
 
-    expect(() => configChanged.formatterLogMessage = formatterLogMessage).toThrow("You cannot specify a formatter for log messages if your loggerType is Custom");
+    expect(() => configChanged.formatterLogMessage = formatterLogMessage).toThrowError("You cannot specify a formatter for log messages if your loggerType is Custom");
     CategoryServiceFactory.setDefaultConfiguration(configChanged);
   });
 
@@ -389,8 +389,10 @@ describe("CategoryServiceFactory", () => {
 
   class CustomLogger extends AbstractCategoryLogger {
 
+    // tslint:disable-next-line:array-type
     private messages: Array<string | LogData> = [];
 
+    // tslint:disable-next-line:array-type
     constructor(rootCategory: Category, runtimeSettings: RuntimeSettings, messages: Array<string | LogData> ) {
       super(rootCategory, runtimeSettings);
       this.messages = messages;

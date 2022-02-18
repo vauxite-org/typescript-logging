@@ -1,14 +1,14 @@
 {
   "name": "typescript-logging",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Library for logging, written in typescript, can be used by normal es5+ javascript as well.",
   "main": "dist/commonjs/typescript-logging",
   "scripts": {
-    "test": "tsc -p tsconfig-test.json && jasmine-node --verbose ./dist-test/spec",
+    "test": "tsc -p tsconfig-test.json && jasmine-ts --project tsconfig-test.json --config=jasmine.json",
     "testLoadBundle": "webpack --config webpack.config.bundle.node.js && node spec/testLoadUseBundle.js",
     "tslint": "tslint -c tslint.json -p tsconfig.json  && tslint -c tslint.json -p tsconfig-test.json",
     "build": "tsc && npm run tslint && webpack --config webpack.config.bundle.js && webpack --config webpack.config.bundle-min.js",
-    "docs": "typedoc --tsconfig tsconfig-docs.json --excludeNotExported --excludePrivate --mode modules --out dist/bundle/docs/api src/logging/typescript-logging.ts && github-markdown docs/latest_log4j.md --flavor gfm --title 'TypeScript log4j logging documentation' > dist/bundle/docs/index_log4j.html && github-markdown docs/latest_categorized.md --flavor gfm --title 'TypeScript logging categorized documentation' > dist/bundle/docs/index_categorized.html && node scripts/process-docs.js dist/bundle",
+    "docs": "typedoc --tsconfig tsconfig-docs.json --excludePrivate --out dist/bundle/docs/api src/logging/typescript-logging.ts",
     "release": "npm run build && npm run test && npm run tslint && npm run testLoadBundle && npm run docs"
   },
   "files": [
@@ -21,7 +21,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mreuvers/typescript-logging.git"
+    "url": "git+https://github.com/vauxite-org/typescript-logging.git"
   },
   "keywords": [
     "typescript-logging",
@@ -30,26 +30,28 @@
     "log",
     "logger"
   ],
-  "author": "Martijn Reuvers <martijnr.work@gmail.com> (http://www.javalid.org)",
+  "author": "Martijn Reuvers <martijnr.work@gmail.com>",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/mreuvers/typescript-logging/issues"
+    "url": "https://github.com/vauxite-org/typescript-logging/issues"
   },
-  "homepage": "https://github.com/mreuvers/typescript-logging#readme",
+  "homepage": "https://github.com/vauxite-org/typescript-logging/#readme",
   "devDependencies": {
-    "@types/jasmine-node": "1.14.32",
-    "@types/stacktrace-js": "0.0.30",
-    "archiver": "2.1.0",
-    "jasmine": "2.8.0",
-    "jasmine-node": "1.14.5",
-    "markdown-to-html": "0.0.13",
-    "shelljs": "0.7.8",
-    "source-map-loader": "0.2.3",
-    "ts-loader": "3.1.1",
-    "tslint": "5.8.0",
-    "typedoc": "0.9.0",
-    "typescript": "2.4.2",
-    "webpack": "2.7.0"
+    "@types/jasmine": "3.10.3",
+    "@types/stacktrace-js": "0.0.33",
+    "archiver": "5.3.0",
+    "jasmine": "3.99.0",
+    "jasmine-ts": "0.4.0",
+    "jasmine-spec-reporter": "7.0.0",
+    "shelljs": "0.8.5",
+    "source-map-loader": "3.0.1",
+    "ts-loader": "9.2.6",
+    "ts-node": "8.10.2",
+    "tslint": "6.1.3",
+    "typedoc": "0.22.11",
+    "typescript": "4.5.5",
+    "webpack": "5.69.1",
+    "webpack-cli": "4.9.2"
   },
   "typings": "./dist/commonjs/typescript-logging.d.ts",
   "dependencies": {

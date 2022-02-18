@@ -7,7 +7,7 @@ export class Timeout {
    * @param delay Delay
    */
   public static invokeLater(f: () => void, delay: number): void {
-    setTimeout(f(), delay);
+    setTimeout(f, delay);
   }
 
 }

@@ -1,7 +1,7 @@
 const path = require("path");
 
 module.exports = {
-
+  mode: "development",
   entry: "./dist/commonjs/typescript-logging.js",
   devtool: "source-map",
   output: {

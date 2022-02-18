@@ -13,6 +13,5 @@
     "node_modules",
     "dist",
     "dist-test",
-    "downloads"
   ]
 }

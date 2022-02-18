@@ -202,13 +202,10 @@ That's all there is to it to make a custom logger. :)
 
 ## Api and documentation
 
-The full typescript API can be found in the downloads part of github as a .zip file. Download and extract the zip and open the relevant index.html,
-it also contains a copy of this file as html.
-
-You can download both bundles and documentation from here: [Documentation](https://github.com/mreuvers/typescript-logging/tree/master/downloads/bundle/latest)
+The full typescript API is bundled in the npm package, your editor will recognize the typings.
 
 ### Changing default configuration
-Can be done through CategoryServiceFactory.setDefaultConfiguration(..). Check the documentation for details, as each class is documented on how to be used.
+Can be done through CategoryServiceFactory.setDefaultConfiguration(...). Check the documentation for details, as each class is documented on how to be used.
 
 ### Changing log levels dynamically
 When an app runs, you can use the developer extension , see: [typescript-logging-extension](https://github.com/mreuvers/typescript-logging-extension) for details.
