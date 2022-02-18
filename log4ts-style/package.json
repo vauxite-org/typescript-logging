@@ -42,7 +42,7 @@
   },
   "homepage": "https://github.com/vauxite-org/typescript-logging/#readme",
   "peerDependencies": {
-    "typescript-logging": "2.0.0"
+    "typescript-logging": "2.0.x"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "21.0.1",

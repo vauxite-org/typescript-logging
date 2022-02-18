@@ -1,7 +1,11 @@
 # TypeScript Logging
 
-TypeScript logging can be used to add logging to your web or node project. There are two different flavors available to
-use. Please visit either of these below and pick the one you prefer.
+TypeScript logging can be used to add logging to your web or node project.
+
+**_Version 2 of typescript-logging has been released, this version has been written from scratch and is
+not compatible with version 1 (see migration)._**
+
+There are two different flavors available to use. Please visit the documentation below and pick the one you prefer.
 
 * The [typescript-logging-category-style](./category-style/README.MD) flavor.
 * The [typescript-logging-log4ts-style](./log4ts-style/README.MD) flavor.
@@ -188,8 +192,8 @@ npm run build   # Run inside respective test-integration project. Builds test we
 
 ## Bugs
 
-If you encounter a bug please log it in the issue tracker of this repository and make sure what flavor (style) you are
-using.
+If you encounter a bug please log it in the issue tracker of this repository and make sure to specify what flavor 
+(style) you are using.
 
 ## Contributing
 
