@@ -3,7 +3,7 @@
 Logging library for Typescript projects. This is one of the available flavors, please see [here](../README.md) for all
 available styles.
 
-This flavor is well known and used by many logger solutions (like e.g. lo4j). It allows creation of loggers based on a
+This flavor is well known and used by many logger solutions (like e.g. log4j). It allows creation of loggers based on a
 name, where each unique name represents a Logger. Often namespaces (packages/paths) and/or logically named groups are
 used to structure the output of the logging, like for example: "service.Account", "model.SomeObject", "view.Component"
 etc.
@@ -37,7 +37,7 @@ the flavor (log4ts) to use.
 
 The following code defines a configuration file which creates a single `Log4TSProvider`, which is configured with a log
 level of `Debug` (default is `Error`). It also specifies a single 'group', which in this case matches everything based
-on namespace.
+on namespace. More information about [groups](#options) follows below.
 
 Note that we give the provider a unique name, this is useful for external control (
 see [Dynamic control](#dynamic-control)) for more details about that.
@@ -177,7 +177,7 @@ A Log4TSProvider created without any options logs on `LogLevel.Error` and uses a
 console. Messages are formatted in a default sane format (see above for an example).
 
 This code snippet creates a Log4TSProvider with default settings, the `groups` property is required to be specified and
-in this case we match every namespace. Note we also specify an identifier, it is recommended to specify this as well if
+in this case we match every namespace. Note we also specify an identifier, it is recommended to specify the identifier if
 you intend to make use of the dynamic control (see in later sections).
 
 ```typescript
@@ -255,6 +255,10 @@ import {LogLevel} from "typescript-logging";
 import {Log4TSProvider} from "typescript-logging-log4ts-style";
 
 const provider = Log4TSProvider.createProvider("ProviderWithCustomSettings", {
+  groups: [{
+    identifier: "matchAll",
+    expression: new RegExp(".+"),
+  }],
   level: LogLevel.Info,
   dateFormatter: millisSinceEpoch => `${millisSinceEpoch}`, // Silly example, normally you'd e.g. create a Date and do custom formatting for that.
   channel: {
@@ -282,7 +286,7 @@ There are two type of channels that can be used for configuration:
 - `LogChannel`
 - `RawLogChannel`
 
-The **LogChannel** is best used if you only want to write a pre-formatted message (and possibly error stack) to another
+Use a custom **LogChannel** if you want to write a pre-formatted message (and possibly error stack) to another
 place than the default console. The LogChannel is defined as follows.
 
 ```typescript
@@ -298,9 +302,9 @@ export interface LogChannel {
 }
 ```
 
-Essentially it expects you to provide the `write` function. The `type` (a discriminating union) is solely there to
+Essentially it expects you to provide the `write` function. The `type` (a [discriminating union](https://www.typescriptlang.org/docs/handbook/2/narrowing.html#discriminated-unions)) is solely there to
 distinguish between the different channels and is always `"LogChannel"` for a `LogChannel`. The write function is called
-with a `LogMessage` when it must be logged, and contains a message and optional error (formatted as stack). We have
+with for each `LogMessage`, and contains a message and optional error (formatted as stack). We have
 already seen how to create a custom LogChannel in the previous section (have a look above if you didn't read it yet).
 
 The **RawLogChannel** can be used for more advanced scenarios. It allows us to completely format the message in any way
