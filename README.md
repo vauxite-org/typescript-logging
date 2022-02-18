@@ -3,8 +3,8 @@
 TypeScript logging can be used to add logging to your web or node project. There are two different flavors available to
 use. Please visit either of these below and pick the one you prefer.
 
-* The [typescript-logging-category-style](./category-style/README.MD) flavor
-* The [typescript-logging-log4ts-style](./log4ts-style/README.MD) flavor
+* The [typescript-logging-category-style](./category-style/README.MD) flavor.
+* The [typescript-logging-log4ts-style](./log4ts-style/README.MD) flavor.
 
 The following general sections are available:
 
@@ -16,9 +16,14 @@ The following general sections are available:
 * [Migration](#migration)
 * [Changelog](#changelog)
 
-Using typescript-logging **_version 1_**? Please
-visit [https://github.com/vauxite-org/typescript-logging/tree/release-1.x](https://github.com/vauxite-org/typescript-logging/tree/release-1.x)
+**Using typescript-logging version 1?**
+
+Please visit [https://github.com/vauxite-org/typescript-logging/tree/release-1.x](https://github.com/vauxite-org/typescript-logging/tree/release-1.x)
 for more details. Consider upgrading to the latest version.
+
+**Version 2 of typescript-logging is _not_ compatible with version 1**
+
+Please check the [migration](#migration) guide for more information.
 
 ## Getting started
 
