@@ -19,10 +19,14 @@ jobs:
         run: |
           cd core
           npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Publish typescript-logging (category-style) 📦
         run: |
           cd category-style
           npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Publish typescript-logging (log4ts-style) 📦
         run: |
           cd log4ts-style
