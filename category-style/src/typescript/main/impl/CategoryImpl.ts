@@ -78,36 +78,36 @@ export class CategoryImpl implements Category {
   public trace(message: LogMessageType, ...args: unknown[]): void;
   public trace(message: LogMessageType, error: ExceptionType, ...args: unknown[]): void;
   public trace(message: LogMessageType, ...args: unknown[]): void {
-    this._logger.trace(message, args);
+    this._logger.trace(message, ...args);
   }
 
   public debug(message: LogMessageType, ...args: unknown[]): void;
   public debug(message: LogMessageType, error: ExceptionType, ...args: unknown[]): void;
   public debug(message: LogMessageType, ...args: unknown[]): void {
-    this._logger.debug(message, args);
+    this._logger.debug(message, ...args);
   }
 
   public info(message: LogMessageType, ...args: unknown[]): void;
   public info(message: LogMessageType, error: ExceptionType, ...args: unknown[]): void;
   public info(message: LogMessageType, ...args: unknown[]): void {
-    this._logger.info(message, args);
+    this._logger.info(message, ...args);
   }
 
   public warn(message: LogMessageType, ...args: unknown[]): void;
   public warn(message: LogMessageType, error: ExceptionType, ...args: unknown[]): void;
   public warn(message: LogMessageType, ...args: unknown[]): void {
-    this._logger.warn(message, args);
+    this._logger.warn(message, ...args);
   }
 
   public error(message: LogMessageType, ...args: unknown[]): void;
   public error(message: LogMessageType, error: ExceptionType, ...args: unknown[]): void;
   public error(message: LogMessageType, ...args: unknown[]): void {
-    this._logger.error(message, args);
+    this._logger.error(message, ...args);
   }
 
   public fatal(message: LogMessageType, ...args: unknown[]): void;
   public fatal(message: LogMessageType, error: ExceptionType, ...args: unknown[]): void;
   public fatal(message: LogMessageType, ...args: unknown[]): void {
-    this._logger.fatal(message, args);
+    this._logger.fatal(message, ...args);
   }
 }

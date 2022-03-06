@@ -210,4 +210,22 @@ describe("Test CategoryProvider", () => {
     expect(child2.logLevel).toEqual(LogLevel.Info);
     expect(child2.runtimeSettings.channel).toEqual(channel2);
   });
+
+  test("Test passed arguments are correct", () => {
+    const channel = new $test.ArrayRawLogChannel();
+    const provider = CategoryProvider.createProvider("test", {
+      level: LogLevel.Debug,
+      channel,
+    });
+
+    const root = provider.getCategory("root");
+    root.debug("hello1");
+
+    root.debug("hello2", 10);
+    root.debug("hello3", { val: 100 });
+    root.debug(() => "hello4", "oops", { val: 100 }, { str: "abc" }, [10, 11]);
+
+    expect(channel.messages).toEqual(["hello1", "hello2", "hello3", "hello4"]);
+    expect(channel.rawMessages.map(msg => msg.args)).toEqual([undefined, [10], [{ val: 100 }], ["oops", { val: 100 }, { str: "abc" }, [10, 11]]]);
+  });
 });

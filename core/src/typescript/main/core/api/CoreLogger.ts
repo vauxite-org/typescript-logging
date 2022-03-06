@@ -61,6 +61,7 @@ export interface CoreLogger {
    * log.debug("Hello", new Error("AnotherError"), "Some", "Random", "Arguments", [], 123);
    * ```
    * @param message Message
+   * @param error Error type (Error or lambda returning an Error)
    * @param args Optional arguments (note the first argument can be a (caught) Error which is treated as such then)
    */
   debug(message: LogMessageType, error: ExceptionType, ...args: unknown[]): void;

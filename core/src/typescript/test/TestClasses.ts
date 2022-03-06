@@ -44,6 +44,10 @@ export class ArrayRawLogChannel implements RawLogChannel {
     return this._buffer.length;
   }
 
+  public get rawMessages() {
+    return this._buffer;
+  }
+
   public clear() {
     this._buffer = [];
   }
