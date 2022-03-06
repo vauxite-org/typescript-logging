@@ -44,7 +44,7 @@ export class ArrayRawLogChannel implements RawLogChannel {
     return this._buffer.length;
   }
 
-  public get rawMessages() {
+  public get rawMessages(): ReadonlyArray<RawLogMessage> {
     return this._buffer;
   }
 
