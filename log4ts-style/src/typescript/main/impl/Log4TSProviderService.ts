@@ -133,7 +133,7 @@ function mergeLog4TSConfigs(lhs: Log4TSConfig, rhs: Log4TSConfigOptional): Log4T
     channel: rhs.channel ? rhs.channel : lhs.channel,
     dateFormatter: rhs.dateFormatter ? rhs.dateFormatter : lhs.dateFormatter,
     groups: [] as Log4TSGroupConfig[], // Just so we can assign below
-    level: rhs.level ? rhs.level : lhs.level,
+    level: rhs.level !== undefined ? rhs.level : lhs.level,
   };
 
   /*
