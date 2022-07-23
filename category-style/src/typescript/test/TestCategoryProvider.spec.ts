@@ -46,7 +46,7 @@ describe("Test CategoryProvider", () => {
     expect(config.allowSameCategoryName).toEqual(false);
   });
 
-  test ("Test merging of log levels works as expected", () => {
+  test("Test merging of log levels works as expected", () => {
     let provider = CategoryProvider.createProvider("test1", {
       level: LogLevel.Debug
     });
@@ -55,7 +55,7 @@ describe("Test CategoryProvider", () => {
 
     /* Trace is numeric value 0, which went wrong as it used a ternary check where 'truthy/falsy' came into play ... */
     provider = CategoryProvider.createProvider("test2", {
-      level: LogLevel.Debug
+      level: LogLevel.Trace
     });
 
     expect(provider.config.level).toEqual(LogLevel.Trace);
@@ -237,10 +237,10 @@ describe("Test CategoryProvider", () => {
     root.debug("hello1");
 
     root.debug("hello2", 10);
-    root.debug("hello3", { val: 100 });
-    root.debug(() => "hello4", "oops", { val: 100 }, { str: "abc" }, [10, 11]);
+    root.debug("hello3", {val: 100});
+    root.debug(() => "hello4", "oops", {val: 100}, {str: "abc"}, [10, 11]);
 
     expect(channel.messages).toEqual(["hello1", "hello2", "hello3", "hello4"]);
-    expect(channel.rawMessages.map(msg => msg.args)).toEqual([undefined, [10], [{ val: 100 }], ["oops", { val: 100 }, { str: "abc" }, [10, 11]]]);
+    expect(channel.rawMessages.map(msg => msg.args)).toEqual([undefined, [10], [{val: 100}], ["oops", {val: 100}, {str: "abc"}, [10, 11]]]);
   });
 });
