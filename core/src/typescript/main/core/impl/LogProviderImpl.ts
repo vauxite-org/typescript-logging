@@ -80,7 +80,10 @@ export class LogProviderImpl implements LogProvider {
     this._log.debug(() => `Updating global runtime settings and updating existing loggers runtime settings using: '${JSON.stringify(settings)}'`);
 
     this._globalRuntimeSettings = {
-      /* It's unclear, but not checking explicitly on undefined here makes the test fail, it makes no sense as level is a number | undefined essentially. */
+      /*
+       * Undefined check is necessary, as level is a number (and LogLevel.Trace = 0), a ternary check otherwise results in the annoying "truthy/falsy"
+       * behavior of javascript where 0 is seen as false.
+       */
       level: settings.level !== undefined ? settings.level : this._globalRuntimeSettings.level,
       channel: settings.channel !== undefined ? settings.channel : this._globalRuntimeSettings.channel,
     };
@@ -125,7 +128,10 @@ export class LogProviderImpl implements LogProvider {
   private static mergeRuntimeSettingsIntoLogRuntime(currentSettings: LogRuntime, settings: RuntimeSettings): LogRuntime {
     return {
       ...currentSettings,
-      /* It's unclear, but not checking explicitly on undefined here makes the test fail, it makes no sense as level is a number | undefined essentially. */
+      /*
+       * Undefined check is necessary, as level is a number (and LogLevel.Trace = 0), a ternary check otherwise results in the annoying "truthy/falsy"
+       * behavior of javascript where 0 is seen as false.
+       */
       level: settings.level !== undefined ? settings.level : currentSettings.level,
       channel: settings.channel !== undefined ? settings.channel : currentSettings.channel,
     };
