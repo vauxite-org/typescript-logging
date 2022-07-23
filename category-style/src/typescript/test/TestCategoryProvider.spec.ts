@@ -46,6 +46,21 @@ describe("Test CategoryProvider", () => {
     expect(config.allowSameCategoryName).toEqual(false);
   });
 
+  test ("Test merging of log levels works as expected", () => {
+    let provider = CategoryProvider.createProvider("test1", {
+      level: LogLevel.Debug
+    });
+
+    expect(provider.config.level).toEqual(LogLevel.Debug);
+
+    /* Trace is numeric value 0, which went wrong as it used a ternary check where 'truthy/falsy' came into play ... */
+    provider = CategoryProvider.createProvider("test2", {
+      level: LogLevel.Debug
+    });
+
+    expect(provider.config.level).toEqual(LogLevel.Trace);
+  });
+
   test("Test provider creates correct loggers", () => {
     const channel = new $test.ArrayRawLogChannel();
 

@@ -93,6 +93,37 @@ describe("Test Log4TSProvider", () => {
     expect(groupConfig.level).toEqual(LogLevel.Debug);
   });
 
+  test ("Test merging of log levels works as expected", () => {
+    let provider = Log4TSProvider.createProvider("test1", {
+      level: LogLevel.Debug,
+      groups: [{
+        expression: new RegExp(".+"),
+        level: LogLevel.Debug
+      }]
+    });
+
+    expect(provider.config.level).toEqual(LogLevel.Debug);
+    expect(provider.groupConfigs.length).toEqual(1);
+
+    let groupConfig = provider.groupConfigs[0];
+    expect(groupConfig.level).toEqual(LogLevel.Debug);
+
+    /* Trace is numeric value 0, which went wrong as it used a ternary check where 'truthy/falsy' came into play ... */
+    provider = Log4TSProvider.createProvider("test2", {
+      level: LogLevel.Debug,
+      groups: [{
+        expression: new RegExp(".+"),
+        level: LogLevel.Trace
+      }]
+    });
+
+    expect(provider.config.level).toEqual(LogLevel.Trace);
+    expect(provider.groupConfigs.length).toEqual(1);
+
+    groupConfig = provider.groupConfigs[0];
+    expect(groupConfig.level).toEqual(LogLevel.Trace);
+  });
+
   test("Provider creates correct loggers", () => {
     const channel = new $test.ArrayRawLogChannel();
     const groupExpressionModel = new RegExp("model.+");
