@@ -93,7 +93,7 @@ describe("Test Log4TSProvider", () => {
     expect(groupConfig.level).toEqual(LogLevel.Debug);
   });
 
-  test ("Test merging of log levels works as expected", () => {
+  test("Test merging of log levels works as expected", () => {
     let provider = Log4TSProvider.createProvider("test1", {
       level: LogLevel.Debug,
       groups: [{
@@ -110,7 +110,7 @@ describe("Test Log4TSProvider", () => {
 
     /* Trace is numeric value 0, which went wrong as it used a ternary check where 'truthy/falsy' came into play ... */
     provider = Log4TSProvider.createProvider("test2", {
-      level: LogLevel.Debug,
+      level: LogLevel.Trace,
       groups: [{
         expression: new RegExp(".+"),
         level: LogLevel.Trace
