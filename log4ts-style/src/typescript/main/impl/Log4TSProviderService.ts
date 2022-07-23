@@ -149,7 +149,7 @@ function mergeLog4TSGroupConfigs(lhs: Log4TSConfig, rhs: Log4TSGroupConfigOption
     channel: lhs.channel, // We don't allow override for this yet at least.
     dateFormatter: rhs.dateFormatter ? rhs.dateFormatter : lhs.dateFormatter,
     expression: rhs.expression,
-    level: rhs.level ? rhs.level : lhs.level,
+    level: rhs.level !== undefined ? rhs.level : lhs.level,
     identifier: rhs.identifier ? rhs.identifier : rhs.expression.toString(),
   };
 }
