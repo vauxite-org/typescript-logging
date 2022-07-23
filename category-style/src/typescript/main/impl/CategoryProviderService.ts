@@ -125,7 +125,7 @@ function mergeWithDefaults(config?: CategoryConfigOptional): CategoryConfig {
   return {
     channel: config.channel ? config.channel : defaultConfig.channel,
     allowSameCategoryName: config.allowSameCategoryName !== undefined ? config.allowSameCategoryName : defaultConfig.allowSameCategoryName,
-    level: config.level ? config.level : defaultConfig.level,
+    level: config.level !== undefined ? config.level : defaultConfig.level,
     dateFormatter: config.dateFormatter ? config.dateFormatter : defaultConfig.dateFormatter,
     argumentFormatter: config.argumentFormatter ? config.argumentFormatter : defaultConfig.argumentFormatter,
   };
