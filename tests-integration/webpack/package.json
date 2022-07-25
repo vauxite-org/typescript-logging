@@ -1,6 +1,6 @@
 {
   "name": "typescript-logging-integration-test-webpack",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "private": "true",
   "description": "Test with webpack",
   "scripts": {
@@ -22,9 +22,9 @@
     "@types/react-dom": "17.0.10",
     "react": "17.0.2",
     "react-dom": "17.0.2",
-    "typescript-logging": "file:../../core/dist/typescript-logging-2.0.1.tgz",
-    "typescript-logging-log4ts-style": "file:../../log4ts-style/dist/typescript-logging-log4ts-style-2.0.1.tgz",
-    "typescript-logging-category-style": "file:../../category-style/dist/typescript-logging-category-style-2.0.1.tgz"
+    "typescript-logging": "file:../../core/dist/typescript-logging-2.0.2.tgz",
+    "typescript-logging-log4ts-style": "file:../../log4ts-style/dist/typescript-logging-log4ts-style-2.0.2.tgz",
+    "typescript-logging-category-style": "file:../../category-style/dist/typescript-logging-category-style-2.0.2.tgz"
   },
   "devDependencies": {
     "cypress": "8.7.0",
