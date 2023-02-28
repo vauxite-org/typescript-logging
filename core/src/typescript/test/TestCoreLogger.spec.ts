@@ -11,6 +11,7 @@ describe("Test core logger", () => {
     assertLogLevels(LogLevel.Warn);
     assertLogLevels(LogLevel.Error);
     assertLogLevels(LogLevel.Fatal);
+    assertLogLevels(LogLevel.OFF);
   });
 
   test("Test with various supported arguments", () => {

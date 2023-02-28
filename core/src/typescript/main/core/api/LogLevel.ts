@@ -8,7 +8,8 @@ export enum LogLevel {
   Info,
   Warn,
   Error,
-  Fatal
+  Fatal,
+  OFF
 }
 
 /* tslint:disable:no-namespace */
@@ -32,6 +33,8 @@ export namespace LogLevel {
         return LogLevel.Error;
       case "fatal":
         return LogLevel.Fatal;
+      case "off":
+        return LogLevel.OFF;
       default:
         return undefined;
     }
