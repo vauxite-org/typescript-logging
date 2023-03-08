@@ -22,7 +22,8 @@ The following general sections are available:
 
 **Using typescript-logging version 1?**
 
-Please visit [https://github.com/vauxite-org/typescript-logging/tree/release-1.x](https://github.com/vauxite-org/typescript-logging/tree/release-1.x)
+Please visit
+[https://github.com/vauxite-org/typescript-logging/tree/release-1.x](https://github.com/vauxite-org/typescript-logging/tree/release-1.x)
 for more details. Consider upgrading to the latest version.
 
 **Version 2 of typescript-logging is _not_ compatible with version 1**
@@ -143,6 +144,8 @@ function example(value: string) {
 
 ## Build
 
+Please make sure to have node 18 LTS installed.
+
 To locally build the logging flavors. The easiest is to run the ./initialize.sh script:
 
 ```shell
@@ -192,7 +195,7 @@ npm run build   # Run inside respective test-integration project. Builds test we
 
 ## Bugs
 
-If you encounter a bug please log it in the issue tracker of this repository and make sure to specify what flavor 
+If you encounter a bug please log it in the issue tracker of this repository and make sure to specify what flavor
 (style) you are using.
 
 ## Contributing
