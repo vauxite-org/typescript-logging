@@ -1,6 +1,6 @@
 {
   "name": "typescript-logging-integration-test-rollup",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "private": "true",
   "description": "Test with rollup",
   "scripts": {
@@ -26,9 +26,9 @@
   },
   "homepage": "https://github.com/vauxite-org/typescript-logging/core/#readme",
   "dependencies": {
-    "typescript-logging": "file:../../core/dist/typescript-logging-2.0.2.tgz",
-    "typescript-logging-log4ts-style": "file:../../log4ts-style/dist/typescript-logging-log4ts-style-2.0.2.tgz",
-    "typescript-logging-category-style": "file:../../category-style/dist/typescript-logging-category-style-2.0.2.tgz"
+    "typescript-logging": "file:../../core/dist/typescript-logging-2.1.0.tgz",
+    "typescript-logging-log4ts-style": "file:../../log4ts-style/dist/typescript-logging-log4ts-style-2.1.0.tgz",
+    "typescript-logging-category-style": "file:../../category-style/dist/typescript-logging-category-style-2.1.0.tgz"
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "13.0.6",

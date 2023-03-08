@@ -1,6 +1,6 @@
 {
   "name": "typescript-logging-log4ts-style",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "description": "TypeScript Logging log4ts style written in and to be used by TypeScript.",
   "main": "dist/bundle/typescript-logging-log4ts.js",
   "module": "dist/bundle/typescript-logging-log4ts.esm.js",
@@ -42,7 +42,7 @@
   },
   "homepage": "https://github.com/vauxite-org/typescript-logging/#readme",
   "peerDependencies": {
-    "typescript-logging": "~2.0.2"
+    "typescript-logging": "~2.1.0"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "21.0.1",
