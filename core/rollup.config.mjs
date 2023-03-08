@@ -1,8 +1,8 @@
-const sharedConfig = require("./rollup.config.base");
+import sharedConfig from "./rollup.config.base.mjs";
 
-import pkg from "./package.json";
+import pkg from "./package.json" assert {type: "json"};
 
-module.exports = {
+const SETTINGS = {
   ...sharedConfig,
   input: "src/typescript/main/typescript-logging.ts",
   output: [
@@ -18,3 +18,5 @@ module.exports = {
     },
   ],
 }
+
+export default SETTINGS;

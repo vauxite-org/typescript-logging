@@ -2,7 +2,7 @@ module.exports = {
   "roots": [
     "src/typescript",
   ],
-  "preset": "ts-jest",
+  "preset": "ts-jest/presets/default-esm",
   "testEnvironment": "jsdom",
   "moduleFileExtensions": [
     "ts",
