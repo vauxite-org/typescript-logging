@@ -45,13 +45,24 @@ describe("Test LogProvider", () => {
 
     logProvider.updateLoggerRuntime(logger1, {level: LogLevel.Debug});
     channel.clear();
-    logger1.trace("debug");
+    logger1.trace("trace");
     logger1.debug("debug");
     logger1.info("info");
     logger1.warn("warn");
     logger1.error(() => "error");
 
     expect(channel.messages).toEqual(["debug", "info", "warn", "error"]);
+
+    logProvider.updateLoggerRuntime(logger1, {level: LogLevel.Off});
+
+    channel.clear();
+    logger1.trace("trace");
+    logger1.debug("debug");
+    logger1.info("info");
+    logger1.warn("warn");
+    logger1.error(() => "error");
+    logger1.fatal(() => "fatal");
+    expect(channel.messages.length).toEqual(0);
   });
 
   test("Test LogProvider can update log level of all loggers", () => {
@@ -84,6 +95,19 @@ describe("Test LogProvider", () => {
     expect(logger1 === logProvider.getLogger("logger1")).toEqual(true);
     expect(logger2 === logProvider.getLogger("logger2")).toEqual(true);
     expect(logger3 === logProvider.getLogger("logger3")).toEqual(true);
+
+    /* Turn logging off for a provider */
+    logProvider.updateRuntimeSettings({level: LogLevel.Off});
+    channel.clear();
+
+    logger1.debug("debug");
+    logger2.error("error");
+    logger3.fatal("fatal");
+    logger1.trace("trace");
+    logger2.info("info");
+    logger3.warn("warn");
+
+    expect(channel.messages.length).toEqual(0);
   });
 
   test("Test LogProvider can update channel for a logger", () => {

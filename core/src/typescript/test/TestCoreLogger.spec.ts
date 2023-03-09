@@ -11,6 +11,18 @@ describe("Test core logger", () => {
     assertLogLevels(LogLevel.Warn);
     assertLogLevels(LogLevel.Error);
     assertLogLevels(LogLevel.Fatal);
+    assertLogLevels(LogLevel.Off);
+  });
+
+  test("Test log level 'Off' logs nothing", () => {
+    const [logger, channel] = createDefaultLogger(LogLevel.Off);
+    logger.trace("trace");
+    logger.debug("debug");
+    logger.info("info");
+    logger.warn("warn");
+    logger.error("error");
+    logger.fatal("fatal");
+    expect(channel.messages.length).toEqual(0);
   });
 
   test("Test with various supported arguments", () => {

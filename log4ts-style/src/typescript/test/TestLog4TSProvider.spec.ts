@@ -237,6 +237,22 @@ describe("Test Log4TSProvider", () => {
     logFruitService.debug("fruitDebug");
     logFruitService.info("fruitInfo");
     expect(channel.messages).toEqual(["appleError", "fruitInfo"]);
+
+    /* Check that it can be turned off completely */
+    provider.updateRuntimeSettings({level: LogLevel.Off});
+    channel.clear();
+
+    const logPeer = provider.getLogger("model.nice.Peer");
+    const differentService = provider.getLogger("service.amazing.DifferentService");
+
+    logApple.fatal("fatal");
+    logFruitService.error("error");
+    logPeer.warn("warn");
+    logPeer.info("info");
+    differentService.debug("debug");
+    differentService.trace("trace");
+
+    expect(channel.messages.length).toEqual(0);
   });
 
   test("Test channel can be changed dynamically", () => {
