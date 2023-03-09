@@ -2,13 +2,14 @@
  * Log level for a logger.
  */
 export enum LogLevel {
-  // Do not reverse/change order, a test relies on it.
-  Trace,
-  Debug,
-  Info,
-  Warn,
-  Error,
-  Fatal
+  // Do not change values/order. Logging a message relies on this.
+  Trace = 0,
+  Debug = 1,
+  Info = 2,
+  Warn = 3,
+  Error = 4,
+  Fatal = 5,
+  Off = 6
 }
 
 /* tslint:disable:no-namespace */
@@ -32,6 +33,8 @@ export namespace LogLevel {
         return LogLevel.Error;
       case "fatal":
         return LogLevel.Fatal;
+      case "off":
+        return LogLevel.Off;
       default:
         return undefined;
     }
