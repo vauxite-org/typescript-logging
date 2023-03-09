@@ -175,6 +175,19 @@ describe("Test CategoryProvider", () => {
     expect(provider.runtimeConfig.allowSameCategoryName).toEqual(true);
     expect(provider.runtimeConfig.level).toEqual(LogLevel.Trace);
     expect(provider.runtimeConfig.channel).toEqual(channel);
+
+    provider.updateRuntimeSettings({level: LogLevel.Off});
+    channel.clear();
+
+    root.trace("root");
+    child1.debug("child1");
+    child11.info("child11");
+    child2.warn("child2");
+    root2.error("root2");
+    const anotherRoot = provider.getCategory("anotherRoot");
+    anotherRoot.fatal("fatal");
+
+    expect(channel.messages.length).toEqual(0);
   });
 
   test("Test that channel can be changed", () => {
