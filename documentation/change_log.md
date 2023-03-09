@@ -3,6 +3,9 @@
 This page describes the relevant changes per version since 2.0.0 release.
 
 * 2.1.0
+    * Add support for LogLevel.Off, this allows logging to be turned off complete.
+      Issue https://github.com/vauxite-org/typescript-logging/issues/109. Please be sure to
+      read the [migration guide](./migration.md) as this change may have an effect.
     * Dev dependencies updated (to get rid of vulnerability warnings), these have no influence on the production
       release and are used during the build only.
 

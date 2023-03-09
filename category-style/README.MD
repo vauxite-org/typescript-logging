@@ -149,9 +149,12 @@ A logger can log on different `LogLevels`:
 - Warn
 - Error
 - Fatal
+- Off
 
-Each level has a matching function on the Logger, for example `trace` for Trace and `debug` for Debug. The signatures of
-the function are the same for all of them. This shows the signatures for debug.
+Each level except 'Off' has a matching function on the Logger, for example `trace` for Trace and `debug` for Debug. The
+signatures of the function are the same for all of them. Note that the level 'Off' turns logging off completely.
+
+This shows the signatures for debug.
 
 ```typescript
 interface CoreLogger {
