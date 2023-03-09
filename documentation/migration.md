@@ -2,6 +2,14 @@
 
 This section provides an overview of breaking changes, when migrating from an older typescript-logging version.
 
+## Version 2.0.x -> 2.1.x
+
+Enum value LogLevel.Off has been added. It is unlikely to cause a problem to existing code, however if you
+do switch on LogLevel in the code somewhere and/or check on LogLevel, the compilation of your project may fail
+or the logic is now wrong.
+
+To find out if you do, you can search for '.logLevel' (it is a property on a logger).
+
 ## Version 1.0.x -> 2.0.x
 
 As version 2 is a complete rewrite from scratch there is no direct migration path although certain things are still

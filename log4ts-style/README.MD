@@ -137,9 +137,12 @@ A logger can log on different `LogLevels`:
 - Warn
 - Error
 - Fatal
+- Off
 
-Each level has a matching function on the Logger, for example `trace` for Trace and `debug` for Debug. The signatures of
-the function are the same for all of them. This shows the signatures for debug.
+Each level except 'Off' has a matching function on the Logger, for example `trace` for Trace and `debug` for Debug. The
+signatures of the function are the same for all of them. Note that the level 'Off' turns logging off completely.
+
+This shows the signatures for debug.
 
 ```typescript
 interface CoreLogger {
@@ -177,7 +180,8 @@ A Log4TSProvider created without any options logs on `LogLevel.Error` and uses a
 console. Messages are formatted in a default sane format (see above for an example).
 
 This code snippet creates a Log4TSProvider with default settings, the `groups` property is required to be specified and
-in this case we match every namespace. Note we also specify an identifier, it is recommended to specify the identifier if
+in this case we match every namespace. Note we also specify an identifier, it is recommended to specify the identifier
+if
 you intend to make use of the dynamic control (see in later sections).
 
 ```typescript
@@ -302,7 +306,9 @@ export interface LogChannel {
 }
 ```
 
-Essentially it expects you to provide the `write` function. The `type` (a [discriminating union](https://www.typescriptlang.org/docs/handbook/2/narrowing.html#discriminated-unions)) is solely there to
+Essentially it expects you to provide the `write` function. The `type` (
+a [discriminating union](https://www.typescriptlang.org/docs/handbook/2/narrowing.html#discriminated-unions)) is solely
+there to
 distinguish between the different channels and is always `"LogChannel"` for a `LogChannel`. The write function is called
 with for each `LogMessage`, and contains a message and optional error (formatted as stack). We have
 already seen how to create a custom LogChannel in the previous section (have a look above if you didn't read it yet).
